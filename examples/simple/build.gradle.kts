@@ -2,7 +2,7 @@
 plugins {
     // This is a dummy version number — use the actual latest version number
     // instead.
-    id("com.github.jyjeanne.dita-ot-gradle") version "1.0-SNAPSHOT"
+    id("io.github.jyjeanne.dita-ot-gradle") version "1.0-SNAPSHOT"
 }
 
 // The DITA-OT Gradle plugin adds a task called "dita" into your Gradle build-

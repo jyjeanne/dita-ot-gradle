@@ -362,7 +362,7 @@ class DitaOtTaskSpec : StringSpec({
         buildFile.writeText(
             """
             plugins {
-                id 'com.github.jyjeanne.dita-ot-gradle'
+                id 'io.github.jyjeanne.dita-ot-gradle'
             }
 
             dita {
@@ -388,7 +388,7 @@ class DitaOtTaskSpec : StringSpec({
         buildFile.writeText(
             """
             plugins {
-                id 'com.github.jyjeanne.dita-ot-gradle'
+                id 'io.github.jyjeanne.dita-ot-gradle'
             }
 
             dita {
@@ -417,7 +417,7 @@ class DitaOtTaskSpec : StringSpec({
         buildFile.writeText(
             """
             plugins {
-                id 'com.github.jyjeanne.dita-ot-gradle'
+                id 'io.github.jyjeanne.dita-ot-gradle'
             }
 
             ditaOt {
@@ -449,7 +449,7 @@ class DitaOtTaskSpec : StringSpec({
         buildFile.writeText(
             """
             plugins {
-                id 'com.github.jyjeanne.dita-ot-gradle'
+                id 'io.github.jyjeanne.dita-ot-gradle'
             }
 
             ditaOt {
@@ -482,7 +482,7 @@ class DitaOtTaskSpec : StringSpec({
         buildFile.writeText(
             """
             plugins {
-                id 'com.github.jyjeanne.dita-ot-gradle'
+                id 'io.github.jyjeanne.dita-ot-gradle'
             }
 
             dita {
@@ -508,7 +508,7 @@ class DitaOtTaskSpec : StringSpec({
         buildFile.writeText(
             """
             plugins {
-                id 'com.github.jyjeanne.dita-ot-gradle'
+                id 'io.github.jyjeanne.dita-ot-gradle'
             }
 
             dita {

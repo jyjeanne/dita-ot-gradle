@@ -10,7 +10,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.50.0"
 }
 
-group = "com.github.jyjeanne"
+group = "io.github.jyjeanne"
 version = "0.7.1"
 
 java {
@@ -102,7 +102,7 @@ gradlePlugin {
 
     plugins {
         create("ditaOtPlugin") {
-            id = "com.github.jyjeanne.dita-ot-gradle"
+            id = "io.github.jyjeanne.dita-ot-gradle"
             displayName = "DITA-OT Gradle Plugin"
             implementationClass = "com.github.jyjeanne.DitaOtPlugin"
             description = "A Gradle plugin for running DITA Open Toolkit"

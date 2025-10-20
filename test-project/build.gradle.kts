@@ -1,5 +1,5 @@
 plugins {
-    id("com.github.jyjeanne.dita-ot-gradle") version "0.7.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "0.7.1"
     id("de.undercouch.download") version "5.5.0"
 }
 

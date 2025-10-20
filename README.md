@@ -1,7 +1,7 @@
 # DITA-OT Gradle Plugin
 
 [![CI/CD](https://github.com/jyjeanne/dita-ot-gradle/actions/workflows/ci.yml/badge.svg)](https://github.com/jyjeanne/dita-ot-gradle/actions/workflows/ci.yml)
-[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.jyjeanne.dita-ot-gradle)](https://plugins.gradle.org/plugin/com.github.jyjeanne.dita-ot-gradle)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.jyjeanne.dita-ot-gradle)](https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle)
 
 A [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
@@ -15,7 +15,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'com.github.jyjeanne.dita-ot-gradle' version '0.7.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '0.7.1'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -32,7 +32,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("com.github.jyjeanne.dita-ot-gradle") version "0.7.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "0.7.1"
 }
 
 // Publish my.ditamap into the HTML5 output format.
