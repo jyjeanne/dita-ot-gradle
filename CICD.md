@@ -177,7 +177,7 @@ cd test-project
 
 Once published, your plugin will be available at:
 - **Portal:** https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle
-- **Usage:** `id("io.github.jyjeanne.dita-ot-gradle") version "0.7.1"`
+- **Usage:** `id("io.github.jyjeanne.dita-ot-gradle") version "1.0.0"`
 
 ## Maintenance
 
