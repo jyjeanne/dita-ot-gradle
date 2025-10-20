@@ -1,0 +1,39 @@
+// Load the DITA-OT Gradle plugin.
+plugins {
+    // This is a dummy version number — use the actual latest version number
+    // instead.
+    id("com.github.jyjeanne.dita-ot-gradle") version "1.0-SNAPSHOT"
+}
+
+// The DITA-OT Gradle plugin adds a task called "dita" into your Gradle build-
+// file. Let's make it the default task so that you can just type "gradle"
+// on the command line to run DITA-OT.
+defaultTasks("dita")
+
+// Configure the dita task
+tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
+    // Tell Gradle where your DITA-OT installation is.
+    //
+    // In this case, we read DITA-OT installation location from a parameter
+    // passed to the build script. You could just pass the path as a String or
+    // a file.
+    ditaOt(findProperty("ditaHome") ?: error("ditaHome property required"))
+
+    // Point DITA-OT to the files you want to publish.
+    input("dita/root.ditamap")
+
+    // Tell DITA-OT what you want it to produce.
+    transtype("pdf")
+
+    // Point DITA-OT to the DITAVAL file you want to use.
+    filter("dita/root.ditaval")
+
+    // Give DITA-OT additional parameters.
+    //
+    // For a list of the parameters DITA-OT understands, see:
+    // http://www.dita-ot.org/2.1/parameters/
+    properties(groovy.lang.Closure<Any>(this) {
+        val delegate = delegate as? groovy.lang.GroovyObject
+        delegate?.invokeMethod("property", mapOf("name" to "processing-mode", "value" to "strict"))
+    })
+}
