@@ -1,0 +1,4 @@
+dita {
+    input 'two.ditamap'
+    transtype 'pdf'
+}

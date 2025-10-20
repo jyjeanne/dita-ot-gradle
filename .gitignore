@@ -1,0 +1,40 @@
+# Gradle
+build/
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradletasknamecache
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.DS_Store
+
+# Node/Bower
+bower_components/
+node_modules/
+
+# Build artifacts
+docs/*
+!docs/index.html
+!docs/commonltr.css
+!docs/app.js
+!docs/data.json
+
+*.hprof
+
+# Claude Code
+.claude/
+*.claude.md
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Test output
+*.log
+*.tmp

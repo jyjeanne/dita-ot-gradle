@@ -1,0 +1,15 @@
+// See the 'simple' example for comments on the basic properties.
+
+plugins {
+    id 'com.github.eerohele.dita-ot-gradle' version '1.0-SNAPSHOT'
+}
+
+defaultTasks 'dita'
+
+dita {
+    ditaOt findProperty('ditaHome')
+
+    // Publish all .ditamap files in the 'dita' directory.
+    input fileTree(dir: 'dita', include: '*.ditamap')
+    transtype 'xhtml'
+}
