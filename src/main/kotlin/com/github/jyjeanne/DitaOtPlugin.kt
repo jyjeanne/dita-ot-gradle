@@ -6,14 +6,12 @@ import org.gradle.api.Project
 /**
  * Gradle plugin for publishing DITA documents using DITA Open Toolkit.
  *
- * This plugin registers two tasks:
- * - `ditaOt`: Deprecated setup task for installing DITA-OT plugins
- * - `dita`: Main task for publishing DITA documents
+ * This plugin registers the `dita` task for publishing DITA documents.
  *
  * Usage:
  * ```
  * plugins {
- *     id("com.github.eerohele.dita-ot-gradle")
+ *     id("io.github.jyjeanne.dita-ot-gradle")
  * }
  *
  * dita {
@@ -29,13 +27,6 @@ class DitaOtPlugin : Plugin<Project> {
         // Apply the base plugin to get standard lifecycle tasks
         project.plugins.apply("base")
 
-        // Register the deprecated ditaOt setup task
-        @Suppress("DEPRECATION")
-        project.tasks.register(DITA_OT, DitaOtSetupTask::class.java) { task ->
-            task.group = "Documentation"
-            task.description = "Set up DITA Open Toolkit (DEPRECATED)"
-        }
-
         // Register the main dita task
         project.tasks.register(DITA, DitaOtTask::class.java) { task ->
             task.group = "Documentation"
@@ -45,6 +36,5 @@ class DitaOtPlugin : Plugin<Project> {
 
     companion object {
         const val DITA = "dita"
-        const val DITA_OT = "ditaOt"
     }
 }

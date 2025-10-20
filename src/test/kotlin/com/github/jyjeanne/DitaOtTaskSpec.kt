@@ -20,7 +20,6 @@ import java.nio.file.Files
 
 class DitaOtTaskSpec : StringSpec({
     val DITA = "dita"
-    val DITA_OT = "ditaOt"
     val ROOT_DITAMAP = "root.ditamap"
     val ROOT_DITAVAL = "root.ditaval"
     val DEFAULT_TRANSTYPE = "html5"
@@ -38,10 +37,8 @@ class DitaOtTaskSpec : StringSpec({
         return fileCollection.files
     }
 
-    fun getDefaultClasspath(project: Project): FileCollection {
-        val method = Class.forName("com.github.jyjeanne.DitaOtSetupTask")
-            .getMethod("getDefaultClasspath", Project::class.java)
-        return method.invoke(null, project) as FileCollection
+    fun getDefaultClasspath(project: Project, ditaHome: File): FileCollection {
+        return Classpath.compile(project, ditaHome)
     }
 
     beforeTest {
@@ -263,11 +260,8 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "DITA-OT directory is included in the input file tree if devMode is enabled" {
-        project.tasks.create(DITA_OT, DitaOtSetupTask::class.java).apply {
-            dir(ditaHome)
-        }
-
         val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             devMode(true)
         }
@@ -285,11 +279,8 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "DITA-OT directory is not included in the input file tree if devMode is disabled" {
-        project.tasks.create(DITA_OT, DitaOtSetupTask::class.java).apply {
-            dir(ditaHome)
-        }
-
         val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             devMode(false)
         }
@@ -302,23 +293,6 @@ class DitaOtTaskSpec : StringSpec({
         }.toSet()
 
         allFiles.contains(File(ditaHome, "build.xml")) shouldBe false
-    }
-
-    "Allows overriding and augmenting the default classpath" {
-        project.tasks.create(DITA_OT, DitaOtSetupTask::class.java).apply {
-            dir(ditaHome)
-
-            val defaultCp = getDefaultClasspath(project)
-            val filteredCp = defaultCp.filter { !it.name.matches(Regex(".*Saxon.*\\.jar")) }
-            classpath(filteredCp + project.files("foo.jar"))
-        }
-
-        val setupTask = project.tasks.getByName(DITA_OT)
-        val classpathProperty = setupTask::class.java.getMethod("getProperties").invoke(setupTask) as Map<*, *>
-        val classpath = classpathProperty["classpath"] as FileCollection
-
-        classpath.files.filter { it.name.matches(Regex(".*Saxon.*\\.jar")) } shouldHaveSize 0
-        classpath shouldContain project.file("foo.jar")
     }
 
     "Single input file => single output directory" {
@@ -443,38 +417,6 @@ class DitaOtTaskSpec : StringSpec({
         shouldNotThrowAny { }
     }
 
-    "Installing plugins inside ditaOt (deprecated)" {
-        settingsFile.writeText("rootProject.name = 'dita-test'")
-
-        buildFile.writeText(
-            """
-            plugins {
-                id 'io.github.jyjeanne.dita-ot-gradle'
-            }
-
-            ditaOt {
-                dir '$ditaHome'
-                plugins 'https://github.com/jelovirt/org.lwdita/releases/download/2.2.0/org.lwdita-2.2.0.zip'
-            }
-
-            dita {
-                input '$examplesDir/simple/dita/root.ditamap'
-                transtype 'markdown'
-            }
-            """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("dita")
-            .forwardOutput()
-            .build()
-
-        result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
-        File(testProjectDir, "build/topic1.md").exists() shouldBe true
-        shouldNotThrowAny { }
-    }
 
     "Specifying no inputs skips the task" {
         settingsFile.writeText("rootProject.name = 'dita-test'")

@@ -37,21 +37,11 @@ class DitaOtPluginTest : StringSpec({
         project.tasks.findByName("clean").shouldNotBeNull()
     }
 
-    "Plugin registers ditaOt task" {
-        project.plugins.apply(DitaOtPlugin::class.java)
-
-        val ditaOtTask = project.tasks.findByName("ditaOt")
-        ditaOtTask.shouldNotBeNull()
-        ditaOtTask.group shouldBe "Documentation"
-    }
-
-    "Plugin registers correct task types" {
+    "Plugin registers correct task type" {
         project.plugins.apply(DitaOtPlugin::class.java)
 
         val ditaTask = project.tasks.findByName(DITA)
-        ditaTask shouldBe org.gradle.api.tasks.TaskCollection::class
-
-        val ditaOtTask = project.tasks.findByName("ditaOt")
-        ditaOtTask shouldBe org.gradle.api.tasks.TaskCollection::class
+        ditaTask.shouldNotBeNull()
+        ditaTask shouldBe DitaOtTask::class
     }
 })
