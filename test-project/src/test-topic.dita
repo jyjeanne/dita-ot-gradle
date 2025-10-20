@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="test-topic">
+    <title>Integration Test Topic</title>
+    <body>
+        <p>This is a test topic for GitHub Actions integration testing.</p>
+        <p>If you can see this content in the generated HTML5 output, the DITA-OT Gradle plugin is working correctly!</p>
+    </body>
+</topic>

@@ -1,5 +1,8 @@
 # DITA-OT Gradle Plugin
 
+[![CI/CD](https://github.com/jyjeanne/dita-ot-gradle/actions/workflows/ci.yml/badge.svg)](https://github.com/jyjeanne/dita-ot-gradle/actions/workflows/ci.yml)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/com.github.jyjeanne.dita-ot-gradle)](https://plugins.gradle.org/plugin/com.github.jyjeanne.dita-ot-gradle)
+
 A [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 **Author**: Jeremy Jeanne

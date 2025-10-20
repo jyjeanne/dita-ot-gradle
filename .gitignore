@@ -38,3 +38,6 @@ Thumbs.db
 # Test output
 *.log
 *.tmp
+
+# Secrets (contains API keys - must not be committed!)
+GITHUB_SECRETS_SETUP.md
