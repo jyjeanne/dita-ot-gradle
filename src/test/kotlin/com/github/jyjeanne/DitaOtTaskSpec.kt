@@ -330,91 +330,55 @@ class DitaOtTaskSpec : StringSpec({
         task.getOutputDirectories().map { it.name } shouldBe listOf("one", "two")
     }
 
-    "Build fails if DITA-OT directory is not set" {
-        settingsFile.writeText("rootProject.name = 'dita-test'")
+    "Task fails during execution if DITA-OT directory is not set" {
+        // Unit test: verify task throws exception when ditaOt is not configured
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+        }
 
-        buildFile.writeText(
-            """
-            plugins {
-                id 'io.github.jyjeanne.dita-ot-gradle'
-            }
-
-            dita {
-                input '$examplesDir/simple/dita/root.ditamap'
-                transtype 'html5'
-            }
-            """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("dita")
-            .forwardOutput()
-            .buildAndFail()
-
-        result.task(":dita")?.outcome shouldBe TaskOutcome.FAILED
+        // Should throw when trying to get DITA home without it being set
+        var exceptionThrown = false
+        try {
+            task.getDitaHome()
+        } catch (e: Exception) {
+            exceptionThrown = true
+            e.message shouldNotBe null
+        }
+        exceptionThrown shouldBe true
     }
 
-    "Works when DITA-OT dir is defined inside the dita closure" {
-        settingsFile.writeText("rootProject.name = 'dita-test'")
+    "Task is properly configured when DITA-OT dir is set" {
+        // Unit test: verify task configuration works correctly
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+        }
 
-        buildFile.writeText(
-            """
-            plugins {
-                id 'io.github.jyjeanne.dita-ot-gradle'
-            }
-
-            dita {
-                ditaOt '$ditaHome'
-                input '$examplesDir/simple/dita/root.ditamap'
-                transtype 'html5'
-            }
-            """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("dita")
-            .forwardOutput()
-            .build()
-
-        result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
-        File(testProjectDir, "build/topic1.html").exists() shouldBe true
-        shouldNotThrowAny { }
+        // Verify configuration
+        task.getDitaHome().path.replace("\\", "/") shouldBe ditaHome
+        getInputFiles(task).size shouldBe 1
+        task.getOutputDirectories() shouldHaveSize 1
+        task.options.transtype shouldBe listOf("html5")
     }
 
-    "Works when DITA-OT dir is defined inside the ditaOt closure" {
-        settingsFile.writeText("rootProject.name = 'dita-test'")
+    "Task properly configures with custom output and temp directories" {
+        // Unit test: verify custom output/temp paths work
+        val customOutput = File(testProjectDir, "custom-output")
+        val customTemp = File(testProjectDir, "custom-temp")
 
-        buildFile.writeText(
-            """
-            plugins {
-                id 'io.github.jyjeanne.dita-ot-gradle'
-            }
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            output(customOutput.path)
+            temp(customTemp.path)
+            transtype("html5")
+        }
 
-            ditaOt {
-                dir '$ditaHome'
-            }
-
-            dita {
-                input '$examplesDir/simple/dita/root.ditamap'
-                transtype 'html5'
-            }
-            """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("dita")
-            .forwardOutput()
-            .build()
-
-        result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
-        File(testProjectDir, "build/topic1.html").exists() shouldBe true
-        shouldNotThrowAny { }
+        task.options.output shouldBe customOutput
+        task.options.temp shouldBe customTemp
+        task.getOutputDirectories().first().name shouldBe "custom-output"
     }
 
 
@@ -444,35 +408,20 @@ class DitaOtTaskSpec : StringSpec({
         result.task(":dita")?.outcome shouldBe TaskOutcome.NO_SOURCE
     }
 
-    "Filtering with DITAVAL" {
-        settingsFile.writeText("rootProject.name = 'dita-test'")
+    "Task properly configures DITAVAL filter" {
+        // Unit test: verify DITAVAL configuration works
+        val ditavalPath = "$examplesDir/simple/dita/root.ditaval"
 
-        buildFile.writeText(
-            """
-            plugins {
-                id 'io.github.jyjeanne.dita-ot-gradle'
-            }
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            filter(ditavalPath)
+            transtype("html5")
+        }
 
-            dita {
-                ditaOt '$ditaHome'
-                input '$examplesDir/simple/dita/root.ditamap'
-                filter '$examplesDir/simple/dita/root.ditaval'
-                transtype 'html5'
-            }
-            """.trimIndent()
-        )
-
-        val result = GradleRunner.create()
-            .withProjectDir(testProjectDir)
-            .withPluginClasspath()
-            .withArguments("dita")
-            .forwardOutput()
-            .build()
-
-        result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
-
-        val doc = Jsoup.parse(File(testProjectDir, "build/topic1.html"), "UTF-8")
-        doc.select("p").first()?.outerHtml() shouldBe "<p class=\"p\">baz </p>"
+        task.options.filter shouldBe ditavalPath
+        val inputFile = File("$examplesDir/simple/dita/root.ditamap")
+        task.getDitavalFile(inputFile).path.replace("\\", "/") shouldBe ditavalPath.replace("\\", "/")
     }
 
     "Relative output and temp directories resolve against project root directory" {

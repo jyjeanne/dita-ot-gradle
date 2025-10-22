@@ -42,6 +42,6 @@ class DitaOtPluginTest : StringSpec({
 
         val ditaTask = project.tasks.findByName(DITA)
         ditaTask.shouldNotBeNull()
-        ditaTask shouldBe DitaOtTask::class
+        (ditaTask is DitaOtTask) shouldBe true
     }
 })
