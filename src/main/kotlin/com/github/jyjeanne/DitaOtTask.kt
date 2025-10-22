@@ -91,7 +91,52 @@ open class DitaOtTask : DefaultTask() {
 
     @InputDirectory
     fun getDitaHome(): File {
-        return options.ditaOt ?: throw GradleException(Messages.ditaHomeError)
+        val ditaHome = options.ditaOt ?: throw GradleException(Messages.ditaHomeError)
+
+        // Validate DITA-OT directory
+        if (!ditaHome.exists()) {
+            throw GradleException("DITA-OT directory does not exist: ${ditaHome.absolutePath}")
+        }
+
+        if (!ditaHome.isDirectory) {
+            throw GradleException("DITA-OT path is not a directory: ${ditaHome.absolutePath}")
+        }
+
+        val buildXml = File(ditaHome, "build.xml")
+        if (!buildXml.exists()) {
+            throw GradleException("""
+                Invalid DITA-OT directory: build.xml not found in ${ditaHome.absolutePath}
+
+                Make sure you're pointing to the root DITA-OT directory, not a subdirectory.
+            """.trimIndent())
+        }
+
+        return ditaHome
+    }
+
+    /**
+     * Detect DITA-OT version from the installation.
+     * Returns version string or "unknown" if version cannot be determined.
+     */
+    fun detectDitaOtVersion(): String {
+        return try {
+            val ditaHome = getDitaHome()
+            val versionFile = File(ditaHome, "VERSION")
+            if (versionFile.exists()) {
+                versionFile.readText().trim()
+            } else {
+                // Try reading from lib directory JAR manifest
+                val libDir = File(ditaHome, "lib")
+                val dostJar = libDir.listFiles()?.find { it.name.startsWith("dost") }
+                if (dostJar != null) {
+                    logger.debug("Found DOST JAR: ${dostJar.name}")
+                }
+                "unknown"
+            }
+        } catch (e: Exception) {
+            logger.debug("Could not detect DITA-OT version: ${e.message}")
+            "unknown"
+        }
     }
 
     /**
@@ -202,15 +247,51 @@ open class DitaOtTask : DefaultTask() {
 
     @TaskAction
     fun render() {
+        val startTime = System.currentTimeMillis()
         val ditaHome = getDitaHome()
+        val inputFiles = getInputFiles().files
+        val transtypes = options.transtype
+
+        // Detect and log DITA-OT version
+        val ditaOtVersion = detectDitaOtVersion()
+
+        // Log transformation start
+        logger.lifecycle("Starting DITA-OT transformation")
+        logger.info("DITA-OT version: $ditaOtVersion")
+        logger.info("DITA-OT home: ${ditaHome.absolutePath}")
+        logger.info("Input files: ${inputFiles.size} file(s)")
+        logger.info("Output formats: ${transtypes.joinToString(", ")}")
+        logger.info("Output directory: ${options.output?.absolutePath ?: project.layout.buildDirectory.asFile.get()}")
+
+        // Warn if DITA-OT version is old
+        if (ditaOtVersion != "unknown") {
+            val majorVersion = ditaOtVersion.split(".").firstOrNull()?.toIntOrNull()
+            if (majorVersion != null && majorVersion < 3) {
+                logger.warn("DITA-OT version $ditaOtVersion is old. Version 3.0+ is recommended for best results.")
+            }
+        }
+
+        if (inputFiles.isEmpty()) {
+            logger.warn("No input files specified - task will be skipped")
+            return
+        }
+
         val classpathToUse = options.classpath ?: getDefaultClasspath()
+        logger.debug("Classpath: ${classpathToUse.files.size} entries")
 
         antBuilder(classpathToUse).execute { antProject ->
-            getInputFiles().files.forEach { inputFile ->
+            inputFiles.forEach { inputFile ->
+                logger.info("Processing: ${inputFile.name}")
+
+                if (!inputFile.exists()) {
+                    throw GradleException("Input file does not exist: ${inputFile.absolutePath}")
+                }
+
                 val associatedPropertyFile = getAssociatedFile(inputFile, FileExtensions.PROPERTIES)
 
-                options.transtype.forEach { transtype ->
+                transtypes.forEach { transtype ->
                     val outputDir = getOutputDirectory(inputFile, transtype)
+                    logger.info("  → Generating $transtype output to: ${outputDir.absolutePath}")
 
                     // Use GroovyObject invokeMethod directly - works reliably across Gradle versions
                     val antBuildFile = File(ditaHome, "build.xml")
@@ -262,10 +343,53 @@ open class DitaOtTask : DefaultTask() {
                     }
 
                     // Execute Ant task - invokeMethod with correct parameter types
-                    (antProject as groovy.lang.GroovyObject).invokeMethod("ant",
-                        arrayOf(mapOf("antfile" to antBuildFile.absolutePath), propertyClosure))
+                    try {
+                        (antProject as groovy.lang.GroovyObject).invokeMethod("ant",
+                            arrayOf(mapOf("antfile" to antBuildFile.absolutePath), propertyClosure))
+                        logger.info("  ✓ Successfully generated $transtype output")
+                    } catch (e: Exception) {
+                        logger.error("  ✗ Failed to generate $transtype output", e)
+                        throw GradleException("DITA-OT transformation failed for $transtype: ${e.message}", e)
+                    }
                 }
             }
+        }
+
+        // Calculate output metrics
+        val duration = System.currentTimeMillis() - startTime
+        val durationSeconds = duration / 1000.0
+        val outputDirs = getOutputDirectories()
+        val totalOutputSize = outputDirs.sumOf { calculateDirectorySize(it) }
+        val outputSizeMB = totalOutputSize / (1024.0 * 1024.0)
+
+        // Log transformation completion with summary
+        logger.lifecycle("")
+        logger.lifecycle("═══════════════════════════════════════════════════════")
+        logger.lifecycle("DITA-OT Transformation Report")
+        logger.lifecycle("═══════════════════════════════════════════════════════")
+        logger.lifecycle("Status:           ✓ SUCCESS")
+        logger.lifecycle("DITA-OT version:  $ditaOtVersion")
+        logger.lifecycle("Files processed:  ${inputFiles.size}")
+        logger.lifecycle("Formats:          ${transtypes.joinToString(", ")}")
+        logger.lifecycle("Output size:      ${String.format("%.2f", outputSizeMB)} MB")
+        logger.lifecycle("Duration:         ${String.format("%.2f", durationSeconds)}s")
+        logger.lifecycle("═══════════════════════════════════════════════════════")
+    }
+
+    /**
+     * Calculate total size of a directory and its contents recursively.
+     */
+    private fun calculateDirectorySize(dir: File): Long {
+        if (!dir.exists() || !dir.isDirectory) return 0L
+
+        return try {
+            dir.walkTopDown()
+                .filter { it.isFile }
+                .map { it.length() }
+                .sum()
+        } catch (e: Exception) {
+            logger.debug("Could not calculate size of ${dir.absolutePath}: ${e.message}")
+            0L
         }
     }
 

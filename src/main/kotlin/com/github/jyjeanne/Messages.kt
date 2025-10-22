@@ -1,19 +1,26 @@
 package com.github.jyjeanne
 
-import java.util.Properties
-
 object Messages {
-    private val properties: Properties by lazy {
-        Properties().apply {
-            val stream = javaClass.classLoader.getResourceAsStream("messages.properties")
-                ?: throw IllegalStateException("messages.properties not found")
-            stream.use { load(it) }
+    val ditaHomeError = """
+        DITA-OT directory not configured.
+
+        Please configure it in your build.gradle:
+
+        dita {
+            ditaOt '/path/to/dita-ot'
+            input 'my.ditamap'
+            transtype 'html5'
         }
-    }
 
-    val classpathError: String
-        get() = properties.getProperty("classpathError")
+        Or in build.gradle.kts:
 
-    val ditaHomeError: String
-        get() = properties.getProperty("ditaHomeError")
+        tasks.named<DitaOtTask>("dita") {
+            ditaOt(file("/path/to/dita-ot"))
+            input("my.ditamap")
+            transtype("html5")
+        }
+
+        To download DITA-OT automatically, see:
+        https://github.com/jyjeanne/dita-ot-gradle/tree/main/examples/download
+    """.trimIndent()
 }
