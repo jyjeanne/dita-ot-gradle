@@ -2,6 +2,50 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.1.0 - 2025-01-22
+
+### Added
+- **Comprehensive Logging**: Added lifecycle, info, debug, and error logging levels throughout transformation process
+  - Log DITA-OT version and configuration at start
+  - Log each file being processed
+  - Log each format being generated
+  - Success/failure messages per format
+  - Professional transformation report with metrics
+
+- **Build Reports & Metrics**: Detailed completion report showing:
+  - Transformation status (SUCCESS/FAILURE)
+  - DITA-OT version
+  - Files processed count
+  - Output formats list
+  - Total output size in MB
+  - Duration in seconds
+
+- **Kotlin DSL Type-Safe Properties**: Native Kotlin DSL for property configuration
+  - Infix notation: `"processing-mode" to "strict"`
+  - Method calls: `property("name", "value")`
+  - File locations: `propertyLocation("name", file)`
+  - Full IDE autocomplete support
+  - Backward compatible with Groovy Closure approach
+
+### Improved
+- **Better Error Messages**: Clear, actionable error messages with examples
+  - Shows both Groovy DSL and Kotlin DSL configuration examples
+  - Links to documentation and download examples
+  - Helpful guidance for common issues
+
+- **Input Validation**: Comprehensive validation of configuration
+  - Validate DITA-OT directory exists and is valid
+  - Check build.xml exists in DITA-OT root
+  - Verify input files exist before processing
+  - DITA-OT version detection and compatibility warnings
+
+### Developer Experience
+- Professional build output with formatted reports
+- Better debugging with multiple log levels
+- Clear error messages reduce troubleshooting time
+- Type-safe Kotlin DSL improves productivity
+- Build metrics help track performance
+
 ## 2.0.0 - 2025-01-22
 
 ### Breaking Changes

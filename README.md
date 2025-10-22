@@ -18,7 +18,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.0.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.1.0'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -35,7 +35,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.0.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.1.0"
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -114,7 +114,7 @@ properties {
 
 ### Kotlin DSL
 
-To pass Ant properties in Kotlin DSL, use the `properties` method with a lambda:
+To pass Ant properties in Kotlin DSL, use the type-safe `properties` block:
 
 ```kotlin
 // Give DITA-OT additional parameters.
@@ -123,7 +123,18 @@ To pass Ant properties in Kotlin DSL, use the `properties` method with a lambda:
 // http://www.dita-ot.org/2.1/parameters/
 tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
     properties {
-        property("name" to "processing-mode", "value" to "strict")
+        "processing-mode" to "strict"
+        "args.rellinks" to "all"
+    }
+}
+```
+
+You can also use the `property()` method:
+
+```kotlin
+tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
+    properties {
+        property("processing-mode", "strict")
     }
 }
 ```
@@ -133,7 +144,7 @@ For paths, use the `projectDir` property:
 ```kotlin
 tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
     properties {
-        property("name" to "args.cssroot", "value" to "$projectDir/my/awesome/path")
+        "args.cssroot" to "$projectDir/my/awesome/path"
     }
 }
 ```
