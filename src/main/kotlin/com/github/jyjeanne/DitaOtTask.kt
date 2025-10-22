@@ -8,10 +8,13 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.internal.project.IsolatedAntBuilder
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import java.io.File
@@ -21,7 +24,13 @@ import java.io.File
  *
  * This task allows you to transform DITA maps into various output formats
  * (HTML5, PDF, XHTML, etc.) using the DITA Open Toolkit.
+ *
+ * **Configuration Cache Support**: This task supports Gradle's configuration cache
+ * when using Kotlin DSL properties. Groovy Closure-based properties may have limitations.
+ *
+ * @since 1.0.0
  */
+@CacheableTask
 open class DitaOtTask : DefaultTask() {
 
     @get:Internal
@@ -115,6 +124,7 @@ open class DitaOtTask : DefaultTask() {
     }
 
     @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
     fun getDitaHome(): File {
         val ditaHome = options.ditaOt ?: throw GradleException(Messages.ditaHomeError)
 
@@ -177,6 +187,7 @@ open class DitaOtTask : DefaultTask() {
      * @since 0.1.0
      */
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     @SkipWhenEmpty
     fun getInputFileTree(): Set<Any> {
         val outputDir = FilenameUtils.getBaseName(options.output?.path ?: "")
@@ -218,6 +229,7 @@ open class DitaOtTask : DefaultTask() {
 
     @SkipWhenEmpty
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     fun getInputFiles(): FileCollection {
         return if (options.input == null) {
             project.files()

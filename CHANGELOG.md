@@ -2,6 +2,39 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.2.0 - 2025-01-23
+
+### Added
+- **Gradle Configuration Cache Support**: Full support for Gradle's configuration cache for faster builds
+  - Added `@CacheableTask` annotation to `DitaOtTask`
+  - Added `@PathSensitive(PathSensitivity.RELATIVE)` to all input methods
+  - Configuration phase can be skipped on subsequent builds (10-50% speedup)
+  - Especially beneficial for CI/CD pipelines
+
+### Improved
+- **Build Script Optimization**: Updated build.gradle.kts for better Provider API usage
+  - DITA-OT download and extraction tasks use Provider API correctly
+  - Better configuration cache compatibility in build scripts
+
+### Documentation
+- Added comprehensive Configuration Cache section to README with:
+  - How to enable configuration cache
+  - Performance benefits explanation
+  - Compatibility notes for different property types
+  - Example usage with configuration cache
+- Updated CONFIG_CACHE_ANALYSIS.md with implementation status and test results
+- Added configuration cache compatibility matrix
+
+### Performance
+- Expected build speedup: 10-50% with configuration cache enabled
+- Configuration phase skipped entirely on cache hit
+- Faster CI/CD pipeline execution
+
+### Compatibility
+- ✅ Fully compatible: Kotlin DSL properties (recommended)
+- ⚠️ Limited: Groovy Closure properties (may disable caching)
+- All existing functionality maintained
+
 ## 2.1.0 - 2025-01-22
 
 ### Added

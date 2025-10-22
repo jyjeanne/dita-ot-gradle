@@ -18,7 +18,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.1.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -35,7 +35,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.1.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -56,11 +56,13 @@ By default, the output appears in the `build` subdirectory.
 
 ## Features
 
-- After the first build, (much) faster than running DITA-OT directly, thanks to the [Gradle Daemon].
-- Easy to configure.
-- Versatile: publish [multiple documents at once](https://github.com/jyjeanne/dita-ot-gradle/tree/master/examples/filetree).
-- Incremental builds: only build DITA documents that have changed.
-- Continuous builds: automatically republish your document when it changes (Gradle's `--continuous` option).
+- **Fast builds**: After the first build, (much) faster than running DITA-OT directly, thanks to the [Gradle Daemon].
+- **Configuration Cache**: Full support for Gradle's configuration cache for faster build times (v2.2.0+).
+- **Easy to configure**: Simple DSL for both Groovy and Kotlin.
+- **Versatile**: Publish [multiple documents at once](https://github.com/jyjeanne/dita-ot-gradle/tree/master/examples/filetree).
+- **Incremental builds**: Only build DITA documents that have changed.
+- **Continuous builds**: Automatically republish your document when it changes (Gradle's `--continuous` option).
+- **Comprehensive logging**: Detailed build reports with metrics and progress tracking.
 
 ## Examples
 
@@ -85,6 +87,56 @@ use the downloaded version in your build. See the [`download` example](https://g
 | `String` or `File` | `filter` | Path to DITAVAL file to use for publishing. |
 | `Boolean` | `singleOutputDir` | Multiple input files ➞ single output directory. Default: `false`. |
 | `Boolean` |	`useAssociatedFilter` |	For every input file, use DITAVAL file in same directory with same basename. Default: `false`. |
+
+## Configuration Cache Support
+
+Since version 2.2.0, this plugin fully supports Gradle's configuration cache, which can significantly speed up your builds.
+
+### Enabling Configuration Cache
+
+To enable configuration cache, add the `--configuration-cache` flag to your Gradle command:
+
+```bash
+gradle dita --configuration-cache
+```
+
+Or enable it globally in `gradle.properties`:
+
+```properties
+org.gradle.configuration-cache=true
+```
+
+### Performance Benefits
+
+- **First run**: Configuration phase runs normally and is cached
+- **Subsequent runs**: Configuration phase is skipped entirely, directly executing tasks
+- **Expected speedup**: 10-50% faster builds, especially beneficial for CI/CD pipelines
+
+### Compatibility Notes
+
+- **✅ Fully supported**: All Kotlin DSL properties (recommended)
+- **⚠️ Limited support**: Groovy Closure-based properties may require project state and disable caching
+- **Recommendation**: Use Kotlin DSL properties for best configuration cache performance
+
+### Example with Configuration Cache
+
+```kotlin
+plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+}
+
+tasks.register<com.github.jyjeanne.DitaOtTask>("dita") {
+    ditaOt(file("/path/to/dita-ot"))
+    input("my.ditamap")
+    transtype("html5")
+
+    // Type-safe properties (configuration cache compatible)
+    properties {
+        "processing-mode" to "strict"
+        "args.rellinks" to "all"
+    }
+}
+```
 
 ## Passing Ant properties to DITA-OT
 

@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.jyjeanne"
-version = "2.1.0"
+version = "2.2.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -54,19 +54,23 @@ val ditaOtVersion = "3.6"
 
 val downloadDitaOt by tasks.registering(Download::class) {
     src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
-    dest(File(layout.buildDirectory.asFile.get(), "dita-ot-$ditaOtVersion.zip"))
+    dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
     overwrite(false)
 }
 
 val extractDitaOt by tasks.registering(Copy::class) {
     dependsOn(downloadDitaOt)
-    from(zipTree(downloadDitaOt.get().dest))
-    into(File(layout.buildDirectory.asFile.get(), "dita-extract"))
+    from(zipTree(downloadDitaOt.map { it.dest }))
+    into(layout.buildDirectory.dir("dita-extract"))
     doNotTrackState("DITA-OT extraction is not tracked for performance")
 
+    // This task is only used for testing, not part of plugin functionality
+    notCompatibleWithConfigurationCache("DITA-OT extraction task uses doLast with script context")
+
     doLast {
-        val ditaOtDir = File(layout.buildDirectory.asFile.get(), "dita-extract/dita-ot-$ditaOtVersion")
-        val targetDir = File(layout.buildDirectory.asFile.get(), "dita-ot")
+        val buildDir = layout.buildDirectory.asFile.get()
+        val ditaOtDir = File(buildDir, "dita-extract/dita-ot-$ditaOtVersion")
+        val targetDir = File(buildDir, "dita-ot")
         if (targetDir.exists()) {
             targetDir.deleteRecursively()
         }
