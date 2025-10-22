@@ -105,7 +105,7 @@ gradlePlugin {
             id = "io.github.jyjeanne.dita-ot-gradle"
             displayName = "DITA-OT Gradle Plugin"
             implementationClass = "com.github.jyjeanne.DitaOtPlugin"
-            description = "A Gradle plugin for publishing DITA documents with DITA Open Toolkit. Supports incremental builds, continuous mode, multiple output formats, and DITAVAL filtering. Faster than running DITA-OT directly thanks to the Gradle Daemon."
+            description = "A Gradle plugin for publishing DITA documents with DITA Open Toolkit. Continuation of com.github.eerohele.dita-ot-gradle with Kotlin migration. Supports incremental builds, continuous mode, multiple output formats, and DITAVAL filtering. Faster than running DITA-OT directly thanks to the Gradle Daemon."
             tags.set(listOf("dita", "dita-ot", "documentation", "publishing", "technical-writing"))
         }
     }

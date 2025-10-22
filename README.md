@@ -5,7 +5,10 @@
 
 A [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
+**Note**: This is a continuation and evolution of the original [com.github.eerohele.dita-ot-gradle](https://github.com/eerohele/dita-ot-gradle) plugin, migrated to Kotlin and maintained with updated dependencies and improvements.
+
 **Author**: Jeremy Jeanne
+**Original Author**: Eero Helenius
 
 ## Use
 
