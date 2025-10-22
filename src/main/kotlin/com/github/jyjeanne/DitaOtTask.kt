@@ -212,26 +212,39 @@ open class DitaOtTask : DefaultTask() {
                 options.transtype.forEach { transtype ->
                     val outputDir = getOutputDirectory(inputFile, transtype)
 
-                    // Use Groovy AntBuilder DSL through reflection
-                    val antMethod = antProject.javaClass.getMethod("ant", Map::class.java, Closure::class.java)
+                    // Use GroovyObject invokeMethod directly - works reliably across Gradle versions
+                    val antBuildFile = File(ditaHome, "build.xml")
+
+                    // Create property closure
                     val propertyClosure = object : Closure<Unit>(this) {
-                        override fun call(): Unit {
-                            val ant = delegate
+                        fun doCall() {
+                            val ant = delegate as groovy.lang.GroovyObject
 
-                            // Helper function to call property() on ant
-                            fun setProperty(name: String? = null, location: String? = null,
-                                          value: String? = null, file: File? = null) {
-                                val propertyMethod = ant!!.javaClass.getMethod("property", Map::class.java)
-                                val params = mutableMapOf<String, Any?>()
-                                name?.let { params["name"] = it }
-                                location?.let { params["location"] = it }
-                                value?.let { params["value"] = it }
-                                file?.let { params["file"] = it }
-                                propertyMethod.invoke(ant, params)
+                            // Set required DITA-OT properties
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.ARGS_INPUT,
+                                "location" to inputFile.absolutePath
+                            ))
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.OUTPUT_DIR,
+                                "location" to outputDir.absolutePath
+                            ))
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.TEMP_DIR,
+                                "location" to options.temp.absolutePath
+                            ))
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.TRANSTYPE,
+                                "value" to transtype
+                            ))
+
+                            // DITAVAL filter
+                            if (options.filter != null || options.useAssociatedFilter) {
+                                ant.invokeMethod("property", mapOf(
+                                    "name" to Properties.ARGS_FILTER,
+                                    "location" to getDitavalFile(inputFile).absolutePath
+                                ))
                             }
-
-                            setProperty(name = Properties.ARGS_INPUT, location = inputFile.path)
-                            setProperty(name = Properties.OUTPUT_DIR, location = outputDir.path)
 
                             // Apply user-defined properties
                             if (options.properties != null) {
@@ -239,28 +252,18 @@ open class DitaOtTask : DefaultTask() {
                                 options.properties!!.call()
                             }
 
-                            // Associated property file
-                            setProperty(file = associatedPropertyFile)
-
-                            setProperty(name = Properties.TEMP_DIR, location = options.temp.path)
-                            setProperty(name = Properties.TRANSTYPE, value = transtype)
-
-                            // DITAVAL filter
-                            if (options.filter != null || options.useAssociatedFilter) {
-                                setProperty(
-                                    name = Properties.ARGS_FILTER,
-                                    location = getDitavalFile(inputFile).path
-                                )
+                            // Load associated property file if it exists
+                            if (associatedPropertyFile.exists()) {
+                                ant.invokeMethod("property", mapOf(
+                                    "file" to associatedPropertyFile.absolutePath
+                                ))
                             }
                         }
                     }
 
-                    propertyClosure.delegate = antProject
-                    antMethod.invoke(
-                        antProject,
-                        mapOf("antfile" to File(ditaHome, "build.xml")),
-                        propertyClosure
-                    )
+                    // Execute Ant task - invokeMethod with correct parameter types
+                    (antProject as groovy.lang.GroovyObject).invokeMethod("ant",
+                        arrayOf(mapOf("antfile" to antBuildFile.absolutePath), propertyClosure))
                 }
             }
         }
