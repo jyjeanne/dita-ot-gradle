@@ -61,8 +61,33 @@ open class DitaOtTask : DefaultTask() {
         options.temp = project.file(t)
     }
 
+    /**
+     * Configure DITA-OT properties using Groovy Closure (for Groovy DSL).
+     * Example:
+     * ```groovy
+     * properties {
+     *     property(name: 'processing-mode', value: 'strict')
+     * }
+     * ```
+     */
     fun properties(p: Closure<*>) {
         options.properties = p
+    }
+
+    /**
+     * Configure DITA-OT properties using Kotlin DSL.
+     * Example:
+     * ```kotlin
+     * properties {
+     *     "processing-mode" to "strict"
+     *     "args.cssroot" to "$projectDir/css"
+     * }
+     * ```
+     */
+    fun properties(block: PropertyBuilder.() -> Unit) {
+        val builder = PropertyBuilder()
+        builder.block()
+        options.kotlinProperties = builder.build()
     }
 
     fun transtype(vararg t: String) {
@@ -327,10 +352,20 @@ open class DitaOtTask : DefaultTask() {
                                 ))
                             }
 
-                            // Apply user-defined properties
+                            // Apply user-defined properties from Groovy Closure
                             if (options.properties != null) {
                                 options.properties!!.delegate = ant
                                 options.properties!!.call()
+                            }
+
+                            // Apply user-defined properties from Kotlin DSL
+                            if (options.kotlinProperties != null) {
+                                options.kotlinProperties!!.forEach { (name, value) ->
+                                    ant.invokeMethod("property", mapOf(
+                                        "name" to name,
+                                        "value" to value
+                                    ))
+                                }
                             }
 
                             // Load associated property file if it exists

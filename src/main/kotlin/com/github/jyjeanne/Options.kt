@@ -25,6 +25,11 @@ class Options {
     var output: File? = null
     var temp: File = getDefaultTempDir()
 
+    // Groovy Closure-based properties (for backward compatibility)
     var properties: Closure<*>? = null
+
+    // Kotlin DSL-based properties
+    var kotlinProperties: Map<String, String>? = null
+
     var transtype: List<String> = listOf(DEFAULT_TRANSTYPE)
 }

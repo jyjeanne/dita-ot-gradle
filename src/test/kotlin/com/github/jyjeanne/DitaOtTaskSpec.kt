@@ -435,4 +435,36 @@ class DitaOtTaskSpec : StringSpec({
             listOf(File(project.rootDir, "out").canonicalPath)
         task.options.temp.canonicalPath shouldBe File(project.rootDir, "temp").canonicalPath
     }
+
+    "Kotlin DSL properties configuration works" {
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            properties {
+                "processing-mode" to "strict"
+                "args.rellinks" to "all"
+            }
+        }
+
+        task.options.kotlinProperties.shouldNotBeNull()
+        task.options.kotlinProperties!!["processing-mode"] shouldBe "strict"
+        task.options.kotlinProperties!!["args.rellinks"] shouldBe "all"
+    }
+
+    "Kotlin DSL properties with property() method works" {
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            properties {
+                property("processing-mode", "lax")
+                property("args.draft", "yes")
+            }
+        }
+
+        task.options.kotlinProperties.shouldNotBeNull()
+        task.options.kotlinProperties!!["processing-mode"] shouldBe "lax"
+        task.options.kotlinProperties!!["args.draft"] shouldBe "yes"
+    }
 })
