@@ -18,7 +18,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '1.0.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.0.0'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -35,7 +35,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "1.0.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.0.0"
 }
 
 // Publish my.ditamap into the HTML5 output format.

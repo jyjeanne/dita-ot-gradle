@@ -1,8 +1,8 @@
 plugins {
-    id 'com.github.eerohele.dita-ot-gradle' version '1.0-SNAPSHOT'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.0.0'
 }
 
-import com.github.eerohele.DitaOtTask
+import com.github.jyjeanne.DitaOtTask
 
 task web(type: DitaOtTask) {
     ditaOt findProperty('ditaHome')
