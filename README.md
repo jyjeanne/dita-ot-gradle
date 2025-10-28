@@ -10,6 +10,71 @@ A [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Author**: Jeremy Jeanne
 **Original Author**: Eero Helenius
 
+## Installation
+
+The plugin is published to the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle) and can be easily added to your project.
+
+### Groovy DSL (build.gradle)
+
+```groovy
+plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
+}
+```
+
+### Kotlin DSL (build.gradle.kts)
+
+```kotlin
+plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+}
+```
+
+## Compatibility
+
+### Migration from Original Plugin
+
+This plugin is **NOT a drop-in replacement** for `com.github.eerohele.dita-ot-gradle`. You need to change the plugin ID, but the rest of your configuration remains compatible.
+
+**Required Change:**
+```groovy
+// OLD
+plugins {
+    id 'com.github.eerohele.dita-ot-gradle' version '0.7.1'
+}
+
+// NEW
+plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
+}
+```
+
+**What Stays the Same:**
+- Task name: `dita` (unchanged)
+- All configuration methods: `ditaOt()`, `input()`, `transtype()`, `filter()`, `properties{}`, etc.
+- Your existing build configuration should work without changes
+
+**Breaking Changes:**
+- Plugin ID changed from `com.github.eerohele.dita-ot-gradle` to `io.github.jyjeanne.dita-ot-gradle`
+- Deprecated `ditaOt` setup task removed (v2.0.0) - install DITA-OT plugins manually
+
+### Version Compatibility
+
+| Component | Tested Version | Supported Versions | Notes |
+|-----------|----------------|-------------------|-------|
+| **DITA-OT** | 3.6 | 3.0+ recommended, 2.x with warnings | Plugin auto-detects version and warns for old versions |
+| **Gradle** | 8.5 | 4.x+ (4.10+ recommended) | Configuration cache requires 6.5+ |
+| **Java** | 17 (build), 8 (runtime) | 8+ | Plugin compiled to Java 8 bytecode |
+| **Kotlin** | 1.9.25 | N/A | Plugin dependency only |
+
+**DITA-OT Version Detection:**
+The plugin automatically detects your DITA-OT version and will warn if using a version older than 3.0.
+
+**Gradle Features:**
+- Configuration Cache support (v2.2.0+) requires Gradle 6.5+
+- Incremental builds supported on all tested versions
+- Continuous builds (`--continuous`) supported on Gradle 4.3+
+
 ## Use
 
 ### Groovy DSL (build.gradle)
