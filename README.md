@@ -30,13 +30,24 @@ plugins {
 }
 ```
 
-## Compatibility
+## Migration Guide
 
-### Migration from Original Plugin
+### Migrating from `com.github.eerohele.dita-ot-gradle`
 
-This plugin is **NOT a drop-in replacement** for `com.github.eerohele.dita-ot-gradle`. You need to change the plugin ID, but the rest of your configuration remains compatible.
+This plugin is a **continuation and evolution** of the original eerohele plugin. While it's **NOT a drop-in replacement**, migration is straightforward and takes only a few minutes.
 
-**Required Change:**
+#### Quick Migration (TL;DR)
+
+1. Change plugin ID: `com.github.eerohele.dita-ot-gradle` → `io.github.jyjeanne.dita-ot-gradle`
+2. Update version: `0.7.1` → `2.2.0`
+3. Remove deprecated `ditaOt` setup task (if used)
+4. Test your build: `gradle dita`
+
+#### Step-by-Step Migration
+
+##### Step 1: Update Plugin Declaration
+
+**Groovy DSL (`build.gradle`):**
 ```groovy
 // OLD
 plugins {
@@ -49,14 +60,198 @@ plugins {
 }
 ```
 
-**What Stays the Same:**
-- Task name: `dita` (unchanged)
-- All configuration methods: `ditaOt()`, `input()`, `transtype()`, `filter()`, `properties{}`, etc.
-- Your existing build configuration should work without changes
+**Kotlin DSL (`build.gradle.kts`):**
+```kotlin
+// OLD
+plugins {
+    id("com.github.eerohele.dita-ot-gradle") version "0.7.1"
+}
 
-**Breaking Changes:**
-- Plugin ID changed from `com.github.eerohele.dita-ot-gradle` to `io.github.jyjeanne.dita-ot-gradle`
-- Deprecated `ditaOt` setup task removed (v2.0.0) - install DITA-OT plugins manually
+// NEW
+plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+}
+```
+
+##### Step 2: Verify Task Configuration (No Changes Needed!)
+
+Your existing `dita` task configuration remains **100% compatible**:
+
+```groovy
+dita {
+    ditaOt '/path/to/dita-ot'
+    input 'my.ditamap'
+    transtype 'html5'
+    filter 'my.ditaval'
+
+    properties {
+        property(name: 'processing-mode', value: 'strict')
+    }
+}
+```
+
+✅ **All these methods work unchanged:**
+- `ditaOt()` - Set DITA-OT directory
+- `input()` - Set input files
+- `output()` - Set output directory
+- `transtype()` - Set output formats
+- `filter()` - Set DITAVAL filter
+- `properties{}` - Set Ant properties
+- `singleOutputDir()` - Multiple inputs to single output
+- `useAssociatedFilter()` - Use associated DITAVAL
+
+##### Step 3: Remove Deprecated Setup Task (If Applicable)
+
+If you were using the deprecated `ditaOt` setup task for plugin installation, remove it:
+
+```groovy
+// REMOVE THIS (no longer supported)
+tasks.register('installPlugins') {
+    dependsOn ditaOt
+}
+```
+
+**Alternative:** Install DITA-OT plugins manually before running builds:
+```bash
+cd /path/to/dita-ot
+bin/dita install <plugin-id>
+```
+
+Or use the [download example](examples/download) which automates plugin installation.
+
+##### Step 4: Test Your Build
+
+Run your build to verify everything works:
+
+```bash
+gradle dita
+```
+
+You should see enhanced logging with build metrics (new in v2.1.0):
+```
+> Task :dita
+Starting DITA-OT transformation...
+DITA-OT Version: 3.6
+Processing 1 input file(s)...
+  ✓ Processing: my.ditamap
+Generating output format: html5
+  ✓ html5 → build/html5 (SUCCESS)
+
+Transformation Report:
+  Status: SUCCESS
+  Files Processed: 1
+  Formats: html5
+  Total Output Size: 2.5 MB
+  Duration: 12.3 seconds
+```
+
+##### Step 5: Optional Enhancements (v2.1.0+ Features)
+
+**Enable Configuration Cache (v2.2.0+):**
+
+Create or update `gradle.properties`:
+```properties
+org.gradle.configuration-cache=true
+```
+
+**Benefits:** 10-50% faster builds on subsequent runs!
+
+**Use Type-Safe Kotlin DSL (v2.1.0+):**
+
+If using Kotlin DSL, upgrade to the new type-safe properties syntax:
+
+```kotlin
+// OLD (still works, but verbose)
+properties(groovy.lang.Closure<Any>(this) {
+    val delegate = delegate as? groovy.lang.GroovyObject
+    delegate?.invokeMethod("property", mapOf("name" to "processing-mode", "value" to "strict"))
+})
+
+// NEW (recommended)
+properties {
+    "processing-mode" to "strict"
+    "args.rellinks" to "all"
+    "args.cssroot" to "$projectDir/css"
+}
+```
+
+#### Migration Checklist
+
+Use this checklist to ensure a smooth migration:
+
+- [ ] Updated plugin ID in `build.gradle` or `build.gradle.kts`
+- [ ] Updated version to `2.2.0`
+- [ ] Removed deprecated `ditaOt` setup task (if used)
+- [ ] Tested build with `gradle dita`
+- [ ] Verified output is generated correctly
+- [ ] (Optional) Enabled configuration cache in `gradle.properties`
+- [ ] (Optional) Updated to type-safe Kotlin DSL properties
+- [ ] (Optional) Reviewed new logging output for insights
+
+#### What's Compatible
+
+✅ **100% Compatible** (no changes needed):
+- Task name: `dita`
+- All configuration methods
+- Groovy DSL syntax
+- Input/output file handling
+- DITAVAL filtering
+- Ant properties
+- Multi-file processing
+- Custom classpath configuration
+
+#### What Changed
+
+⚠️ **Breaking Changes:**
+- **Plugin ID changed** (required): `com.github.eerohele.dita-ot-gradle` → `io.github.jyjeanne.dita-ot-gradle`
+- **Setup task removed** (v2.0.0): Deprecated `ditaOt` task for plugin installation no longer available
+
+✨ **New Features** (optional but recommended):
+- **Configuration Cache** (v2.2.0): 10-50% faster builds
+- **Enhanced Logging** (v2.1.0): Detailed build metrics and reports
+- **Type-Safe Kotlin DSL** (v2.1.0): Better IDE support and autocomplete
+- **Input Validation** (v2.1.0): Catches configuration errors early
+- **Version Detection** (v2.1.0): Auto-detects DITA-OT version
+
+#### Troubleshooting Migration
+
+**Problem:** Build fails with "Could not find plugin"
+```
+Solution: Ensure you've updated the plugin ID to 'io.github.jyjeanne.dita-ot-gradle'
+```
+
+**Problem:** Task `ditaOt` not found (plugin installation)
+```
+Solution: This task was removed in v2.0.0. Install DITA-OT plugins manually:
+  cd /path/to/dita-ot
+  bin/dita install <plugin-id>
+
+Or use the automated download example: examples/download/
+```
+
+**Problem:** Configuration cache warnings in Groovy DSL
+```
+Solution: This is expected. For best configuration cache support, use Kotlin DSL.
+Groovy Closure properties may require project state and disable caching.
+
+Alternatively, disable configuration cache:
+  gradle dita --no-configuration-cache
+```
+
+**Problem:** Different logging output
+```
+Solution: This is normal. v2.1.0+ includes enhanced logging with metrics.
+To see less output, use: gradle dita --quiet
+To see more details, use: gradle dita --info
+```
+
+#### Migration Support
+
+- **Examples:** See [examples/](examples/) directory for updated examples
+- **Issues:** Report problems at https://github.com/jyjeanne/dita-ot-gradle/issues
+- **Changelog:** Full version history in [CHANGELOG.md](CHANGELOG.md)
+
+## Compatibility
 
 ### Version Compatibility
 
