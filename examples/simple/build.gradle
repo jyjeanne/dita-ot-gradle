@@ -1,8 +1,8 @@
 // Load the DITA-OT Gradle plugin.
 plugins {
-    // Using version 2.0.0 of the plugin
+    // Using version 2.2.0 of the plugin with Configuration Cache support
     // For latest version, see: https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.0.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
 }
 
 // The DITA-OT Gradle plugin adds a task called "dita" into your Gradle build-

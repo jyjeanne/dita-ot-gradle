@@ -1,8 +1,8 @@
 // Load the DITA-OT Gradle plugin.
 plugins {
-    // This is a dummy version number — use the actual latest version number
-    // instead.
-    id("io.github.jyjeanne.dita-ot-gradle") version "1.0-SNAPSHOT"
+    // Using version 2.2.0 of the plugin with Configuration Cache support
+    // For latest version, see: https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
 }
 
 // The DITA-OT Gradle plugin adds a task called "dita" into your Gradle build-
@@ -28,12 +28,12 @@ tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
     // Point DITA-OT to the DITAVAL file you want to use.
     filter("dita/root.ditaval")
 
-    // Give DITA-OT additional parameters.
+    // Give DITA-OT additional parameters using the type-safe Kotlin DSL (v2.1.0+)
     //
     // For a list of the parameters DITA-OT understands, see:
-    // http://www.dita-ot.org/2.1/parameters/
-    properties(groovy.lang.Closure<Any>(this) {
-        val delegate = delegate as? groovy.lang.GroovyObject
-        delegate?.invokeMethod("property", mapOf("name" to "processing-mode", "value" to "strict"))
-    })
+    // https://www.dita-ot.org/dev/parameters/
+    properties {
+        "processing-mode" to "strict"
+        "args.rellinks" to "all"
+    }
 }
