@@ -70,10 +70,10 @@ The CI/CD pipeline is defined in `.github/workflows/ci.yml` and consists of thre
 2. Click **Settings** → **Secrets and variables** → **Actions**
 3. Click **New repository secret**
 4. Add both secrets:
-   - Name: `GRADLE_PUBLISH_KEY`, Value: `hfi5aonJFS9wwrQXMb5lyAWvdKFvMgmM`
-   - Name: `GRADLE_PUBLISH_SECRET`, Value: `r2ipaeVk1ZVeA0ph1BXp04ty9roV8aFx`
+   - Name: `GRADLE_PUBLISH_KEY`, Value: `<your-api-key-from-gradle-plugin-portal>`
+   - Name: `GRADLE_PUBLISH_SECRET`, Value: `<your-api-secret-from-gradle-plugin-portal>`
 
-**⚠️ Security Note:** These keys are sensitive. Never commit them to your repository!
+**⚠️ Security Note:** These keys are sensitive. Never commit them to your repository! Get your keys from https://plugins.gradle.org/user/account
 
 ## Publishing a New Version
 
