@@ -8,6 +8,24 @@ class Options {
     companion object {
         const val DEFAULT_TRANSTYPE = "html5"
 
+        // ANT execution strategy options
+        enum class AntExecutionStrategy {
+            /** Use Gradle's IsolatedAntBuilder (default, has known issues) */
+            ISOLATED_BUILDER,
+
+            /** Execute via DITA-OT script (dita or dita.bat) */
+            DITA_SCRIPT,
+
+            /** Execute via custom Java classloader */
+            CUSTOM_CLASSLOADER,
+
+            /** Execute via Gradle exec task wrapper */
+            GRADLE_EXEC,
+
+            /** Experimental: Use Groovy's Ant binding */
+            GROOVY_ANT_BINDING
+        }
+
         private fun getDefaultTempDir(): File {
             val tmpdir = System.getProperty("java.io.tmpdir")
             return File("$tmpdir/dita-ot", System.currentTimeMillis().toString())
@@ -32,4 +50,7 @@ class Options {
     var kotlinProperties: Map<String, String>? = null
 
     var transtype: List<String> = listOf(DEFAULT_TRANSTYPE)
+
+    // Experimental: ANT execution strategy (default is ISOLATED_BUILDER for backward compatibility)
+    var antExecutionStrategy: AntExecutionStrategy = AntExecutionStrategy.ISOLATED_BUILDER
 }

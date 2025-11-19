@@ -118,6 +118,42 @@ open class DitaOtTask : DefaultTask() {
         options.useAssociatedFilter = a
     }
 
+    /**
+     * Configure ANT execution strategy.
+     *
+     * Experimental feature to switch between different ANT invocation approaches.
+     * Default is ISOLATED_BUILDER for backward compatibility.
+     *
+     * Example (Kotlin DSL):
+     * ```kotlin
+     * dita {
+     *     antExecutionStrategy("DITA_SCRIPT") // Use DITA-OT script instead
+     * }
+     * ```
+     *
+     * Example (Groovy DSL):
+     * ```groovy
+     * dita {
+     *     antExecutionStrategy 'DITA_SCRIPT'
+     * }
+     * ```
+     *
+     * @param strategy Strategy name (ISOLATED_BUILDER, DITA_SCRIPT, CUSTOM_CLASSLOADER, GRADLE_EXEC, GROOVY_ANT_BINDING)
+     * @since 2.3.0-experimental
+     */
+    fun antExecutionStrategy(strategy: String) {
+        try {
+            options.antExecutionStrategy = Options.Companion.AntExecutionStrategy.valueOf(strategy)
+            logger.info("ANT execution strategy set to: $strategy")
+        } catch (e: IllegalArgumentException) {
+            throw GradleException(
+                "Invalid ANT execution strategy: $strategy. " +
+                "Valid options are: ${Options.Companion.AntExecutionStrategy.values().joinToString(", ")}",
+                e
+            )
+        }
+    }
+
     @Internal
     fun getDefaultClasspath(): FileTree {
         return Classpath.compile(project, getDitaHome()).asFileTree
