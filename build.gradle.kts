@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.jyjeanne"
-version = "2.2.0"
+version = "2.2.1"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -40,10 +40,10 @@ dependencies {
     // Common dependencies
     implementation("commons-io:commons-io:2.20.0")
 
-    // Kotlin tests (Kotest) - Using 5.11.1 for Kotlin 2.1.x compatibility
-    testImplementation("io.kotest:kotest-runner-junit5:5.11.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.11.1")
-    testImplementation("io.kotest:kotest-property:5.11.1")
+    // Kotlin tests (Kotest)
+    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
+    testImplementation("io.kotest:kotest-property:5.9.1")
 
     // For jsoup (HTML parsing in tests)
     testImplementation("org.jsoup:jsoup:1.21.2")

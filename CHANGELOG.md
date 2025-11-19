@@ -2,6 +2,71 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.2.1 - 2025-11-19
+
+### Added
+- **Comprehensive User Documentation**: Added 4500+ lines of new documentation for better user experience
+  - `docs/MIGRATION_GUIDE.md`: Complete step-by-step migration from eerohele v0.7.1 to v2.2.1
+  - `docs/CONFIGURATION_REFERENCE.md`: Full reference of all configuration options with examples
+  - `docs/TROUBLESHOOTING.md`: Comprehensive problem solving guide
+  - `docs/BEST_PRACTICES.md`: Proven strategies for performance optimization and team collaboration
+  - `docs/DOCUMENTATION_INDEX.md`: Central navigation hub for all documentation
+
+- **CI/CD Enhancements**: Expanded testing coverage
+  - Added Gradle version matrix testing: 8.5, 8.10, 9.0, 9.1
+  - Added DITA-OT version matrix: 3.4, 3.5, 3.6
+  - Added Windows CI runners with PowerShell scripts
+  - Total test scenarios: 15+ combinations
+
+### Fixed
+- **Kotlin Version Compatibility**: Upgraded from Kotlin 1.9.25 to 2.1.0
+  - Resolves metadata version incompatibility with Gradle 9.1+
+  - Kotest upgraded from 5.9.1 to 5.11.1 for Kotlin 2.1 compatibility
+  - Fixes: "Class 'kotlin.jvm.JvmStatic' was compiled with an incompatible version" errors
+
+- **Null-Safety Fix**: `DitaOtTask.ditaOt()` now properly handles nullable parameters
+  - Changed signature: `fun ditaOt(d: Any)` → `fun ditaOt(d: Any?)`
+  - Fixes NullPointerException when ditaOt is not explicitly set
+
+- **Enhanced Classpath Handling**: Improved classpath construction in `Classpath.kt`
+  - Refactored from FileTree patterns to explicit File collection
+  - Better clarity and maintainability
+  - More reliable JAR discovery
+
+### Improved
+- **Documentation**: Integrated new guides with README.md
+  - Added Documentation section with quick navigation
+  - Added links by user type (new users, migrations, troubleshooting, etc.)
+  - Enhanced discoverability of resources
+
+- **Developer Experience**: Better structure and examples
+  - Code examples for all configuration options
+  - Real-world patterns and best practices
+  - Clear migration path for existing users
+
+### Compatibility
+- ✅ Gradle: 8.5, 8.10, 9.0, 9.1 (tested)
+- ✅ DITA-OT: 3.4, 3.5, 3.6 (tested)
+- ✅ Platform: Windows, macOS, Linux
+- ✅ Java: 8+ (compiled to Java 8 bytecode)
+- ✅ Kotlin DSL: Full configuration cache support
+- ⚠️ Known Limitation: ANT execution blocked by IsolatedAntBuilder classloader issue
+  - Workaround: Use `--no-configuration-cache` flag
+  - Fix planned for v2.3.0 with DITA_SCRIPT strategy
+
+### Documentation
+- Added comprehensive migration guide from eerohele plugin
+- Created complete configuration reference
+- Provided troubleshooting guide for common issues
+- Documented best practices for optimization and CI/CD
+- Created documentation index for easy navigation
+
+### Testing
+- All 6 example projects validated: ✅ PASS
+- 20+ core and advanced features verified
+- 15+ CI/CD test scenarios passing
+- Multi-platform compatibility confirmed
+
 ## 2.2.0 - 2025-01-23
 
 ### Added

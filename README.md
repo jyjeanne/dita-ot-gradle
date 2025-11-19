@@ -18,7 +18,7 @@ The plugin is published to the [Gradle Plugin Portal](https://plugins.gradle.org
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.1'
 }
 ```
 
@@ -26,7 +26,7 @@ plugins {
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
 }
 ```
 
@@ -39,7 +39,7 @@ This plugin is a **continuation and evolution** of the original eerohele plugin.
 #### Quick Migration (TL;DR)
 
 1. Change plugin ID: `com.github.eerohele.dita-ot-gradle` → `io.github.jyjeanne.dita-ot-gradle`
-2. Update version: `0.7.1` → `2.2.0`
+2. Update version: `0.7.1` → `2.2.1`
 3. Remove deprecated `ditaOt` setup task (if used)
 4. Test your build: `gradle dita`
 
@@ -56,7 +56,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.1'
 }
 ```
 
@@ -69,7 +69,7 @@ plugins {
 
 // NEW
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
 }
 ```
 
@@ -180,7 +180,7 @@ properties {
 Use this checklist to ensure a smooth migration:
 
 - [ ] Updated plugin ID in `build.gradle` or `build.gradle.kts`
-- [ ] Updated version to `2.2.0`
+- [ ] Updated version to `2.2.1`
 - [ ] Removed deprecated `ditaOt` setup task (if used)
 - [ ] Tested build with `gradle dita`
 - [ ] Verified output is generated correctly
@@ -278,7 +278,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.1'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -295,7 +295,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -332,6 +332,27 @@ For more examples, see the [`examples`](https://github.com/jyjeanne/dita-ot-grad
 
 You're most welcome to contribute improvements on the current set of examples or entirely new examples.
 
+## Documentation
+
+Comprehensive documentation for all use cases:
+
+| Guide | Purpose |
+|-------|---------|
+| **[Migration Guide](docs/MIGRATION_GUIDE.md)** | Detailed instructions for migrating from eerohele plugin (v0.7.1) to jyjeanne plugin (v2.2.0) |
+| **[Configuration Reference](docs/CONFIGURATION_REFERENCE.md)** | Complete reference of all configuration options with examples |
+| **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** | Solutions for common issues and problems |
+| **[Best Practices](docs/BEST_PRACTICES.md)** | Proven strategies for performance, CI/CD, and team collaboration |
+| **[ANT Execution Strategies](docs/ANT_EXECUTION_STRATEGIES.md)** | Technical analysis of ANT execution alternatives (advanced) |
+| **[Future Work Implementation](docs/FUTURE_WORK_IMPLEMENTATION.md)** | Implementation status of planned features |
+
+### Quick Links
+
+- **Migrating from eerohele?** → Start with [Migration Guide](docs/MIGRATION_GUIDE.md)
+- **Need help with configuration?** → See [Configuration Reference](docs/CONFIGURATION_REFERENCE.md)
+- **Something not working?** → Check [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+- **Want to optimize?** → Read [Best Practices](docs/BEST_PRACTICES.md)
+- **Looking for examples?** → Browse [`examples/`](examples/) directory
+
 ## Downloading DITA Open Toolkit
 
 You can use the [Gradle Download Task](https://github.com/michel-kraemer/gradle-download-task) to download DITA-OT and
@@ -350,7 +371,7 @@ use the downloaded version in your build. See the [`download` example](https://g
 
 ## Configuration Cache Support
 
-Since version 2.2.0, this plugin fully supports Gradle's configuration cache, which can significantly speed up your builds.
+Since version 2.2.0+, this plugin fully supports Gradle's configuration cache, which can significantly speed up your builds.
 
 ### Enabling Configuration Cache
 
@@ -382,7 +403,7 @@ org.gradle.configuration-cache=true
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
 }
 
 tasks.register<com.github.jyjeanne.DitaOtTask>("dita") {

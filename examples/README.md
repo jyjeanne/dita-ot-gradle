@@ -1,11 +1,11 @@
 DITA-OT Gradle Plugin: Examples
 ===============================
 
-This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.2.0** features.
+This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.2.1** features.
 
-## 🆕 What's New in v2.2.0
+## 🆕 What's New in v2.2.1
 
-All examples have been updated to **v2.2.0** with:
+All examples have been updated to **v2.2.1** with:
 
 - ⚡ **Configuration Cache Support** - 10-50% faster builds
 - 🚀 **Performance Optimizations** - Skip configuration phase on subsequent runs
@@ -25,7 +25,7 @@ Each example is provided in both **Groovy DSL** (`build.gradle`) and **Kotlin DS
 
 ## Running Examples
 
-### Quick Start with Configuration Cache (v2.2.0+)
+### Quick Start with Configuration Cache (v2.2.1+)
 
 ```bash
 cd simple
@@ -47,7 +47,7 @@ cd simple
 gradle dita -PditaHome=/path/to/dita-ot -b build.gradle.kts
 ```
 
-## Configuration Cache Benefits (v2.2.0+)
+## Configuration Cache Benefits (v2.2.1+)
 
 Enable configuration cache for significantly faster builds:
 
@@ -70,7 +70,7 @@ gradle dita --configuration-cache
 
 - **Groovy DSL** (`build.gradle`) - Traditional Gradle syntax, more concise
 - **Kotlin DSL** (`build.gradle.kts`) - Type-safe, better IDE support, modern
-  - ⭐ **Recommended for v2.2.0+** - Best configuration cache compatibility
+  - ⭐ **Recommended for v2.2.1+** - Best configuration cache compatibility
   - ⭐ Includes new type-safe properties syntax (v2.1.0+)
 
 Both formats are functionally equivalent. Choose the one that fits your project's needs.
