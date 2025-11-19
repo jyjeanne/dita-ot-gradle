@@ -13,10 +13,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - `docs/DOCUMENTATION_INDEX.md`: Central navigation hub for all documentation
 
 - **CI/CD Enhancements**: Expanded testing coverage
-  - Added Gradle version matrix testing: 8.5, 8.10, 9.0, 9.1
+  - Added Gradle version matrix testing: 8.5, 8.10, 9.0
   - Added DITA-OT version matrix: 3.4, 3.5, 3.6
   - Added Windows CI runners with PowerShell scripts
-  - Total test scenarios: 15+ combinations
+  - Total test scenarios: 12+ combinations
 
 ### Fixed
 - **Kotlin Version Compatibility**: Upgraded from Kotlin 1.9.25 to 2.1.0
@@ -45,7 +45,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
   - Clear migration path for existing users
 
 ### Compatibility
-- ✅ Gradle: 8.5, 8.10, 9.0, 9.1 (tested)
+- ✅ Gradle: 8.5, 8.10, 9.0 (tested)
 - ✅ DITA-OT: 3.4, 3.5, 3.6 (tested)
 - ✅ Platform: Windows, macOS, Linux
 - ✅ Java: 8+ (compiled to Java 8 bytecode)
