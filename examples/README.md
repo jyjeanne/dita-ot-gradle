@@ -1,11 +1,11 @@
 DITA-OT Gradle Plugin: Examples
 ===============================
 
-This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.2.1** features.
+This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.2.2** features.
 
-## 🆕 What's New in v2.2.1
+## 🆕 What's New in v2.2.2
 
-All examples have been updated to **v2.2.1** with:
+All examples have been updated to **v2.2.2** with:
 
 - ⚡ **Configuration Cache Support** - 10-50% faster builds
 - 🚀 **Performance Optimizations** - Skip configuration phase on subsequent runs
@@ -239,7 +239,7 @@ gradle -p classpath dita -PditaHome=$DITA_HOME
 gradle -p download dita
 ```
 
-## Configuration Cache Benefits (v2.2.1+)
+## Configuration Cache Benefits (v2.2.2+)
 
 Enable configuration cache for significantly faster builds:
 
@@ -262,7 +262,7 @@ gradle dita --configuration-cache
 
 - **Groovy DSL** (`build.gradle`) - Traditional Gradle syntax, more concise
 - **Kotlin DSL** (`build.gradle.kts`) - Type-safe, better IDE support, modern
-  - ⭐ **Recommended for v2.2.1+** - Best configuration cache compatibility
+  - ⭐ **Recommended for v2.2.2+** - Best configuration cache compatibility
   - ⭐ Includes new type-safe properties syntax (v2.1.0+)
 
 Both formats are functionally equivalent. Choose the one that fits your project's needs.
@@ -297,8 +297,8 @@ Every build now includes detailed reports:
 
 ## Version History of Examples
 
-### v2.2.1 (November 19, 2025)
-All examples updated to **v2.2.1** featuring:
+### v2.2.2 (November 19, 2025)
+All examples updated to **v2.2.2** featuring:
 - ✅ Kotlin 2.1.0 compatibility
 - ✅ Configuration cache support (10-50% faster builds)
 - ✅ Enhanced null-safety in task parameters
@@ -366,7 +366,7 @@ chmod +x gradlew
 
 ## Performance Tips
 
-### Configuration Cache (v2.2.1+)
+### Configuration Cache (v2.2.2+)
 
 Enable in `gradle.properties` for 10-50% faster builds:
 ```properties

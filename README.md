@@ -18,7 +18,7 @@ The plugin is published to the [Gradle Plugin Portal](https://plugins.gradle.org
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.2'
 }
 ```
 
@@ -26,7 +26,7 @@ plugins {
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
 }
 ```
 
@@ -39,7 +39,7 @@ This plugin is a **continuation and evolution** of the original eerohele plugin.
 #### Quick Migration (TL;DR)
 
 1. Change plugin ID: `com.github.eerohele.dita-ot-gradle` → `io.github.jyjeanne.dita-ot-gradle`
-2. Update version: `0.7.1` → `2.2.1`
+2. Update version: `0.7.1` → `2.2.2`
 3. Remove deprecated `ditaOt` setup task (if used)
 4. Test your build: `gradle dita`
 
@@ -56,7 +56,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.2'
 }
 ```
 
@@ -69,7 +69,7 @@ plugins {
 
 // NEW
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
 }
 ```
 
@@ -180,7 +180,7 @@ properties {
 Use this checklist to ensure a smooth migration:
 
 - [ ] Updated plugin ID in `build.gradle` or `build.gradle.kts`
-- [ ] Updated version to `2.2.1`
+- [ ] Updated version to `2.2.2`
 - [ ] Removed deprecated `ditaOt` setup task (if used)
 - [ ] Tested build with `gradle dita`
 - [ ] Verified output is generated correctly
@@ -278,7 +278,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.2'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -295,7 +295,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -403,7 +403,7 @@ org.gradle.configuration-cache=true
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
 }
 
 tasks.register<com.github.jyjeanne.DitaOtTask>("dita") {
