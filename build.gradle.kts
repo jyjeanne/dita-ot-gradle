@@ -2,7 +2,7 @@ import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.25"
+    kotlin("jvm") version "2.1.0"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.2.1"
     id("de.undercouch.download") version "5.5.0"
@@ -21,8 +21,8 @@ java {
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
-        apiVersion = "1.9"
-        languageVersion = "1.9"
+        apiVersion = "2.1"
+        languageVersion = "2.1"
     }
 }
 
@@ -40,10 +40,10 @@ dependencies {
     // Common dependencies
     implementation("commons-io:commons-io:2.20.0")
 
-    // Kotlin tests (Kotest) - Using 5.9.1 for Kotlin 1.9.x compatibility
-    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
-    testImplementation("io.kotest:kotest-property:5.9.1")
+    // Kotlin tests (Kotest) - Using 5.11.1 for Kotlin 2.1.x compatibility
+    testImplementation("io.kotest:kotest-runner-junit5:5.11.1")
+    testImplementation("io.kotest:kotest-assertions-core:5.11.1")
+    testImplementation("io.kotest:kotest-property:5.11.1")
 
     // For jsoup (HTML parsing in tests)
     testImplementation("org.jsoup:jsoup:1.21.2")

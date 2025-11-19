@@ -46,8 +46,8 @@ open class DitaOtTask : DefaultTask() {
         options.devMode = d
     }
 
-    fun ditaOt(d: Any) {
-        options.ditaOt = project.file(d)
+    fun ditaOt(d: Any?) {
+        options.ditaOt = if (d != null) project.file(d) else null
     }
 
     fun classpath(vararg classpath: Any) {
