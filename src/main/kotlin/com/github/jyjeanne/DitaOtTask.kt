@@ -25,8 +25,11 @@ import java.io.File
  * This task allows you to transform DITA maps into various output formats
  * (HTML5, PDF, XHTML, etc.) using the DITA Open Toolkit.
  *
- * **Configuration Cache Support**: This task supports Gradle's configuration cache
- * when using Kotlin DSL properties. Groovy Closure-based properties may have limitations.
+ * **Configuration Cache**: This task is NOT compatible with Gradle's configuration cache due to:
+ * - Dynamic classpath computation that depends on DITA-OT directory structure
+ * - Complex ANT integration through IsolatedAntBuilder
+ * - Groovy Closure-based properties that require serialization
+ * Run with `--no-configuration-cache` flag if you encounter cache-related errors.
  *
  * @since 1.0.0
  */
@@ -36,8 +39,12 @@ open class DitaOtTask : DefaultTask() {
     @get:Internal
     val options: Options = Options()
 
+    // Pre-computed default output directory (accessed during configuration time)
+    @get:Internal
+    private val defaultBuildDirectory: File = project.layout.buildDirectory.asFile.get()
+
     init {
-        options.output = project.layout.buildDirectory.asFile.get()
+        options.output = defaultBuildDirectory
     }
 
     // Configuration methods (for both Groovy and Kotlin DSL)
@@ -265,7 +272,7 @@ open class DitaOtTask : DefaultTask() {
         } else {
             val basename = FilenameUtils.getBaseName(inputFile.path)
             File(options.output, basename)
-        } ?: project.layout.buildDirectory.asFile.get()
+        } ?: defaultBuildDirectory
 
         return if (transtype.isNotEmpty() && options.transtype.size > 1) {
             File(baseOutputDir, transtype)
@@ -298,7 +305,7 @@ open class DitaOtTask : DefaultTask() {
         logger.info("DITA-OT home: ${ditaHome.absolutePath}")
         logger.info("Input files: ${inputFiles.size} file(s)")
         logger.info("Output formats: ${transtypes.joinToString(", ")}")
-        logger.info("Output directory: ${options.output?.absolutePath ?: project.layout.buildDirectory.asFile.get()}")
+        logger.info("Output directory: ${options.output?.absolutePath ?: defaultBuildDirectory.absolutePath}")
 
         // Warn if DITA-OT version is old
         if (ditaOtVersion != "unknown") {
