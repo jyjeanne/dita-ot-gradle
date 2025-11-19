@@ -65,19 +65,26 @@ object Classpath {
     fun compile(project: Project, ditaHome: File): FileCollection {
         System.setProperty("logback.configurationFile", "$ditaHome/config/logback.xml")
 
-        val fileTree = project.fileTree(ditaHome).apply {
-            include(
-                "config/",
-                "resources/",
-                "lib/**/*.jar"
-            )
+        // Collect all required files and directories
+        val libDir = File(ditaHome, "lib")
+        val configDir = File(ditaHome, "config")
+        val resourcesDir = File(ditaHome, "resources")
 
-            exclude(
-                "lib/ant-launcher.jar",
-                "lib/ant.jar"
-            )
-        }
+        // Get all JAR files from lib directory (excluding ant.jar and ant-launcher.jar)
+        val libJars = libDir.listFiles { file ->
+            file.isFile && file.name.endsWith(".jar") &&
+            file.name != "ant.jar" &&
+            file.name != "ant-launcher.jar"
+        }?.toList() ?: emptyList()
 
-        return fileTree + pluginClasspath(project, ditaHome)
+        // Build the classpath: lib jars first, then plugin jars, then config and resources
+        // This order is important for ANT classloader to find resources properly
+        val classpath = mutableListOf<File>()
+        classpath.addAll(libJars)
+        classpath.addAll(pluginClasspath(project, ditaHome).files)
+        classpath.add(configDir)
+        classpath.add(resourcesDir)
+
+        return project.files(classpath)
     }
 }

@@ -316,6 +316,13 @@ open class DitaOtTask : DefaultTask() {
         val classpathToUse = options.classpath ?: getDefaultClasspath()
         logger.debug("Classpath: ${classpathToUse.files.size} entries")
 
+        // Debug: Log all classpath files
+        if (logger.isDebugEnabled) {
+            classpathToUse.files.forEach { file ->
+                logger.debug("  - ${file.absolutePath}")
+            }
+        }
+
         antBuilder(classpathToUse).execute { antProject ->
             inputFiles.forEach { inputFile ->
                 logger.info("Processing: ${inputFile.name}")
