@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map id="configuration-cache-guide">
+    <title>Configuration Cache Example Guide</title>
+
+    <topicmeta>
+        <shortdesc>A sample guide demonstrating Gradle Configuration Cache with DITA-OT</shortdesc>
+    </topicmeta>
+
+    <topicref href="intro.dita"/>
+    <topicref href="benefits.dita"/>
+    <topicref href="usage.dita"/>
+</map>

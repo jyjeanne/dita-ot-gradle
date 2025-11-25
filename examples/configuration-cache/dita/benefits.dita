@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="benefits">
+    <title>Performance Benefits</title>
+    <body>
+        <p>Using Configuration Cache with the DITA-OT Gradle plugin provides significant
+        performance improvements, especially for iterative documentation workflows.</p>
+
+        <section>
+            <title>Typical Performance Gains</title>
+            <simpletable>
+                <sthead>
+                    <stentry>Scenario</stentry>
+                    <stentry>Without Cache</stentry>
+                    <stentry>With Cache</stentry>
+                    <stentry>Improvement</stentry>
+                </sthead>
+                <strow>
+                    <stentry>Configuration Phase</stentry>
+                    <stentry>3-8 seconds</stentry>
+                    <stentry>&lt;1 second</stentry>
+                    <stentry>80-90% faster</stentry>
+                </strow>
+                <strow>
+                    <stentry>Up-to-date Check</stentry>
+                    <stentry>5-10 seconds</stentry>
+                    <stentry>2-4 seconds</stentry>
+                    <stentry>50-60% faster</stentry>
+                </strow>
+                <strow>
+                    <stentry>Full Build (cached)</stentry>
+                    <stentry>25-35 seconds</stentry>
+                    <stentry>15-25 seconds</stentry>
+                    <stentry>30-40% faster</stentry>
+                </strow>
+            </simpletable>
+        </section>
+
+        <section>
+            <title>When Configuration Cache Helps Most</title>
+            <ul>
+                <li>Iterative documentation development (frequent rebuilds)</li>
+                <li>CI/CD pipelines with incremental builds</li>
+                <li>Multi-project builds where DITA is one of many tasks</li>
+                <li>Projects with complex Gradle configurations</li>
+            </ul>
+        </section>
+    </body>
+</topic>

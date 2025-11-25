@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="intro">
+    <title>Introduction to Configuration Cache</title>
+    <body>
+        <p>Gradle's Configuration Cache is a feature that significantly improves build performance
+        by caching the result of the configuration phase and reusing it in subsequent builds.</p>
+
+        <p>Starting with version 2.3.0, the DITA-OT Gradle plugin fully supports Configuration Cache
+        when using the default DITA_SCRIPT execution strategy.</p>
+
+        <section>
+            <title>What is Configuration Cache?</title>
+            <p>The Configuration Cache stores the task graph after the configuration phase completes.
+            On subsequent builds with the same configuration, Gradle can skip the configuration phase
+            entirely and load the cached task graph directly.</p>
+        </section>
+
+        <section>
+            <title>Requirements</title>
+            <ul>
+                <li>Gradle 8.1 or later (Configuration Cache is stable)</li>
+                <li>DITA-OT 3.0 or later (required for DITA_SCRIPT strategy)</li>
+                <li>DITA-OT Gradle Plugin 2.3.0 or later</li>
+            </ul>
+        </section>
+    </body>
+</topic>

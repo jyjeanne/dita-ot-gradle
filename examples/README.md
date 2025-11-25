@@ -1,27 +1,40 @@
 DITA-OT Gradle Plugin: Examples
 ===============================
 
-This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.2.2** features.
+This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.3.0** features.
 
-## 🆕 What's New in v2.2.2
+## 🆕 What's New in v2.3.0
 
-All examples have been updated to **v2.2.2** with:
+All examples have been updated to **v2.3.0** with:
 
-- ⚡ **Configuration Cache Support** - 10-50% faster builds
-- 🚀 **Performance Optimizations** - Skip configuration phase on subsequent runs
-- 📊 **Enhanced Logging** - Detailed build metrics and reports (v2.1.0+)
-- 🔧 **Type-Safe Kotlin DSL** - Improved property configuration (v2.1.0+)
+- ⚡ **Full Configuration Cache Support** - Up to 77% faster incremental builds
+- 🔧 **IsolatedAntBuilder Fix** - DITA_SCRIPT strategy resolves classloader issues
+- 🚀 **Provider API Refactoring** - Modern Gradle architecture
+- 📊 **Enhanced Logging** - Detailed build metrics and reports
+- 🔧 **Type-Safe Kotlin DSL** - Improved property configuration
+
+## Performance Benchmarks (v2.3.0)
+
+Tested on Windows 11, Gradle 8.5, DITA-OT 3.6:
+
+| Scenario | Time | Improvement |
+|----------|------|-------------|
+| Without Configuration Cache | 20.8s | baseline |
+| With Cache (first run) | 22.8s | -10% (stores cache) |
+| With Cache (up-to-date) | **4.8s** | **77% faster** |
+| With Cache (clean build) | 22.4s | similar |
 
 ## Available Examples
 
 Each example is provided in both **Groovy DSL** (`build.gradle`) and **Kotlin DSL** (`build.gradle.kts`) formats:
 
-1. **simple** - Basic DITA transformation with properties ⭐ **NEW: Configuration Cache demo**
-2. **filetree** - Process multiple files using glob patterns
-3. **multi-project** - Multi-module project with shared configuration
-4. **multi-task** - Multiple transformation tasks (web + pdf)
-5. **classpath** - Custom classpath configuration (Saxon-PE example)
-6. **download** - Download DITA-OT and install plugins automatically
+1. **simple** - Basic DITA transformation with properties
+2. **configuration-cache** - ⭐ **NEW: Configuration Cache performance demo**
+3. **filetree** - Process multiple files using glob patterns
+4. **multi-project** - Multi-module project with shared configuration
+5. **multi-task** - Multiple transformation tasks (web + pdf)
+6. **classpath** - Custom classpath configuration (Saxon-PE example)
+7. **download** - Download DITA-OT and install plugins automatically
 
 ## Running Examples
 
@@ -39,9 +52,9 @@ Each example is provided in both **Groovy DSL** (`build.gradle`) and **Kotlin DS
 
 Each example below shows how to run it with both **Groovy DSL** and **Kotlin DSL**.
 
-#### 1. **simple** - Basic DITA Transformation with Properties ⭐ RECOMMENDED
+#### 1. **simple** - Basic DITA Transformation with Properties
 
-Demonstrates basic configuration cache support and property handling.
+Demonstrates basic DITA transformation with property handling.
 
 **Groovy DSL:**
 ```bash
@@ -55,17 +68,50 @@ cd simple
 gradle dita -PditaHome=$DITA_HOME -b build.gradle.kts
 ```
 
-**Configuration Cache (Second Run - Much Faster!):**
-```bash
-# Enable in gradle.properties or via command line
-gradle dita -PditaHome=$DITA_HOME --configuration-cache
-```
-
-**Output:** PDF document in `build/out/` directory
+**Output:** PDF document in `build/` directory
 
 ---
 
-#### 2. **filetree** - Multiple Files with Glob Patterns
+#### 2. **configuration-cache** - Configuration Cache Performance Demo ⭐ NEW
+
+Demonstrates the Configuration Cache feature for significantly faster builds.
+
+**First Run (stores cache):**
+```bash
+cd configuration-cache
+gradle dita --configuration-cache -PditaHome=$DITA_HOME
+# Output: "Configuration cache entry stored."
+```
+
+**Second Run (reuses cache - 77% faster!):**
+```bash
+gradle dita --configuration-cache -PditaHome=$DITA_HOME
+# Output: "Reusing configuration cache."
+```
+
+**Run Benchmark Instructions:**
+```bash
+gradle benchmark
+```
+
+**Features Demonstrated:**
+- Configuration Cache compatibility
+- Multiple output formats (HTML5 + PDF)
+- Type-safe Kotlin DSL properties
+- Performance benchmarking
+
+**Expected Performance:**
+| Run | Time | Notes |
+|-----|------|-------|
+| First | ~22s | Stores configuration cache |
+| Second (up-to-date) | ~5s | **77% faster** |
+| Clean build (cached) | ~22s | Reuses configuration |
+
+**Output:** HTML5 and PDF in `build/` directory
+
+---
+
+#### 3. **filetree** - Multiple Files with Glob Patterns
 
 Processes multiple DITA files using glob patterns for flexible file selection.
 
@@ -90,7 +136,7 @@ gradle dita -PditaHome=$DITA_HOME -b build.gradle.kts
 
 ---
 
-#### 3. **multi-project** - Multi-Module Project Configuration
+#### 4. **multi-project** - Multi-Module Project Configuration
 
 Demonstrates shared configuration across multiple sub-projects.
 
@@ -124,7 +170,7 @@ gradle :two:dita -PditaHome=$DITA_HOME
 
 ---
 
-#### 4. **multi-task** - Multiple Transformation Tasks
+#### 5. **multi-task** - Multiple Transformation Tasks
 
 Demonstrates running multiple DITA transformations in the same project (web and PDF).
 
@@ -160,7 +206,7 @@ gradle dita -PditaHome=$DITA_HOME -b build.gradle.kts
 
 ---
 
-#### 5. **classpath** - Custom Classpath Configuration
+#### 6. **classpath** - Custom Classpath Configuration
 
 Demonstrates custom classpath setup (advanced feature using Saxon-PE as example).
 
@@ -188,7 +234,7 @@ gradle dita -PditaHome=$DITA_HOME -b build.gradle.kts
 
 ---
 
-#### 6. **download** - Automatic DITA-OT Download and Plugin Installation
+#### 7. **download** - Automatic DITA-OT Download and Plugin Installation
 
 Demonstrates automatic download and setup of DITA-OT without manual installation.
 
@@ -297,13 +343,12 @@ Every build now includes detailed reports:
 
 ## Version History of Examples
 
-### v2.2.2 (November 19, 2025)
-All examples updated to **v2.2.2** featuring:
-- ✅ Kotlin 2.1.0 compatibility
-- ✅ Configuration cache support (10-50% faster builds)
-- ✅ Enhanced null-safety in task parameters
-- ✅ Improved classpath handling
-- ⚠️ Known limitation: ANT execution blocked by IsolatedAntBuilder (workaround: use `--no-configuration-cache`)
+### v2.3.0 (November 2025)
+All examples updated to **v2.3.0** featuring:
+- ✅ **Full Configuration Cache Support** - Up to 77% faster incremental builds
+- ✅ **IsolatedAntBuilder Fix** - DITA_SCRIPT strategy resolves classloader issues
+- ✅ **Provider API Refactoring** - Modern Gradle architecture
+- ✅ **New configuration-cache example** - Demonstrates performance benefits
 
 **Tested Compatibility:**
 - ✅ Gradle 8.5, 8.10, 9.0
@@ -312,6 +357,7 @@ All examples updated to **v2.2.2** featuring:
 - ✅ Windows, macOS, Linux
 
 ### Previous Versions
+- v2.2.2 - IsolatedAntBuilder workaround, Kotlin 2.1.0 compatibility
 - v2.2.0 - Configuration cache support introduction
 - v2.1.0 - Kotlin DSL properties, enhanced logging, build reports
 - v2.0.0 - Breaking changes, Ant DSL fixes
@@ -333,18 +379,18 @@ Or set it in `gradle.properties`:
 ditaHome=/path/to/dita-ot-3.6
 ```
 
-### Issue: ANT ClassNotFoundException
+### Issue: ANT ClassNotFoundException (Fixed in v2.3.0)
 
 **Symptom:** `taskdef class org.dita.dost.ant.InitializeProjectTask cannot be found`
 
-**Cause:** Known limitation with IsolatedAntBuilder classloader
+**Cause:** IsolatedAntBuilder classloader issue (fixed in v2.3.0)
 
-**Workaround:**
+**Solution:** Upgrade to v2.3.0 which uses DITA_SCRIPT strategy by default.
+
+**For older versions, workaround:**
 ```bash
 gradle dita --no-configuration-cache -PditaHome=$DITA_HOME
 ```
-
-**Note:** This will be fixed in v2.3.0
 
 ### Issue: Out of Memory during transformation
 

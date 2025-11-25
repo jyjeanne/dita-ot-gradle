@@ -5,6 +5,13 @@
 
 A [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
+## Highlights (v2.3.0)
+
+- **Full Configuration Cache Support** - Up to **77% faster** incremental builds
+- **IsolatedAntBuilder Fix** - DITA_SCRIPT strategy resolves classloader issues
+- **Provider API Architecture** - Modern Gradle best practices
+- **Cross-Platform** - Windows, macOS, Linux support
+
 **Note**: This is a continuation and evolution of the original [com.github.eerohele.dita-ot-gradle](https://github.com/eerohele/dita-ot-gradle) plugin, migrated to Kotlin and maintained with updated dependencies and improvements.
 
 **Author**: Jeremy Jeanne
@@ -18,7 +25,7 @@ The plugin is published to the [Gradle Plugin Portal](https://plugins.gradle.org
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
 }
 ```
 
@@ -26,7 +33,7 @@ plugins {
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
 }
 ```
 
@@ -39,7 +46,7 @@ This plugin is a **continuation and evolution** of the original eerohele plugin.
 #### Quick Migration (TL;DR)
 
 1. Change plugin ID: `com.github.eerohele.dita-ot-gradle` → `io.github.jyjeanne.dita-ot-gradle`
-2. Update version: `0.7.1` → `2.2.2`
+2. Update version: `0.7.1` → `2.3.0`
 3. Remove deprecated `ditaOt` setup task (if used)
 4. Test your build: `gradle dita`
 
@@ -56,7 +63,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
 }
 ```
 
@@ -69,7 +76,7 @@ plugins {
 
 // NEW
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
 }
 ```
 
@@ -180,7 +187,7 @@ properties {
 Use this checklist to ensure a smooth migration:
 
 - [ ] Updated plugin ID in `build.gradle` or `build.gradle.kts`
-- [ ] Updated version to `2.2.2`
+- [ ] Updated version to `2.3.0`
 - [ ] Removed deprecated `ditaOt` setup task (if used)
 - [ ] Tested build with `gradle dita`
 - [ ] Verified output is generated correctly
@@ -258,9 +265,9 @@ To see more details, use: gradle dita --info
 | Component | Tested Version | Supported Versions | Notes |
 |-----------|----------------|-------------------|-------|
 | **DITA-OT** | 3.6 | 3.0+ recommended, 2.x with warnings | Plugin auto-detects version and warns for old versions |
-| **Gradle** | 8.5 | 4.x+ (4.10+ recommended) | Configuration cache requires 6.5+ |
+| **Gradle** | 8.5, 8.10, 9.0 | 6.5+ | Configuration cache requires 6.5+ |
 | **Java** | 17 (build), 8 (runtime) | 8+ | Plugin compiled to Java 8 bytecode |
-| **Kotlin** | 1.9.25 | N/A | Plugin dependency only |
+| **Kotlin** | 2.1.0 | N/A | Plugin dependency only |
 
 **DITA-OT Version Detection:**
 The plugin automatically detects your DITA-OT version and will warn if using a version older than 3.0.
@@ -278,7 +285,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.2.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -295,7 +302,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -371,14 +378,31 @@ use the downloaded version in your build. See the [`download` example](https://g
 
 ## Configuration Cache Support
 
-Since version 2.2.0+, this plugin fully supports Gradle's configuration cache, which can significantly speed up your builds.
+Since version 2.3.0, this plugin **fully supports** Gradle's configuration cache with the DITA_SCRIPT execution strategy (default).
+
+### Performance Benchmarks
+
+Tested on Windows 11, Gradle 8.5, DITA-OT 3.6 (generating HTML5 + PDF):
+
+| Scenario | Time | Improvement |
+|----------|------|-------------|
+| Without Configuration Cache | 20.8s | baseline |
+| With Cache (first run) | 22.8s | -10% (stores cache) |
+| **With Cache (up-to-date)** | **4.8s** | **77% faster** |
+| With Cache (clean build) | 22.4s | reuses configuration |
 
 ### Enabling Configuration Cache
 
-To enable configuration cache, add the `--configuration-cache` flag to your Gradle command:
+Add the `--configuration-cache` flag to your Gradle command:
 
 ```bash
+# First run (stores cache)
 gradle dita --configuration-cache
+# Output: "Configuration cache entry stored."
+
+# Second run (reuses cache - 77% faster!)
+gradle dita --configuration-cache
+# Output: "Reusing configuration cache."
 ```
 
 Or enable it globally in `gradle.properties`:
@@ -387,29 +411,32 @@ Or enable it globally in `gradle.properties`:
 org.gradle.configuration-cache=true
 ```
 
-### Performance Benefits
+### How It Works
 
-- **First run**: Configuration phase runs normally and is cached
-- **Subsequent runs**: Configuration phase is skipped entirely, directly executing tasks
-- **Expected speedup**: 10-50% faster builds, especially beneficial for CI/CD pipelines
+1. **First run**: Gradle calculates the task graph and stores it in cache (~22s)
+2. **Subsequent runs**: Gradle skips configuration phase entirely (~5s for up-to-date checks)
+3. **Clean builds**: Configuration is reused, only execution phase runs
 
 ### Compatibility Notes
 
-- **✅ Fully supported**: All Kotlin DSL properties (recommended)
-- **⚠️ Limited support**: Groovy Closure-based properties may require project state and disable caching
-- **Recommendation**: Use Kotlin DSL properties for best configuration cache performance
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **DITA_SCRIPT strategy** | ✅ Fully supported | Default, recommended |
+| **Kotlin DSL properties** | ✅ Fully supported | Use `properties { }` block |
+| **Groovy DSL properties** | ⚠️ Works with warnings | Closures not serializable |
+| **IsolatedAntBuilder** | ❌ Not compatible | Legacy strategy, use DITA_SCRIPT |
 
 ### Example with Configuration Cache
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
 }
 
-tasks.register<com.github.jyjeanne.DitaOtTask>("dita") {
+tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
     ditaOt(file("/path/to/dita-ot"))
     input("my.ditamap")
-    transtype("html5")
+    transtype("html5", "pdf")  // Multiple formats
 
     // Type-safe properties (configuration cache compatible)
     properties {
@@ -418,6 +445,10 @@ tasks.register<com.github.jyjeanne.DitaOtTask>("dita") {
     }
 }
 ```
+
+### Try the Configuration Cache Example
+
+See the [configuration-cache example](examples/configuration-cache) for a complete demo with benchmark instructions.
 
 ## Passing Ant properties to DITA-OT
 

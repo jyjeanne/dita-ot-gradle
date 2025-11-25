@@ -3,10 +3,104 @@ package com.github.jyjeanne
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
+import org.gradle.api.model.ObjectFactory
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
 object Classpath {
+
+    /**
+     * Get plugin classpath files as a list (configuration cache compatible).
+     */
+    @JvmStatic
+    fun getPluginClasspathFiles(ditaHome: File?): List<File> {
+        if (ditaHome == null) {
+            throw GradleException("You must specify the DITA-OT directory (ditaOt.dir) before you can retrieve the plugin classpath.")
+        }
+
+        val plugins = listOf(
+            File(ditaHome, "config/plugins.xml"),
+            File(ditaHome, "resources/plugins.xml")
+        ).find { it.exists() }
+            ?: throw GradleException(
+                """
+                Can't find DITA-OT plugin XML file.
+                Are you sure you're using a valid DITA-OT directory?
+                """.trimIndent()
+            )
+
+        val archives = mutableListOf<File>()
+
+        try {
+            val factory = DocumentBuilderFactory.newInstance()
+            factory.isNamespaceAware = true
+            val builder = factory.newDocumentBuilder()
+            val doc = builder.parse(plugins)
+
+            val pluginNodes = doc.documentElement.getElementsByTagName("plugin")
+            for (i in 0 until pluginNodes.length) {
+                val pluginNode = pluginNodes.item(i)
+                val xmlBase = pluginNode.attributes.getNamedItemNS(
+                    "http://www.w3.org/XML/1998/namespace",
+                    "base"
+                )?.nodeValue ?: continue
+
+                val pluginDir = File(plugins.parent, xmlBase)
+                check(pluginDir.exists()) { "Plugin directory does not exist: $pluginDir" }
+
+                val featureNodes = (pluginNode as org.w3c.dom.Element).getElementsByTagName("feature")
+                for (j in 0 until featureNodes.length) {
+                    val featureNode = featureNodes.item(j)
+                    val file = featureNode.attributes.getNamedItem("file")?.nodeValue
+                    if (file != null) {
+                        archives.add(File(pluginDir.parent, file))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            throw GradleException("Failed to parse DITA-OT plugin XML: ${plugins.absolutePath}", e)
+        }
+
+        check(archives.isNotEmpty()) { "No plugin archives found" }
+
+        return archives
+    }
+
+    /**
+     * Get compile classpath files as a list (configuration cache compatible).
+     */
+    @JvmStatic
+    fun getCompileClasspathFiles(ditaHome: File): List<File> {
+        System.setProperty("logback.configurationFile", "$ditaHome/config/logback.xml")
+
+        val libDir = File(ditaHome, "lib")
+        val configDir = File(ditaHome, "config")
+        val resourcesDir = File(ditaHome, "resources")
+
+        val libJars = libDir.listFiles { file ->
+            file.isFile && file.name.endsWith(".jar") &&
+            file.name != "ant.jar" &&
+            file.name != "ant-launcher.jar"
+        }?.toList() ?: emptyList()
+
+        val classpath = mutableListOf<File>()
+        classpath.addAll(libJars)
+        classpath.addAll(getPluginClasspathFiles(ditaHome))
+        classpath.add(configDir)
+        classpath.add(resourcesDir)
+
+        return classpath
+    }
+
+    /**
+     * Compile classpath using ObjectFactory (configuration cache compatible).
+     */
+    @JvmStatic
+    fun compileWithObjectFactory(objectFactory: ObjectFactory, ditaHome: File): FileCollection {
+        val files = getCompileClasspathFiles(ditaHome)
+        return objectFactory.fileCollection().from(files)
+    }
+
     @JvmStatic
     fun pluginClasspath(project: Project, ditaHome: File?): FileCollection {
         if (ditaHome == null) {

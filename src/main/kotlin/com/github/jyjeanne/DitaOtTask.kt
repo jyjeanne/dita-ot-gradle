@@ -4,20 +4,28 @@ import groovy.lang.Closure
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.FileTree
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.internal.project.IsolatedAntBuilder
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import java.io.File
+import javax.inject.Inject
 
 /**
  * Gradle task for publishing DITA documents using DITA-OT.
@@ -25,124 +33,217 @@ import java.io.File
  * This task allows you to transform DITA maps into various output formats
  * (HTML5, PDF, XHTML, etc.) using the DITA Open Toolkit.
  *
- * **Configuration Cache**: This task is NOT compatible with Gradle's configuration cache due to:
- * - Dynamic classpath computation that depends on DITA-OT directory structure
- * - Complex ANT integration through IsolatedAntBuilder
- * - Groovy Closure-based properties that require serialization
- * Run with `--no-configuration-cache` flag if you encounter cache-related errors.
+ * **Configuration Cache**: This task is compatible with Gradle's configuration cache
+ * when using the DITA_SCRIPT execution strategy (default). The task uses Gradle's
+ * Provider API to ensure all project references are resolved during configuration time.
  *
  * @since 1.0.0
  */
 @CacheableTask
-open class DitaOtTask : DefaultTask() {
+abstract class DitaOtTask @Inject constructor(
+    private val objectFactory: ObjectFactory,
+    private val projectLayout: ProjectLayout
+) : DefaultTask() {
+
+    // ==================== Properties (Configuration Cache Compatible) ====================
+
+    /**
+     * DITA-OT installation directory.
+     */
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val ditaOtDir: DirectoryProperty
+
+    /**
+     * Input files (DITA maps or topics) to process.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:SkipWhenEmpty
+    abstract val inputFiles: ConfigurableFileCollection
+
+    /**
+     * DITAVAL filter file (optional).
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    abstract val filterFile: ConfigurableFileCollection
+
+    /**
+     * Output directory for generated content.
+     */
+    @get:Internal
+    abstract val outputDir: DirectoryProperty
+
+    /**
+     * Temporary directory for DITA-OT processing.
+     */
+    @get:Internal
+    abstract val tempDir: DirectoryProperty
+
+    /**
+     * Output formats (transtypes) to generate.
+     */
+    @get:Input
+    abstract val transtypes: ListProperty<String>
+
+    /**
+     * Custom DITA-OT properties.
+     */
+    @get:Input
+    @get:Optional
+    abstract val ditaProperties: MapProperty<String, String>
+
+    /**
+     * Enable dev mode (include DITA-OT directory in up-to-date checks).
+     */
+    @get:Input
+    abstract val devMode: Property<Boolean>
+
+    /**
+     * Use single output directory for all inputs.
+     */
+    @get:Input
+    abstract val singleOutputDir: Property<Boolean>
+
+    /**
+     * Use associated DITAVAL filter files.
+     */
+    @get:Input
+    abstract val useAssociatedFilter: Property<Boolean>
+
+    /**
+     * ANT execution strategy.
+     */
+    @get:Input
+    abstract val antExecutionStrategy: Property<String>
+
+    /**
+     * Custom classpath for DITA-OT (optional).
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    abstract val customClasspath: ConfigurableFileCollection
+
+    // ==================== Legacy Options (for backward compatibility) ====================
 
     @get:Internal
     val options: Options = Options()
 
-    // Pre-computed default output directory (accessed during configuration time)
+    // Groovy Closure for properties (not serializable, marked @Internal)
     @get:Internal
-    private val defaultBuildDirectory: File = project.layout.buildDirectory.asFile.get()
+    var groovyProperties: Closure<*>? = null
+
+    // ==================== Initialization ====================
 
     init {
-        options.output = defaultBuildDirectory
+        // Set defaults
+        devMode.convention(false)
+        singleOutputDir.convention(false)
+        useAssociatedFilter.convention(false)
+        transtypes.convention(listOf(Options.DEFAULT_TRANSTYPE))
+        antExecutionStrategy.convention(Options.Companion.AntExecutionStrategy.DITA_SCRIPT.name)
+        outputDir.convention(projectLayout.buildDirectory)
+        tempDir.convention(projectLayout.buildDirectory.dir("dita-temp"))
     }
 
-    // Configuration methods (for both Groovy and Kotlin DSL)
+    // ==================== Configuration Methods (DSL) ====================
 
     fun devMode(d: Boolean) {
+        devMode.set(d)
         options.devMode = d
     }
 
     fun ditaOt(d: Any?) {
-        options.ditaOt = if (d != null) project.file(d) else null
+        if (d != null) {
+            val file = when (d) {
+                is File -> d
+                is String -> projectLayout.projectDirectory.dir(d).asFile
+                else -> projectLayout.projectDirectory.file(d.toString()).asFile
+            }
+            ditaOtDir.set(file)
+            options.ditaOt = file
+        }
     }
 
     fun classpath(vararg classpath: Any) {
-        options.classpath = project.files(*classpath)
+        customClasspath.from(*classpath)
+        options.classpath = objectFactory.fileCollection().from(*classpath)
     }
 
     fun input(i: Any) {
+        inputFiles.from(i)
         options.input = i
     }
 
     fun filter(f: Any) {
+        val file = when (f) {
+            is File -> f
+            is String -> projectLayout.projectDirectory.file(f).asFile
+            else -> projectLayout.projectDirectory.file(f.toString()).asFile
+        }
+        filterFile.from(file)
         options.filter = f
     }
 
     fun output(o: String) {
-        options.output = project.file(o)
+        val dir = projectLayout.projectDirectory.dir(o)
+        outputDir.set(dir)
+        options.output = dir.asFile
     }
 
     fun temp(t: String) {
-        options.temp = project.file(t)
+        val dir = projectLayout.projectDirectory.dir(t)
+        tempDir.set(dir)
+        options.temp = dir.asFile
     }
 
     /**
      * Configure DITA-OT properties using Groovy Closure (for Groovy DSL).
-     * Example:
-     * ```groovy
-     * properties {
-     *     property(name: 'processing-mode', value: 'strict')
-     * }
-     * ```
+     * Note: Groovy Closures are not configuration cache compatible.
+     * Use the Kotlin DSL properties method for full compatibility.
      */
     fun properties(p: Closure<*>) {
+        groovyProperties = p
         options.properties = p
     }
 
     /**
      * Configure DITA-OT properties using Kotlin DSL.
-     * Example:
-     * ```kotlin
-     * properties {
-     *     "processing-mode" to "strict"
-     *     "args.cssroot" to "$projectDir/css"
-     * }
-     * ```
+     * This method is configuration cache compatible.
      */
     fun properties(block: PropertyBuilder.() -> Unit) {
         val builder = PropertyBuilder()
         builder.block()
-        options.kotlinProperties = builder.build()
+        val props = builder.build()
+        ditaProperties.putAll(props)
+        options.kotlinProperties = props
     }
 
     fun transtype(vararg t: String) {
+        transtypes.set(t.toList())
         options.transtype = t.toList()
     }
 
     fun singleOutputDir(s: Boolean) {
+        singleOutputDir.set(s)
         options.singleOutputDir = s
     }
 
     fun useAssociatedFilter(a: Boolean) {
+        useAssociatedFilter.set(a)
         options.useAssociatedFilter = a
     }
 
     /**
      * Configure ANT execution strategy.
-     *
-     * Experimental feature to switch between different ANT invocation approaches.
-     * Default is ISOLATED_BUILDER for backward compatibility.
-     *
-     * Example (Kotlin DSL):
-     * ```kotlin
-     * dita {
-     *     antExecutionStrategy("DITA_SCRIPT") // Use DITA-OT script instead
-     * }
-     * ```
-     *
-     * Example (Groovy DSL):
-     * ```groovy
-     * dita {
-     *     antExecutionStrategy 'DITA_SCRIPT'
-     * }
-     * ```
-     *
-     * @param strategy Strategy name (ISOLATED_BUILDER, DITA_SCRIPT, CUSTOM_CLASSLOADER, GRADLE_EXEC, GROOVY_ANT_BINDING)
-     * @since 2.3.0-experimental
      */
     fun antExecutionStrategy(strategy: String) {
         try {
+            Options.Companion.AntExecutionStrategy.valueOf(strategy)
+            antExecutionStrategy.set(strategy)
             options.antExecutionStrategy = Options.Companion.AntExecutionStrategy.valueOf(strategy)
             logger.info("ANT execution strategy set to: $strategy")
         } catch (e: IllegalArgumentException) {
@@ -154,24 +255,14 @@ open class DitaOtTask : DefaultTask() {
         }
     }
 
-    @Internal
-    fun getDefaultClasspath(): FileTree {
-        return Classpath.compile(project, getDitaHome()).asFileTree
-    }
+    // ==================== Computed Properties ====================
 
-    @Deprecated("Use getDefaultClasspath() instead", ReplaceWith("getDefaultClasspath()"))
-    @Suppress("UNUSED_PARAMETER")
-    fun getDefaultClasspath(project: Project): FileTree {
-        logger.warn("getDefaultClasspath(project) is deprecated. Use getDefaultClasspath() instead.")
-        return getDefaultClasspath()
-    }
+    /**
+     * Resolve DITA-OT home directory with validation.
+     */
+    fun resolveDitaHome(): File {
+        val ditaHome = ditaOtDir.asFile.orNull ?: throw GradleException(Messages.ditaHomeError)
 
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
-    fun getDitaHome(): File {
-        val ditaHome = options.ditaOt ?: throw GradleException(Messages.ditaHomeError)
-
-        // Validate DITA-OT directory
         if (!ditaHome.exists()) {
             throw GradleException("DITA-OT directory does not exist: ${ditaHome.absolutePath}")
         }
@@ -194,21 +285,14 @@ open class DitaOtTask : DefaultTask() {
 
     /**
      * Detect DITA-OT version from the installation.
-     * Returns version string or "unknown" if version cannot be determined.
      */
     fun detectDitaOtVersion(): String {
         return try {
-            val ditaHome = getDitaHome()
+            val ditaHome = resolveDitaHome()
             val versionFile = File(ditaHome, "VERSION")
             if (versionFile.exists()) {
                 versionFile.readText().trim()
             } else {
-                // Try reading from lib directory JAR manifest
-                val libDir = File(ditaHome, "lib")
-                val dostJar = libDir.listFiles()?.find { it.name.startsWith("dost") }
-                if (dostJar != null) {
-                    logger.debug("Found DOST JAR: ${dostJar.name}")
-                }
                 "unknown"
             }
         } catch (e: Exception) {
@@ -218,190 +302,108 @@ open class DitaOtTask : DefaultTask() {
     }
 
     /**
-     * Get input files for up-to-date check.
-     *
-     * By default, all files under all input directories are included in the
-     * up-to-date check, apart from the build directory.
-     *
-     * If devMode is true, the DITA-OT directory is also checked. That's useful
-     * for stylesheet developers who don't want to use --rerun-tasks every time
-     * they make a change to the DITA-OT plugin they're developing.
-     *
-     * @since 0.1.0
+     * Get input file tree for up-to-date checks.
+     * Includes parent directories of input files and optionally DITA-OT directory in dev mode.
      */
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    @SkipWhenEmpty
-    fun getInputFileTree(): Set<Any> {
-        val outputDir = FilenameUtils.getBaseName(options.output?.path ?: "")
+    fun getInputFileTree(): FileCollection {
+        val outputDirName = FilenameUtils.getBaseName(outputDir.asFile.orNull?.path ?: "")
+        val collection = objectFactory.fileCollection()
 
-        val inputFiles = mutableSetOf<Any>()
-
-        getInputFiles().files.forEach { file ->
-            inputFiles.add(project.fileTree(file.parent ?: ".").apply {
-                exclude("**/.gradle/**", outputDir)
-            })
+        // Add parent directories of all input files
+        inputFiles.files.forEach { file ->
+            val parentDir = file.parentFile
+            if (parentDir != null && parentDir.exists()) {
+                val tree = objectFactory.fileTree()
+                tree.from(parentDir)
+                tree.exclude("**/.gradle/**", outputDirName)
+                collection.from(tree)
+            }
         }
 
-        // DITAVAL file might be outside the DITA map directory, so we add that separately
-        if (options.filter != null) {
-            inputFiles.add(project.files(options.filter).asFileTree)
+        // Add filter file if specified
+        if (!filterFile.isEmpty) {
+            collection.from(filterFile)
         }
 
-        if (options.devMode) {
-            inputFiles.add(project.fileTree(getDitaHome()).apply {
-                exclude(
+        // In dev mode, include DITA-OT directory for up-to-date checks
+        if (devMode.get()) {
+            val ditaHome = ditaOtDir.asFile.orNull
+            if (ditaHome != null && ditaHome.exists()) {
+                val tree = objectFactory.fileTree()
+                tree.from(ditaHome)
+                tree.exclude(
                     "temp",
                     "lib/dost-configuration.jar",
                     "lib/org.dita.dost.platform/plugin.properties"
                 )
-            })
+                collection.from(tree)
+            }
         }
 
-        return inputFiles
+        return collection
     }
 
+    /**
+     * Get all output directories for this task.
+     */
     @OutputDirectories
     fun getOutputDirectories(): Set<File> {
-        return getInputFiles().files.flatMap { file ->
-            options.transtype.map { transtype ->
+        return inputFiles.files.flatMap { file ->
+            transtypes.get().map { transtype ->
                 getOutputDirectory(file, transtype)
             }
         }.toSet()
     }
 
-    @SkipWhenEmpty
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    fun getInputFiles(): FileCollection {
-        return if (options.input == null) {
-            project.files()
-        } else {
-            project.files(options.input)
-        }
-    }
-
-    fun getDitavalFile(inputFile: File): File {
-        return if (options.filter != null) {
-            project.file(options.filter!!)
-        } else {
-            getAssociatedFile(inputFile, FileExtensions.DITAVAL)
-        }
-    }
-
     /**
      * Get the output directory for the given DITA map.
-     *
-     * If the user has given an output directory, use that. Otherwise,
-     * use the basename of the input DITA file.
-     *
-     * Example: if the name input DITA file is `root`, the output directory
-     * is `${buildDir}/root`.
-     *
-     * @param inputFile Input DITA file.
-     * @param transtype DITA transtype.
-     * @since 0.1.0
      */
     fun getOutputDirectory(inputFile: File, transtype: String): File {
-        val baseOutputDir = if (options.singleOutputDir || getInputFiles().files.size == 1) {
-            options.output
+        val baseOutputDir = if (singleOutputDir.get() || inputFiles.files.size == 1) {
+            outputDir.asFile.orNull
         } else {
             val basename = FilenameUtils.getBaseName(inputFile.path)
-            File(options.output, basename)
-        } ?: defaultBuildDirectory
+            File(outputDir.asFile.orNull, basename)
+        } ?: projectLayout.buildDirectory.asFile.get()
 
-        return if (transtype.isNotEmpty() && options.transtype.size > 1) {
+        return if (transtype.isNotEmpty() && transtypes.get().size > 1) {
             File(baseOutputDir, transtype)
         } else {
             baseOutputDir
         }
     }
 
-    private fun antBuilder(classpath: FileCollection): IsolatedAntBuilder {
-        val builder = services.get(IsolatedAntBuilder::class.java)
-
-        builder.withClasspath(classpath.files)
-
-        return builder
+    /**
+     * Get DITAVAL filter file for the given input file.
+     */
+    fun getDitavalFile(inputFile: File): File {
+        return if (!filterFile.isEmpty) {
+            filterFile.files.first()
+        } else {
+            getAssociatedFile(inputFile, FileExtensions.DITAVAL)
+        }
     }
 
     /**
-     * Workaround: Uses DITA-OT script execution to avoid IsolatedAntBuilder classloader issues.
-     *
-     * The DITA_SCRIPT strategy executes DITA-OT via its native dita/dita.bat script
-     * instead of using Gradle's restricted IsolatedAntBuilder classloader.
+     * Create default classpath for DITA-OT.
      */
-    private fun renderViaDitaScript(
-        ditaHome: File,
-        inputFiles: Set<File>,
-        transtypes: Array<String>,
-        startTime: Long
-    ): Boolean {
-        var hasErrors = false
-
-        inputFiles.forEach { inputFile ->
-            logger.info("Processing: ${inputFile.name}")
-
-            if (!inputFile.exists()) {
-                throw GradleException("Input file does not exist: ${inputFile.absolutePath}")
-            }
-
-            transtypes.forEach { transtype ->
-                val outputDir = getOutputDirectory(inputFile, transtype)
-                logger.info("  → Generating $transtype output to: ${outputDir.absolutePath}")
-
-                // Build properties map
-                val properties = mutableMapOf<String, String>()
-
-                // User-defined properties from Kotlin DSL
-                if (options.kotlinProperties != null) {
-                    options.kotlinProperties!!.forEach { (name, value) ->
-                        properties[name] = value
-                    }
-                }
-
-                // Determine filter file
-                val filterFile = if (options.filter != null || options.useAssociatedFilter) {
-                    getDitavalFile(inputFile)
-                } else {
-                    null
-                }
-
-                // Execute via DITA script workaround
-                try {
-                    val exitCode = AntExecutor.executeViaDitaScript(
-                        ditaHome = ditaHome,
-                        inputFile = inputFile,
-                        transtype = transtype,
-                        outputDir = outputDir,
-                        tempDir = options.temp,
-                        filterFile = filterFile,
-                        properties = properties,
-                        logger = logger
-                    )
-
-                    if (exitCode == 0) {
-                        logger.info("  ✓ Successfully generated $transtype output")
-                    } else {
-                        logger.error("  ✗ Failed to generate $transtype output (exit code: $exitCode)")
-                        hasErrors = true
-                    }
-                } catch (e: Exception) {
-                    logger.error("  ✗ Failed to generate $transtype output", e)
-                    hasErrors = true
-                }
-            }
-        }
-
-        return !hasErrors
+    fun createDefaultClasspath(): FileCollection {
+        // Note: This method creates a new FileCollection during execution
+        // For configuration cache compatibility, prefer using customClasspath property
+        val ditaHome = resolveDitaHome()
+        return Classpath.compileWithObjectFactory(objectFactory, ditaHome)
     }
+
+    // ==================== Task Action ====================
 
     @TaskAction
     fun render() {
         val startTime = System.currentTimeMillis()
-        val ditaHome = getDitaHome()
-        val inputFiles = getInputFiles().files
-        val transtypes = options.transtype.toTypedArray()
+        val ditaHome = resolveDitaHome()
+        val inputs = inputFiles.files
+        val types = transtypes.get().toTypedArray()
 
         // Detect and log DITA-OT version
         val ditaOtVersion = detectDitaOtVersion()
@@ -410,10 +412,10 @@ open class DitaOtTask : DefaultTask() {
         logger.lifecycle("Starting DITA-OT transformation")
         logger.info("DITA-OT version: $ditaOtVersion")
         logger.info("DITA-OT home: ${ditaHome.absolutePath}")
-        logger.info("Input files: ${inputFiles.size} file(s)")
-        logger.info("Output formats: ${transtypes.joinToString(", ")}")
-        logger.info("Output directory: ${options.output?.absolutePath ?: defaultBuildDirectory.absolutePath}")
-        logger.info("ANT execution strategy: ${options.antExecutionStrategy.name}")
+        logger.info("Input files: ${inputs.size} file(s)")
+        logger.info("Output formats: ${types.joinToString(", ")}")
+        logger.info("Output directory: ${outputDir.asFile.orNull?.absolutePath}")
+        logger.info("ANT execution strategy: ${antExecutionStrategy.get()}")
 
         // Warn if DITA-OT version is old
         if (ditaOtVersion != "unknown") {
@@ -423,119 +425,26 @@ open class DitaOtTask : DefaultTask() {
             }
         }
 
-        if (inputFiles.isEmpty()) {
+        if (inputs.isEmpty()) {
             logger.warn("No input files specified - task will be skipped")
             return
         }
 
-        // WORKAROUND: Use DITA_SCRIPT strategy by default (avoids IsolatedAntBuilder classloader issue)
-        if (options.antExecutionStrategy == Options.Companion.AntExecutionStrategy.DITA_SCRIPT) {
-            logger.info("✓ Workaround active: Using DITA_SCRIPT strategy to avoid IsolatedAntBuilder classloader issue")
-            val success = renderViaDitaScript(ditaHome, inputFiles, transtypes, startTime)
+        // WORKAROUND: Use DITA_SCRIPT strategy by default
+        val strategy = Options.Companion.AntExecutionStrategy.valueOf(antExecutionStrategy.get())
+        if (strategy == Options.Companion.AntExecutionStrategy.DITA_SCRIPT) {
+            logger.info("Using DITA_SCRIPT strategy (configuration cache compatible)")
+            val success = renderViaDitaScript(ditaHome, inputs, types, startTime)
 
             if (!success) {
                 throw GradleException("DITA-OT transformation failed with DITA_SCRIPT strategy")
             }
         } else {
-            // Legacy: Use IsolatedAntBuilder (may fail with classloader issues)
-            logger.warn("⚠️  Using deprecated IsolatedAntBuilder strategy - may encounter classloader issues")
-            logger.warn("    Recommendation: Use '--Pant-execution-strategy=DITA_SCRIPT' or set 'antExecutionStrategy(\"DITA_SCRIPT\")' in build.gradle")
+            // Legacy: Use IsolatedAntBuilder (not configuration cache compatible)
+            logger.warn("Using deprecated IsolatedAntBuilder strategy - NOT configuration cache compatible")
+            logger.warn("Recommendation: Use antExecutionStrategy(\"DITA_SCRIPT\") for configuration cache support")
 
-            val classpathToUse = options.classpath ?: getDefaultClasspath()
-            logger.debug("Classpath: ${classpathToUse.files.size} entries")
-
-            // Debug: Log all classpath files
-            if (logger.isDebugEnabled) {
-                classpathToUse.files.forEach { file ->
-                    logger.debug("  - ${file.absolutePath}")
-                }
-            }
-
-            antBuilder(classpathToUse).execute { antProject ->
-                inputFiles.forEach { inputFile ->
-                    logger.info("Processing: ${inputFile.name}")
-
-                    if (!inputFile.exists()) {
-                        throw GradleException("Input file does not exist: ${inputFile.absolutePath}")
-                    }
-
-                    val associatedPropertyFile = getAssociatedFile(inputFile, FileExtensions.PROPERTIES)
-
-                    transtypes.forEach { transtype ->
-                        val outputDir = getOutputDirectory(inputFile, transtype)
-                        logger.info("  → Generating $transtype output to: ${outputDir.absolutePath}")
-
-                        // Use GroovyObject invokeMethod directly - works reliably across Gradle versions
-                        val antBuildFile = File(ditaHome, "build.xml")
-
-                        // Create property closure
-                        val propertyClosure = object : Closure<Unit>(this) {
-                            fun doCall() {
-                                val ant = delegate as groovy.lang.GroovyObject
-
-                                // Set required DITA-OT properties
-                                ant.invokeMethod("property", mapOf(
-                                    "name" to Properties.ARGS_INPUT,
-                                    "location" to inputFile.absolutePath
-                                ))
-                                ant.invokeMethod("property", mapOf(
-                                    "name" to Properties.OUTPUT_DIR,
-                                    "location" to outputDir.absolutePath
-                                ))
-                                ant.invokeMethod("property", mapOf(
-                                    "name" to Properties.TEMP_DIR,
-                                    "location" to options.temp.absolutePath
-                                ))
-                                ant.invokeMethod("property", mapOf(
-                                    "name" to Properties.TRANSTYPE,
-                                    "value" to transtype
-                                ))
-
-                                // DITAVAL filter
-                                if (options.filter != null || options.useAssociatedFilter) {
-                                    ant.invokeMethod("property", mapOf(
-                                        "name" to Properties.ARGS_FILTER,
-                                        "location" to getDitavalFile(inputFile).absolutePath
-                                    ))
-                                }
-
-                                // Apply user-defined properties from Groovy Closure
-                                if (options.properties != null) {
-                                    options.properties!!.delegate = ant
-                                    options.properties!!.call()
-                                }
-
-                                // Apply user-defined properties from Kotlin DSL
-                                if (options.kotlinProperties != null) {
-                                    options.kotlinProperties!!.forEach { (name, value) ->
-                                        ant.invokeMethod("property", mapOf(
-                                            "name" to name,
-                                            "value" to value
-                                        ))
-                                    }
-                                }
-
-                                // Load associated property file if it exists
-                                if (associatedPropertyFile.exists()) {
-                                    ant.invokeMethod("property", mapOf(
-                                        "file" to associatedPropertyFile.absolutePath
-                                    ))
-                                }
-                            }
-                        }
-
-                        // Execute Ant task - invokeMethod with correct parameter types
-                        try {
-                            (antProject as groovy.lang.GroovyObject).invokeMethod("ant",
-                                arrayOf(mapOf("antfile" to antBuildFile.absolutePath), propertyClosure))
-                            logger.info("  ✓ Successfully generated $transtype output")
-                        } catch (e: Exception) {
-                            logger.error("  ✗ Failed to generate $transtype output", e)
-                            throw GradleException("DITA-OT transformation failed for $transtype: ${e.message}", e)
-                        }
-                    }
-                }
-            }
+            renderViaIsolatedAntBuilder(ditaHome, inputs, types)
         }
 
         // Calculate output metrics
@@ -550,18 +459,189 @@ open class DitaOtTask : DefaultTask() {
         logger.lifecycle("═══════════════════════════════════════════════════════")
         logger.lifecycle("DITA-OT Transformation Report")
         logger.lifecycle("═══════════════════════════════════════════════════════")
-        logger.lifecycle("Status:           ✓ SUCCESS")
+        logger.lifecycle("Status:           SUCCESS")
         logger.lifecycle("DITA-OT version:  $ditaOtVersion")
-        logger.lifecycle("Files processed:  ${inputFiles.size}")
-        logger.lifecycle("Formats:          ${transtypes.joinToString(", ")}")
+        logger.lifecycle("Files processed:  ${inputs.size}")
+        logger.lifecycle("Formats:          ${types.joinToString(", ")}")
         logger.lifecycle("Output size:      ${String.format("%.2f", outputSizeMB)} MB")
         logger.lifecycle("Duration:         ${String.format("%.2f", durationSeconds)}s")
         logger.lifecycle("═══════════════════════════════════════════════════════")
     }
 
+    // ==================== Execution Strategies ====================
+
     /**
-     * Calculate total size of a directory and its contents recursively.
+     * Execute DITA-OT via native script (configuration cache compatible).
      */
+    private fun renderViaDitaScript(
+        ditaHome: File,
+        inputs: Set<File>,
+        types: Array<String>,
+        startTime: Long
+    ): Boolean {
+        var hasErrors = false
+
+        inputs.forEach { inputFile ->
+            logger.info("Processing: ${inputFile.name}")
+
+            if (!inputFile.exists()) {
+                throw GradleException("Input file does not exist: ${inputFile.absolutePath}")
+            }
+
+            types.forEach { transtype ->
+                val outDir = getOutputDirectory(inputFile, transtype)
+                logger.info("  -> Generating $transtype output to: ${outDir.absolutePath}")
+
+                // Build properties map
+                val properties = mutableMapOf<String, String>()
+
+                // User-defined properties from Provider API
+                if (ditaProperties.isPresent) {
+                    properties.putAll(ditaProperties.get())
+                }
+
+                // Determine filter file
+                val filter = if (!filterFile.isEmpty || useAssociatedFilter.get()) {
+                    getDitavalFile(inputFile)
+                } else {
+                    null
+                }
+
+                // Execute via DITA script workaround
+                try {
+                    val exitCode = AntExecutor.executeViaDitaScript(
+                        ditaHome = ditaHome,
+                        inputFile = inputFile,
+                        transtype = transtype,
+                        outputDir = outDir,
+                        tempDir = tempDir.asFile.get(),
+                        filterFile = filter,
+                        properties = properties,
+                        logger = logger
+                    )
+
+                    if (exitCode == 0) {
+                        logger.info("  [OK] Successfully generated $transtype output")
+                    } else {
+                        logger.error("  [FAIL] Failed to generate $transtype output (exit code: $exitCode)")
+                        hasErrors = true
+                    }
+                } catch (e: Exception) {
+                    logger.error("  [FAIL] Failed to generate $transtype output", e)
+                    hasErrors = true
+                }
+            }
+        }
+
+        return !hasErrors
+    }
+
+    /**
+     * Execute DITA-OT via IsolatedAntBuilder (legacy, not configuration cache compatible).
+     */
+    private fun renderViaIsolatedAntBuilder(
+        ditaHome: File,
+        inputs: Set<File>,
+        types: Array<String>
+    ) {
+        val classpathToUse = if (!customClasspath.isEmpty) {
+            customClasspath
+        } else {
+            createDefaultClasspath()
+        }
+        logger.debug("Classpath: ${classpathToUse.files.size} entries")
+
+        val builder = services.get(IsolatedAntBuilder::class.java)
+        builder.withClasspath(classpathToUse.files)
+
+        builder.execute { antProject ->
+            inputs.forEach { inputFile ->
+                logger.info("Processing: ${inputFile.name}")
+
+                if (!inputFile.exists()) {
+                    throw GradleException("Input file does not exist: ${inputFile.absolutePath}")
+                }
+
+                val associatedPropertyFile = getAssociatedFile(inputFile, FileExtensions.PROPERTIES)
+
+                types.forEach { transtype ->
+                    val outDir = getOutputDirectory(inputFile, transtype)
+                    logger.info("  -> Generating $transtype output to: ${outDir.absolutePath}")
+
+                    val antBuildFile = File(ditaHome, "build.xml")
+
+                    // Create property closure
+                    val propertyClosure = object : Closure<Unit>(this) {
+                        fun doCall() {
+                            val ant = delegate as groovy.lang.GroovyObject
+
+                            // Set required DITA-OT properties
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.ARGS_INPUT,
+                                "location" to inputFile.absolutePath
+                            ))
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.OUTPUT_DIR,
+                                "location" to outDir.absolutePath
+                            ))
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.TEMP_DIR,
+                                "location" to tempDir.asFile.get().absolutePath
+                            ))
+                            ant.invokeMethod("property", mapOf(
+                                "name" to Properties.TRANSTYPE,
+                                "value" to transtype
+                            ))
+
+                            // DITAVAL filter
+                            if (!filterFile.isEmpty || useAssociatedFilter.get()) {
+                                ant.invokeMethod("property", mapOf(
+                                    "name" to Properties.ARGS_FILTER,
+                                    "location" to getDitavalFile(inputFile).absolutePath
+                                ))
+                            }
+
+                            // Apply user-defined properties from Groovy Closure
+                            if (groovyProperties != null) {
+                                groovyProperties!!.delegate = ant
+                                groovyProperties!!.call()
+                            }
+
+                            // Apply user-defined properties from Provider API
+                            if (ditaProperties.isPresent) {
+                                ditaProperties.get().forEach { (name, value) ->
+                                    ant.invokeMethod("property", mapOf(
+                                        "name" to name,
+                                        "value" to value
+                                    ))
+                                }
+                            }
+
+                            // Load associated property file if it exists
+                            if (associatedPropertyFile.exists()) {
+                                ant.invokeMethod("property", mapOf(
+                                    "file" to associatedPropertyFile.absolutePath
+                                ))
+                            }
+                        }
+                    }
+
+                    // Execute Ant task
+                    try {
+                        (antProject as groovy.lang.GroovyObject).invokeMethod("ant",
+                            arrayOf(mapOf("antfile" to antBuildFile.absolutePath), propertyClosure))
+                        logger.info("  [OK] Successfully generated $transtype output")
+                    } catch (e: Exception) {
+                        logger.error("  [FAIL] Failed to generate $transtype output", e)
+                        throw GradleException("DITA-OT transformation failed for $transtype: ${e.message}", e)
+                    }
+                }
+            }
+        }
+    }
+
+    // ==================== Utility Methods ====================
+
     private fun calculateDirectorySize(dir: File): Long {
         if (!dir.exists() || !dir.isDirectory) return 0L
 
@@ -579,17 +659,6 @@ open class DitaOtTask : DefaultTask() {
     companion object {
         /**
          * Get a file "associated" with a given file.
-         *
-         * An "associated" file is a file in the same directory as the
-         * input file that has the exact same basename but with the given extension.
-         *
-         * Example: if the input file is `subdir/root.ditamap` and the given
-         * extension is ".properties", the associated file is
-         * `subdir/root.properties`.
-         *
-         * @param inputFile Input file.
-         * @param extension The extension of the associated file.
-         * @since 0.2.0
          */
         @JvmStatic
         fun getAssociatedFile(inputFile: File, extension: String): File {

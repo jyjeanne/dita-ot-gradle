@@ -1,5 +1,5 @@
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
 }
 
 import com.github.jyjeanne.DitaOtTask

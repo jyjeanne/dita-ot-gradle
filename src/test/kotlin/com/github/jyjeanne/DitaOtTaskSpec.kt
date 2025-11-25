@@ -165,12 +165,7 @@ class DitaOtTaskSpec : StringSpec({
             )
         }
 
-        val inputFiles = task.getInputFileTree().flatMap {
-            when (it) {
-                is FileCollection -> it.files
-                else -> emptySet()
-            }
-        }.toSet()
+        val inputFiles = task.getInputFileTree().files
         inputFiles shouldContain File("$examplesDir/multi-project/one/one.ditamap")
         inputFiles shouldContain File("$examplesDir/multi-project/two/two.ditamap")
     }
@@ -205,12 +200,7 @@ class DitaOtTaskSpec : StringSpec({
             input(fileTree)
         }
 
-        val inputFiles = task.getInputFileTree().flatMap {
-            when (it) {
-                is FileCollection -> it.files
-                else -> emptySet()
-            }
-        }.toSet()
+        val inputFiles = task.getInputFileTree().files
         inputFiles shouldContain File("$examplesDir/filetree/dita/one.ditamap")
         inputFiles shouldContain File("$examplesDir/filetree/dita/two.ditamap")
     }
@@ -223,12 +213,7 @@ class DitaOtTaskSpec : StringSpec({
 
         val inputFileTree = task.getInputFileTree()
         val ditavalFile = File("$examplesDir/simple/dita/root.ditaval")
-        val allFiles = inputFileTree.flatMap {
-            when (it) {
-                is FileCollection -> it.files
-                else -> emptySet()
-            }
-        }.toSet()
+        val allFiles = inputFileTree.files
         allFiles shouldContain ditavalFile
     }
 
@@ -240,12 +225,7 @@ class DitaOtTaskSpec : StringSpec({
 
         val inputFileTree = task.getInputFileTree()
         val ditavalFile = File("$examplesDir/filetree/dita/two.ditaval")
-        val allFiles = inputFileTree.flatMap {
-            when (it) {
-                is FileCollection -> it.files
-                else -> emptySet()
-            }
-        }.toSet()
+        val allFiles = inputFileTree.files
         allFiles shouldContain ditavalFile
     }
 
@@ -266,12 +246,7 @@ class DitaOtTaskSpec : StringSpec({
             devMode(true)
         }
 
-        val allFiles = task.getInputFileTree().flatMap {
-            when (it) {
-                is FileCollection -> it.files
-                else -> emptySet()
-            }
-        }.toSet()
+        val allFiles = task.getInputFileTree().files
 
         allFiles shouldContain File(ditaHome, "build.xml")
         allFiles.contains(File(ditaHome, "lib/org.dita.dost.platform/plugin.properties")) shouldBe false
@@ -340,7 +315,7 @@ class DitaOtTaskSpec : StringSpec({
         // Should throw when trying to get DITA home without it being set
         var exceptionThrown = false
         try {
-            task.getDitaHome()
+            task.resolveDitaHome()
         } catch (e: Exception) {
             exceptionThrown = true
             e.message shouldNotBe null
@@ -357,7 +332,7 @@ class DitaOtTaskSpec : StringSpec({
         }
 
         // Verify configuration
-        task.getDitaHome().path.replace("\\", "/") shouldBe ditaHome
+        task.resolveDitaHome().path.replace("\\", "/") shouldBe ditaHome
         getInputFiles(task).size shouldBe 1
         task.getOutputDirectories() shouldHaveSize 1
         task.options.transtype shouldBe listOf("html5")

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="usage">
+    <title>Using Configuration Cache</title>
+    <body>
+        <p>Enabling Configuration Cache is simple - just add the <codeph>--configuration-cache</codeph>
+        flag to your Gradle command.</p>
+
+        <section>
+            <title>Basic Usage</title>
+            <codeblock># Enable configuration cache for a single build
+./gradlew dita --configuration-cache -PditaHome=/path/to/dita-ot
+
+# Enable by default in gradle.properties
+org.gradle.configuration-cache=true</codeblock>
+        </section>
+
+        <section>
+            <title>Best Practices</title>
+            <ol>
+                <li><b>Use Kotlin DSL properties</b> - The Kotlin DSL <codeph>properties { }</codeph>
+                block is fully serializable and configuration cache compatible.</li>
+                <li><b>Avoid Groovy Closures</b> - Groovy Closure-based properties may cause
+                configuration cache warnings.</li>
+                <li><b>Use DITA_SCRIPT strategy</b> - This is the default and is fully compatible
+                with configuration cache.</li>
+                <li><b>Keep ditaHome consistent</b> - Changing the DITA-OT path invalidates the cache.</li>
+            </ol>
+        </section>
+
+        <section>
+            <title>Troubleshooting</title>
+            <p>If you encounter configuration cache issues:</p>
+            <ul>
+                <li>Run with <codeph>--no-configuration-cache</codeph> to disable temporarily</li>
+                <li>Delete <codeph>.gradle/configuration-cache</codeph> to clear the cache</li>
+                <li>Check the configuration cache report for specific incompatibilities</li>
+            </ul>
+        </section>
+    </body>
+</topic>

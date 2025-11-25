@@ -4,7 +4,7 @@ import de.undercouch.gradle.tasks.download.Download
 
 plugins {
     id("de.undercouch.download") version "4.1.1"
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
 }
 
 val ditaOtVersion = "3.4"

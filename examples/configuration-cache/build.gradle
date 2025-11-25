@@ -1,0 +1,37 @@
+/**
+ * Configuration Cache Example (Groovy DSL)
+ *
+ * This example demonstrates the DITA-OT Gradle plugin's compatibility with
+ * Gradle's Configuration Cache feature.
+ *
+ * Note: For full configuration cache compatibility, use Kotlin DSL properties
+ * instead of Groovy Closure-based properties. Groovy Closures are not serializable
+ * and will cause configuration cache warnings.
+ *
+ * Usage:
+ *   ./gradlew dita --configuration-cache -PditaHome=/path/to/dita-ot
+ */
+
+plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
+}
+
+defaultTasks 'dita'
+
+dita {
+    // DITA-OT installation directory
+    ditaOt findProperty('ditaHome')
+
+    // Input DITA map
+    input 'dita/guide.ditamap'
+
+    // Output formats
+    transtype 'html5', 'pdf'
+
+    // Note: Groovy Closure properties work but may show configuration cache warnings
+    // For full compatibility, use Kotlin DSL build.gradle.kts instead
+    properties {
+        property(name: 'processing-mode', value: 'strict')
+        property(name: 'args.rellinks', value: 'all')
+    }
+}
