@@ -114,6 +114,7 @@ jobs:
       with:
         name: integration-test-dita-${{ matrix.dita-version }}
         path: test-project/build/
+        if-no-files-found: ignore
 
   build-windows:
     name: Windows Build & Test
@@ -192,6 +193,7 @@ jobs:
       with:
         name: integration-test-windows-dita-${{ matrix.dita-version }}
         path: test-project/build/
+        if-no-files-found: ignore
 
   publish:
     name: Publish to Gradle Plugin Portal
