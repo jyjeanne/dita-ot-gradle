@@ -495,7 +495,14 @@ abstract class DitaOtTask @Inject constructor(
                 // Build properties map
                 val properties = mutableMapOf<String, String>()
 
-                // User-defined properties from Provider API
+                // User-defined properties from Groovy Closure (for backward compatibility)
+                if (groovyProperties != null) {
+                    val capturedProps = GroovyPropertyCapture.captureFromClosure(groovyProperties)
+                    properties.putAll(capturedProps)
+                    logger.debug("Captured ${capturedProps.size} properties from Groovy closure")
+                }
+
+                // User-defined properties from Provider API (these override closure properties)
                 if (ditaProperties.isPresent) {
                     properties.putAll(ditaProperties.get())
                 }

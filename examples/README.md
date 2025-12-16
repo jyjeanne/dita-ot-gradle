@@ -1,11 +1,11 @@
 DITA-OT Gradle Plugin: Examples
 ===============================
 
-This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.3.0** features.
+This directory contains example projects demonstrating various use cases of the DITA-OT Gradle plugin, including the latest **v2.3.1** features.
 
-## 🆕 What's New in v2.3.0
+## 🆕 What's New in v2.3.1
 
-All examples have been updated to **v2.3.0** with:
+All examples have been updated to **v2.3.1** with:
 
 - ⚡ **Full Configuration Cache Support** - Up to 77% faster incremental builds
 - 🔧 **IsolatedAntBuilder Fix** - DITA_SCRIPT strategy resolves classloader issues
@@ -13,7 +13,7 @@ All examples have been updated to **v2.3.0** with:
 - 📊 **Enhanced Logging** - Detailed build metrics and reports
 - 🔧 **Type-Safe Kotlin DSL** - Improved property configuration
 
-## Performance Benchmarks (v2.3.0)
+## Performance Benchmarks (v2.3.1)
 
 Tested on Windows 11, Gradle 8.5, DITA-OT 3.6:
 
@@ -343,8 +343,8 @@ Every build now includes detailed reports:
 
 ## Version History of Examples
 
-### v2.3.0 (November 2025)
-All examples updated to **v2.3.0** featuring:
+### v2.3.1 (November 2025)
+All examples updated to **v2.3.1** featuring:
 - ✅ **Full Configuration Cache Support** - Up to 77% faster incremental builds
 - ✅ **IsolatedAntBuilder Fix** - DITA_SCRIPT strategy resolves classloader issues
 - ✅ **Provider API Refactoring** - Modern Gradle architecture
@@ -379,13 +379,13 @@ Or set it in `gradle.properties`:
 ditaHome=/path/to/dita-ot-3.6
 ```
 
-### Issue: ANT ClassNotFoundException (Fixed in v2.3.0)
+### Issue: ANT ClassNotFoundException (Fixed in v2.3.1)
 
 **Symptom:** `taskdef class org.dita.dost.ant.InitializeProjectTask cannot be found`
 
-**Cause:** IsolatedAntBuilder classloader issue (fixed in v2.3.0)
+**Cause:** IsolatedAntBuilder classloader issue (fixed in v2.3.1)
 
-**Solution:** Upgrade to v2.3.0 which uses DITA_SCRIPT strategy by default.
+**Solution:** Upgrade to v2.3.1 which uses DITA_SCRIPT strategy by default.
 
 **For older versions, workaround:**
 ```bash

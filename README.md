@@ -5,7 +5,7 @@
 
 A [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
-## Highlights (v2.3.0)
+## Highlights (v2.3.1)
 
 - **Full Configuration Cache Support** - Up to **77% faster** incremental builds
 - **IsolatedAntBuilder Fix** - DITA_SCRIPT strategy resolves classloader issues
@@ -25,7 +25,7 @@ The plugin is published to the [Gradle Plugin Portal](https://plugins.gradle.org
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.1'
 }
 ```
 
@@ -33,7 +33,7 @@ plugins {
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
 }
 ```
 
@@ -46,7 +46,7 @@ This plugin is a **continuation and evolution** of the original eerohele plugin.
 #### Quick Migration (TL;DR)
 
 1. Change plugin ID: `com.github.eerohele.dita-ot-gradle` → `io.github.jyjeanne.dita-ot-gradle`
-2. Update version: `0.7.1` → `2.3.0`
+2. Update version: `0.7.1` → `2.3.1`
 3. Remove deprecated `ditaOt` setup task (if used)
 4. Test your build: `gradle dita`
 
@@ -63,7 +63,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.1'
 }
 ```
 
@@ -76,7 +76,7 @@ plugins {
 
 // NEW
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
 }
 ```
 
@@ -187,7 +187,7 @@ properties {
 Use this checklist to ensure a smooth migration:
 
 - [ ] Updated plugin ID in `build.gradle` or `build.gradle.kts`
-- [ ] Updated version to `2.3.0`
+- [ ] Updated version to `2.3.1`
 - [ ] Removed deprecated `ditaOt` setup task (if used)
 - [ ] Tested build with `gradle dita`
 - [ ] Verified output is generated correctly
@@ -285,7 +285,7 @@ In your Gradle build script (`build.gradle`), add something like this:
 
 ```gradle
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.1'
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -302,7 +302,7 @@ In your Kotlin DSL build script (`build.gradle.kts`), add something like this:
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
 }
 
 // Publish my.ditamap into the HTML5 output format.
@@ -378,7 +378,7 @@ use the downloaded version in your build. See the [`download` example](https://g
 
 ## Configuration Cache Support
 
-Since version 2.3.0, this plugin **fully supports** Gradle's configuration cache with the DITA_SCRIPT execution strategy (default).
+Since version 2.3.1, this plugin **fully supports** Gradle's configuration cache with the DITA_SCRIPT execution strategy (default).
 
 ### Performance Benchmarks
 
@@ -430,7 +430,7 @@ org.gradle.configuration-cache=true
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
 }
 
 tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {

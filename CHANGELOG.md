@@ -2,6 +2,27 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.3.1 - 2025-12-16
+
+### Fixed
+- **✅ Groovy Closure Properties - RESTORED**
+  - Problem: `properties { }` closure syntax was silently ignored in v2.3.0
+  - Root cause: DITA_SCRIPT execution path didn't process Groovy closure properties
+  - Solution: Added `GroovyPropertyCapture` class to extract properties from Groovy closures
+  - Both syntaxes now work:
+    - Groovy closure: `properties { property name: 'key', value: 'value' }`
+    - Direct API: `ditaProperties.put('key', 'value')`
+
+### Added
+- **GroovyPropertyCapture** - New utility class for backward compatibility
+  - Captures properties from Groovy closures using ANT-style syntax
+  - Works with DITA_SCRIPT execution strategy
+
+### Improved
+- **GitHub Actions** - Fixed CI/CD warnings
+  - Added `if-no-files-found: ignore` to integration test artifact uploads
+  - Suppresses warnings about missing test-project/build/ directory
+
 ## 2.3.0 - 2025-11-25
 
 ### Added

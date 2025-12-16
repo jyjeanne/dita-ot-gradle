@@ -442,4 +442,236 @@ class DitaOtTaskSpec : StringSpec({
         task.options.kotlinProperties!!["processing-mode"] shouldBe "lax"
         task.options.kotlinProperties!!["args.draft"] shouldBe "yes"
     }
+
+    // ============================================================================
+    // Groovy Closure Properties Tests (v2.3.1 regression prevention)
+    // These tests ensure the v2.3.0 bug where properties { } closure was ignored
+    // does not recur.
+    // ============================================================================
+
+    "Groovy closure properties are captured correctly" {
+        // This test prevents regression of the v2.3.0 bug
+        val propertiesClosure = object : groovy.lang.Closure<Unit>(null) {
+            override fun call(): Unit {
+                val capture = delegate as GroovyPropertyCapture
+                capture.property(mapOf("name" to "args.css", "value" to "custom.css"))
+                capture.property(mapOf("name" to "args.copycss", "value" to "yes"))
+            }
+        }
+
+        val captured = GroovyPropertyCapture.captureFromClosure(propertiesClosure)
+
+        captured["args.css"] shouldBe "custom.css"
+        captured["args.copycss"] shouldBe "yes"
+    }
+
+    "Groovy closure with HTML5 CSS properties" {
+        // Specific test for html5 transtype with args.css property
+        val propertiesClosure = object : groovy.lang.Closure<Unit>(null) {
+            override fun call(): Unit {
+                val capture = delegate as GroovyPropertyCapture
+                capture.property(mapOf("name" to "args.copycss", "value" to "yes"))
+                capture.property(mapOf("name" to "args.css", "value" to "dita-ot-doc.css"))
+                capture.property(mapOf("name" to "args.csspath", "value" to "css"))
+                capture.property(mapOf("name" to "args.cssroot", "value" to "/resources/"))
+                capture.property(mapOf("name" to "args.gen.task.lbl", "value" to "YES"))
+                capture.property(mapOf("name" to "nav-toc", "value" to "partial"))
+            }
+        }
+
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            properties(propertiesClosure)
+        }
+
+        // Verify closure was stored
+        task.options.properties.shouldNotBeNull()
+
+        // Verify properties can be captured from the closure
+        val captured = GroovyPropertyCapture.captureFromClosure(propertiesClosure)
+        captured["args.css"] shouldBe "dita-ot-doc.css"
+        captured["args.copycss"] shouldBe "yes"
+        captured["args.csspath"] shouldBe "css"
+        captured["args.cssroot"] shouldBe "/resources/"
+        captured["args.gen.task.lbl"] shouldBe "YES"
+        captured["nav-toc"] shouldBe "partial"
+    }
+
+    "Task stores Groovy closure in options.properties" {
+        val propertiesClosure = object : groovy.lang.Closure<Unit>(null) {
+            override fun call(): Unit {
+                val capture = delegate as GroovyPropertyCapture
+                capture.property(mapOf("name" to "processing-mode", "value" to "strict"))
+            }
+        }
+
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            properties(propertiesClosure)
+        }
+
+        task.options.properties shouldBe propertiesClosure
+    }
+
+    "ditaProperties MapProperty can be used directly" {
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            ditaProperties.put("args.css", "direct-api.css")
+            ditaProperties.put("args.copycss", "yes")
+        }
+
+        task.ditaProperties.get()["args.css"] shouldBe "direct-api.css"
+        task.ditaProperties.get()["args.copycss"] shouldBe "yes"
+    }
+
+    "Both closure and ditaProperties can be used together" {
+        val propertiesClosure = object : groovy.lang.Closure<Unit>(null) {
+            override fun call(): Unit {
+                val capture = delegate as GroovyPropertyCapture
+                capture.property(mapOf("name" to "args.css", "value" to "from-closure.css"))
+            }
+        }
+
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            properties(propertiesClosure)
+            ditaProperties.put("args.copycss", "yes")
+        }
+
+        // Both should be set
+        task.options.properties.shouldNotBeNull()
+        task.ditaProperties.get()["args.copycss"] shouldBe "yes"
+
+        // Closure properties should be captured
+        val closureProps = GroovyPropertyCapture.captureFromClosure(propertiesClosure)
+        closureProps["args.css"] shouldBe "from-closure.css"
+    }
+
+    "ditaProperties overrides closure properties when same key" {
+        // This tests the expected behavior: ditaProperties.put() takes precedence
+        val propertiesClosure = object : groovy.lang.Closure<Unit>(null) {
+            override fun call(): Unit {
+                val capture = delegate as GroovyPropertyCapture
+                capture.property(mapOf("name" to "args.css", "value" to "from-closure.css"))
+            }
+        }
+
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            properties(propertiesClosure)
+            ditaProperties.put("args.css", "from-direct-api.css")
+        }
+
+        // Direct API should override closure
+        task.ditaProperties.get()["args.css"] shouldBe "from-direct-api.css"
+    }
+
+    "Groovy closure with PDF properties" {
+        val propertiesClosure = object : groovy.lang.Closure<Unit>(null) {
+            override fun call(): Unit {
+                val capture = delegate as GroovyPropertyCapture
+                capture.property(mapOf("name" to "args.chapter.layout", "value" to "BASIC"))
+                capture.property(mapOf("name" to "args.gen.task.lbl", "value" to "YES"))
+                capture.property(mapOf("name" to "include.rellinks", "value" to "#default external"))
+                capture.property(mapOf("name" to "outputFile.base", "value" to "userguide"))
+                capture.property(mapOf("name" to "theme", "value" to "custom-theme.yaml"))
+            }
+        }
+
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("pdf")
+            properties(propertiesClosure)
+        }
+
+        val captured = GroovyPropertyCapture.captureFromClosure(propertiesClosure)
+        captured["args.chapter.layout"] shouldBe "BASIC"
+        captured["outputFile.base"] shouldBe "userguide"
+        captured["theme"] shouldBe "custom-theme.yaml"
+    }
+
+    "Integration test: Groovy DSL build with args.css property" {
+        settingsFile.writeText("rootProject.name = 'dita-css-test'")
+
+        // Copy example DITA files to test project
+        val ditaDir = File(testProjectDir, "dita")
+        ditaDir.mkdirs()
+        File("$examplesDir/simple/dita").copyRecursively(ditaDir, overwrite = true)
+
+        buildFile.writeText(
+            """
+            plugins {
+                id 'io.github.jyjeanne.dita-ot-gradle'
+            }
+
+            dita {
+                ditaOt '$ditaHome'
+                input 'dita/root.ditamap'
+                transtype 'html5'
+
+                // Test the Groovy closure properties syntax
+                properties {
+                    property name: 'processing-mode', value: 'strict'
+                    property name: 'args.rellinks', value: 'all'
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath()
+            .withArguments("dita", "--info")
+            .forwardOutput()
+            .build()
+
+        result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
+    }
+
+    "Integration test: ditaProperties.put with args.css" {
+        settingsFile.writeText("rootProject.name = 'dita-properties-test'")
+
+        // Copy example DITA files to test project
+        val ditaDir = File(testProjectDir, "dita")
+        ditaDir.mkdirs()
+        File("$examplesDir/simple/dita").copyRecursively(ditaDir, overwrite = true)
+
+        buildFile.writeText(
+            """
+            plugins {
+                id 'io.github.jyjeanne.dita-ot-gradle'
+            }
+
+            dita {
+                ditaOt '$ditaHome'
+                input 'dita/root.ditamap'
+                transtype 'html5'
+
+                // Test the direct ditaProperties API
+                ditaProperties.put('processing-mode', 'strict')
+                ditaProperties.put('args.rellinks', 'all')
+            }
+            """.trimIndent()
+        )
+
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath()
+            .withArguments("dita", "--info")
+            .forwardOutput()
+            .build()
+
+        result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
+    }
 })

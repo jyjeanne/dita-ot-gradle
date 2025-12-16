@@ -13,7 +13,7 @@
  * Requirements:
  * - Gradle 8.1+ (Configuration Cache stable)
  * - DITA-OT 3.0+ (for DITA_SCRIPT strategy)
- * - Plugin version 2.3.0+
+ * - Plugin version 2.3.1+
  *
  * Usage:
  *   # First run (stores configuration cache)
@@ -27,7 +27,7 @@
  */
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
 }
 
 defaultTasks("dita")

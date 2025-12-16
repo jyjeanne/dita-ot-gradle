@@ -6,7 +6,7 @@
         <p>Gradle's Configuration Cache is a feature that significantly improves build performance
         by caching the result of the configuration phase and reusing it in subsequent builds.</p>
 
-        <p>Starting with version 2.3.0, the DITA-OT Gradle plugin fully supports Configuration Cache
+        <p>Starting with version 2.3.1, the DITA-OT Gradle plugin fully supports Configuration Cache
         when using the default DITA_SCRIPT execution strategy.</p>
 
         <section>
@@ -21,7 +21,7 @@
             <ul>
                 <li>Gradle 8.1 or later (Configuration Cache is stable)</li>
                 <li>DITA-OT 3.0 or later (required for DITA_SCRIPT strategy)</li>
-                <li>DITA-OT Gradle Plugin 2.3.0 or later</li>
+                <li>DITA-OT Gradle Plugin 2.3.1 or later</li>
             </ul>
         </section>
     </body>
