@@ -674,4 +674,171 @@ class DitaOtTaskSpec : StringSpec({
 
         result.task(":dita")?.outcome shouldBe TaskOutcome.SUCCESS
     }
+
+    // ============================================================================
+    // Implicit Dependency Bug Tests (v2.3.2 fix)
+    // These tests ensure multiple tasks sharing the same ditaOtDir don't have
+    // implicit dependencies inferred by Gradle.
+    // See: BUGS_EXPLAINATION.md for full analysis
+    // ============================================================================
+
+    "ditaOtDir should be marked as @Internal, not @InputDirectory" {
+        // This test verifies the fix for the implicit dependency bug.
+        // When ditaOtDir was @InputDirectory, Gradle would infer implicit
+        // dependencies between tasks sharing the same DITA-OT installation.
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+        }
+
+        // Get all task inputs - ditaOtDir should NOT be among them
+        val taskInputs = task.inputs.files.files
+        val ditaOtFile = File(ditaHome)
+
+        // The DITA-OT directory itself should not be a direct task input
+        // (it may be included via getInputFileTree in devMode, but not as direct input)
+        taskInputs.contains(ditaOtFile) shouldBe false
+    }
+
+    "Multiple tasks with same ditaOtDir should not have shared input files" {
+        // Create two tasks pointing to the same DITA-OT directory
+        val task1 = project.tasks.create("html", DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            output("out/html")
+            transtype("html5")
+        }
+
+        val task2 = project.tasks.create("pdf", DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            output("out/pdf")
+            transtype("pdf")
+        }
+
+        // Get input files for both tasks (excluding getInputFileTree which is separate)
+        val task1DirectInputs = task1.inputFiles.files
+        val task2DirectInputs = task2.inputFiles.files
+
+        // Both should have the same input files (the ditamap)
+        task1DirectInputs shouldBe task2DirectInputs
+
+        // But neither should include the DITA-OT directory as a direct input
+        val ditaOtFile = File(ditaHome)
+        task1DirectInputs.none { it.absolutePath.startsWith(ditaOtFile.absolutePath) } shouldBe true
+        task2DirectInputs.none { it.absolutePath.startsWith(ditaOtFile.absolutePath) } shouldBe true
+    }
+
+    "Integration test: Multiple tasks with same ditaOtDir run without implicit dependency errors" {
+        settingsFile.writeText("rootProject.name = 'multi-task-test'")
+
+        // Copy example DITA files to test project
+        val ditaDir = File(testProjectDir, "dita")
+        ditaDir.mkdirs()
+        File("$examplesDir/simple/dita").copyRecursively(ditaDir, overwrite = true)
+
+        buildFile.writeText(
+            """
+            import com.github.jyjeanne.DitaOtTask
+
+            plugins {
+                id 'io.github.jyjeanne.dita-ot-gradle'
+            }
+
+            task html(type: DitaOtTask) {
+                ditaOt '$ditaHome'
+                input 'dita/root.ditamap'
+                output 'out/html'
+                transtype 'html5'
+            }
+
+            task pdf(type: DitaOtTask) {
+                ditaOt '$ditaHome'
+                input 'dita/root.ditamap'
+                output 'out/pdf'
+                transtype 'pdf'
+            }
+            """.trimIndent()
+        )
+
+        // Run both tasks - should not fail with implicit dependency errors
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath()
+            .withArguments("html", "pdf", "--info")
+            .forwardOutput()
+            .build()
+
+        result.task(":html")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":pdf")?.outcome shouldBe TaskOutcome.SUCCESS
+    }
+
+    "Integration test: Output inside ditaOtDir does not cause dependency errors" {
+        // This simulates the DITA-OT distribution build scenario where
+        // output is written inside the DITA-OT directory structure
+        settingsFile.writeText("rootProject.name = 'output-inside-ditaot-test'")
+
+        // Copy example DITA files to test project
+        val ditaDir = File(testProjectDir, "dita")
+        ditaDir.mkdirs()
+        File("$examplesDir/simple/dita").copyRecursively(ditaDir, overwrite = true)
+
+        // Create output directory inside the project (simulating ditaOt/doc scenario)
+        val outputDir = File(testProjectDir, "doc")
+        outputDir.mkdirs()
+
+        buildFile.writeText(
+            """
+            import com.github.jyjeanne.DitaOtTask
+
+            plugins {
+                id 'io.github.jyjeanne.dita-ot-gradle'
+            }
+
+            task html(type: DitaOtTask) {
+                ditaOt '$ditaHome'
+                input 'dita/root.ditamap'
+                output 'doc'
+                transtype 'html5'
+            }
+
+            task pdf(type: DitaOtTask) {
+                ditaOt '$ditaHome'
+                input 'dita/root.ditamap'
+                output 'doc'
+                transtype 'pdf'
+            }
+            """.trimIndent()
+        )
+
+        // Run both tasks - should not fail even with shared output directory
+        val result = GradleRunner.create()
+            .withProjectDir(testProjectDir)
+            .withPluginClasspath()
+            .withArguments("html", "pdf", "--info")
+            .forwardOutput()
+            .build()
+
+        result.task(":html")?.outcome shouldBe TaskOutcome.SUCCESS
+        result.task(":pdf")?.outcome shouldBe TaskOutcome.SUCCESS
+    }
+
+    "devMode includes ditaOtDir in input file tree but not as direct task input" {
+        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+            transtype("html5")
+            devMode(true)
+        }
+
+        // In devMode, getInputFileTree() should include DITA-OT files
+        val inputFileTree = task.getInputFileTree().files
+        inputFileTree shouldContain File(ditaHome, "build.xml")
+
+        // But the direct task inputs should NOT include ditaOtDir
+        // (getInputFileTree is a separate @InputFiles method)
+        val directInputFiles = task.inputFiles.files
+        directInputFiles.none { it.absolutePath == File(ditaHome).absolutePath } shouldBe true
+    }
 })

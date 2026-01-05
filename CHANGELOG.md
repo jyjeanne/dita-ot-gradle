@@ -2,6 +2,41 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.3.2 - 2026-01-05
+
+### Fixed
+- **✅ Implicit Task Dependency Bug - RESOLVED**
+  - Problem: Multiple `DitaOtTask` instances sharing the same `ditaOtDir` caused Gradle to infer implicit dependencies
+  - Symptoms: Build failures with "implicit dependency" errors when running tasks like `html` and `pdf` together
+  - Affected scenario: DITA-OT distribution builds where output directory is inside or adjacent to the DITA-OT installation
+  - Root cause: `ditaOtDir` was annotated with `@InputDirectory`, causing Gradle to track the entire DITA-OT installation as task input
+  - Solution: Changed `ditaOtDir` annotation from `@InputDirectory` to `@Internal`
+  - Rationale: DITA-OT is a tool/runtime (like JDK), not input data - tools should not be tracked as task inputs
+  - For up-to-date checks on DITA-OT changes, users can enable `devMode(true)` which includes DITA-OT in `getInputFileTree()`
+
+### Added
+- **Implicit Dependency Test Suite** - 5 new tests to prevent regression
+  - `ditaOtDir should be marked as @Internal, not @InputDirectory`
+  - `Multiple tasks with same ditaOtDir should not have shared input files`
+  - `Integration test: Multiple tasks with same ditaOtDir run without implicit dependency errors`
+  - `Integration test: Output inside ditaOtDir does not cause dependency errors`
+  - `devMode includes ditaOtDir in input file tree but not as direct task input`
+
+### Improved
+- **KDoc Documentation** - Enhanced comments for `ditaOtDir` property explaining the design decision
+
+### Verified
+- ✅ Build: SUCCESS (all tests passing)
+- ✅ Multiple tasks with shared ditaOtDir: No implicit dependency errors
+- ✅ Output inside ditaOtDir: Works correctly
+- ✅ devMode: Still includes DITA-OT in up-to-date checks when enabled
+
+### Compatibility
+- ✅ Gradle: 8.5, 8.10, 9.0
+- ✅ DITA-OT: 3.4, 3.5, 3.6, 4.x
+- ✅ Platform: Windows, macOS, Linux
+- ✅ Java: 8+
+
 ## 2.3.1 - 2025-12-16
 
 ### Fixed

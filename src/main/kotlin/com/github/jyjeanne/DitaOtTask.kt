@@ -15,7 +15,6 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -49,9 +48,21 @@ abstract class DitaOtTask @Inject constructor(
 
     /**
      * DITA-OT installation directory.
+     *
+     * Marked as @Internal (not @InputDirectory) because:
+     * 1. The DITA-OT directory is a tool/runtime, not input data
+     * 2. Using @InputDirectory causes Gradle to infer implicit dependencies
+     *    between tasks that share the same DITA-OT installation
+     * 3. When output directories are inside or adjacent to ditaOtDir,
+     *    Gradle incorrectly assumes tasks depend on each other
+     *
+     * For up-to-date checks on DITA-OT changes, use devMode(true) which
+     * includes the DITA-OT directory in getInputFileTree().
+     *
+     * @see devMode
+     * @see getInputFileTree
      */
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Internal
     abstract val ditaOtDir: DirectoryProperty
 
     /**
