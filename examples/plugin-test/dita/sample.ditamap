@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map>
+    <title>DITA-OT Plugin Test Sample</title>
+
+    <topicmeta>
+        <shortdesc>Sample content for testing DITA-OT plugin installation and transformation.</shortdesc>
+    </topicmeta>
+
+    <topicref href="topics/introduction.dita"/>
+    <topicref href="topics/getting-started.dita">
+        <topicref href="topics/installation.dita"/>
+        <topicref href="topics/configuration.dita"/>
+    </topicref>
+    <topicref href="topics/features.dita"/>
+    <topicref href="topics/conclusion.dita"/>
+</map>

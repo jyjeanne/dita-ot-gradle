@@ -18,8 +18,9 @@ gradle-app.setting
 bower_components/
 node_modules/
 
-# Build artifacts
+# Build artifacts (generated documentation)
 docs/*
+!docs/*.md
 !docs/index.html
 !docs/commonltr.css
 !docs/app.js

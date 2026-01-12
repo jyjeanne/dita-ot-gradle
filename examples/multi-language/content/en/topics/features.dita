@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="features" xml:lang="en">
+  <title>Features</title>
+  <shortdesc>Overview of product features.</shortdesc>
+  <body>
+    <section>
+      <title>Key Features</title>
+      <p>The product includes the following features:</p>
+      <ul>
+        <li><b>Performance</b> - Optimized for speed</li>
+        <li><b>Security</b> - Enterprise-grade protection</li>
+        <li><b>Scalability</b> - Grows with your needs</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Feature Comparison</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="feature" colwidth="1*"/>
+          <colspec colname="basic" colwidth="1*"/>
+          <colspec colname="pro" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Feature</entry>
+              <entry>Basic</entry>
+              <entry>Pro</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Users</entry>
+              <entry>10</entry>
+              <entry>Unlimited</entry>
+            </row>
+            <row>
+              <entry>Storage</entry>
+              <entry>1 GB</entry>
+              <entry>100 GB</entry>
+            </row>
+            <row>
+              <entry>Support</entry>
+              <entry>Email</entry>
+              <entry>24/7 Phone</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+  </body>
+</topic>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="kubernetes-support" product="v3-only">
+  <title>Kubernetes Support</title>
+  <shortdesc>Deploying on Kubernetes clusters.</shortdesc>
+  <body>
+    <p>Native Kubernetes support was introduced in version 3.0, providing enterprise-grade container orchestration.</p>
+
+    <section>
+      <title>Prerequisites</title>
+      <ul>
+        <li>Kubernetes 1.24 or later</li>
+        <li>kubectl configured for your cluster</li>
+        <li>Helm 3.x (recommended)</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Quick Deployment</title>
+      <p>Deploy using kubectl:</p>
+      <codeblock>kubectl apply -f https://example.com/product/k8s-manifest.yaml</codeblock>
+    </section>
+
+    <section>
+      <title>Helm Installation</title>
+      <p>For production deployments, use Helm:</p>
+      <codeblock># Add the Helm repository
+helm repo add example https://charts.example.com
+helm repo update
+
+# Install the chart
+helm install product example/product \
+  --set replicas=3 \
+  --set resources.requests.memory=512Mi</codeblock>
+    </section>
+
+    <section>
+      <title>Scaling</title>
+      <p>Scale your deployment:</p>
+      <codeblock>kubectl scale deployment product --replicas=5</codeblock>
+    </section>
+
+    <section>
+      <title>Monitoring</title>
+      <p>The product exposes Prometheus metrics at <codeph>/metrics</codeph>:</p>
+      <codeblock>kubectl port-forward svc/product 8080:8080
+curl http://localhost:8080/metrics</codeblock>
+    </section>
+  </body>
+</topic>

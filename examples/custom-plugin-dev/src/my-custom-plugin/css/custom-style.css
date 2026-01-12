@@ -1,0 +1,109 @@
+/**
+ * Custom DITA-OT Plugin Stylesheet
+ *
+ * This CSS file is automatically included in the HTML output
+ * by the my-custom-html transtype.
+ */
+
+/* Base styling */
+body.my-custom-theme {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  color: #2c3e50;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.3em;
+}
+
+/* Custom note styling */
+.custom-note {
+  background: #f8f9fa;
+  border-left: 4px solid #3498db;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.custom-note.note_warning {
+  border-left-color: #f39c12;
+  background: #fef9e7;
+}
+
+.custom-note.note_danger {
+  border-left-color: #e74c3c;
+  background: #fdedec;
+}
+
+/* Code blocks */
+pre, code {
+  background: #f4f4f4;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+}
+
+pre {
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+code {
+  padding: 0.2em 0.4em;
+}
+
+/* Custom header */
+.custom-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  margin: -2rem -2rem 2rem -2rem;
+  text-align: center;
+}
+
+.custom-header p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Links */
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+tr:hover {
+  background: #f5f5f5;
+}

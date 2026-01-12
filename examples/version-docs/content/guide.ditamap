@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<!--
+  Product Documentation Map
+
+  This map includes topics for all product versions.
+  Use DITAVAL filters to generate version-specific documentation.
+-->
+<map>
+  <title>Product User Guide</title>
+
+  <topicmeta>
+    <prodinfo>
+      <prodname>Sample Product</prodname>
+    </prodinfo>
+  </topicmeta>
+
+  <!-- Core topics (all versions) -->
+  <topicref href="topics/introduction.dita"/>
+  <topicref href="topics/installation.dita"/>
+  <topicref href="topics/configuration.dita"/>
+
+  <!-- Feature topics -->
+  <topicref href="topics/features.dita">
+    <topicref href="topics/docker-support.dita" product="v2-v3"/>
+    <topicref href="topics/kubernetes-support.dita" product="v3-only"/>
+  </topicref>
+
+  <!-- Migration guide (v2+ only) -->
+  <topicref href="topics/migration.dita" product="v2-v3"/>
+</map>

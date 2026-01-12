@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<!--
+  Sample Documentation Guide
+
+  This is a sample DITA map for CI/CD documentation publishing.
+  Replace with your actual documentation content.
+-->
+<map>
+  <title>Product Documentation</title>
+
+  <topicmeta>
+    <prodinfo>
+      <prodname>Sample Product</prodname>
+      <vrmlist>
+        <vrm version="1.0"/>
+      </vrmlist>
+    </prodinfo>
+  </topicmeta>
+
+  <topicref href="topics/introduction.dita"/>
+  <topicref href="topics/getting-started.dita"/>
+  <topicref href="topics/configuration.dita"/>
+  <topicref href="topics/troubleshooting.dita"/>
+</map>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="troubleshooting">
+  <title>Troubleshooting</title>
+  <shortdesc>Common issues and their solutions.</shortdesc>
+  <body>
+    <section>
+      <title>Connection Issues</title>
+      <p><b>Problem:</b> Unable to connect to the server.</p>
+      <p><b>Solution:</b></p>
+      <ol>
+        <li>Verify the server is running</li>
+        <li>Check firewall settings</li>
+        <li>Confirm the port is correct</li>
+        <li>Test network connectivity</li>
+      </ol>
+    </section>
+
+    <section>
+      <title>Performance Issues</title>
+      <p><b>Problem:</b> Slow response times.</p>
+      <p><b>Solution:</b></p>
+      <ul>
+        <li>Check system resource usage</li>
+        <li>Review database query performance</li>
+        <li>Consider scaling resources</li>
+        <li>Enable caching if available</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Getting Help</title>
+      <p>If you cannot resolve an issue:</p>
+      <ol>
+        <li>Check the <xref href="https://example.com/docs" format="html" scope="external">online documentation</xref></li>
+        <li>Search the <xref href="https://example.com/forum" format="html" scope="external">community forum</xref></li>
+        <li>Contact <xref href="https://example.com/support" format="html" scope="external">technical support</xref></li>
+      </ol>
+    </section>
+
+    <note type="tip">Enable debug logging to get more detailed error information.</note>
+  </body>
+</topic>

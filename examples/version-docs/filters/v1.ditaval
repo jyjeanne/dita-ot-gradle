@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Version 1.x Filter
+
+  Includes only content applicable to version 1.x (LTS).
+  Excludes content marked for v2 or v3 only.
+-->
+<val>
+  <!-- Include v1 content -->
+  <prop action="include" att="product" val="v1"/>
+
+  <!-- Exclude v2-only and v3-only content -->
+  <prop action="exclude" att="product" val="v2-only"/>
+  <prop action="exclude" att="product" val="v3-only"/>
+  <prop action="exclude" att="product" val="v2-v3"/>
+
+  <!-- Flag deprecated content for v1 -->
+  <prop action="flag" att="status" val="deprecated">
+    <startflag>
+      <alt-text>[DEPRECATED in v2]</alt-text>
+    </startflag>
+  </prop>
+</val>

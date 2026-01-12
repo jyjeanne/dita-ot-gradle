@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map xml:lang="de">
+  <title>Benutzerhandbuch</title>
+
+  <topicmeta>
+    <prodinfo>
+      <prodname>Beispielprodukt</prodname>
+      <vrmlist>
+        <vrm version="1.0"/>
+      </vrmlist>
+    </prodinfo>
+  </topicmeta>
+
+  <topicref href="topics/introduction.dita"/>
+  <topicref href="topics/getting-started.dita"/>
+  <topicref href="topics/features.dita"/>
+</map>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Release Filter
+
+  Use this DITAVAL file to filter content for release builds.
+  Excludes draft and internal content from production documentation.
+-->
+<val>
+  <!-- Exclude draft content -->
+  <prop action="exclude" att="status" val="draft"/>
+
+  <!-- Exclude internal-only content -->
+  <prop action="exclude" att="audience" val="internal"/>
+
+  <!-- Include customer-facing content -->
+  <prop action="include" att="audience" val="external"/>
+
+  <!-- Flag deprecated content -->
+  <prop action="flag" att="status" val="deprecated">
+    <startflag>
+      <alt-text>[DEPRECATED]</alt-text>
+    </startflag>
+  </prop>
+</val>

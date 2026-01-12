@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="conclusion">
+    <title>Conclusion</title>
+    <shortdesc>Summary and next steps.</shortdesc>
+    <body>
+        <p>This sample project provides a complete workflow for testing DITA-OT plugins
+           with the <codeph>dita-ot-gradle</codeph> plugin.</p>
+
+        <section>
+            <title>What You've Learned</title>
+            <ul>
+                <li>How to download DITA-OT automatically</li>
+                <li>How to install plugins from the registry</li>
+                <li>How to run transformations</li>
+                <li>How to verify output</li>
+            </ul>
+        </section>
+
+        <section>
+            <title>Next Steps</title>
+            <ul>
+                <li>Customize the DITA content for your needs</li>
+                <li>Add more plugins to test</li>
+                <li>Integrate with CI/CD pipelines</li>
+                <li>Create custom transtypes</li>
+            </ul>
+        </section>
+
+        <section>
+            <title>Resources</title>
+            <ul>
+                <li><xref href="https://www.dita-ot.org/" format="html" scope="external">DITA-OT Website</xref></li>
+                <li><xref href="https://www.dita-ot.org/plugins" format="html" scope="external">DITA-OT Plugin Registry</xref></li>
+                <li><xref href="https://github.com/jyjeanne/dita-ot-gradle" format="html" scope="external">dita-ot-gradle Plugin</xref></li>
+            </ul>
+        </section>
+    </body>
+</topic>

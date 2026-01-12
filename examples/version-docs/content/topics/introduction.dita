@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="introduction">
+  <title>Introduction</title>
+  <shortdesc>Welcome to the Product User Guide.</shortdesc>
+  <body>
+    <p>This guide provides comprehensive information about installing, configuring, and using the product.</p>
+
+    <section>
+      <title>About This Guide</title>
+      <p>This documentation covers:</p>
+      <ul>
+        <li>Installation and setup</li>
+        <li>Configuration options</li>
+        <li>Feature overview</li>
+        <li product="v2-v3">Migration from previous versions</li>
+      </ul>
+    </section>
+
+    <section product="v3-only">
+      <title>What's New in Version 3</title>
+      <p>Version 3 introduces several major enhancements:</p>
+      <ul>
+        <li>Native Kubernetes support</li>
+        <li>Improved performance (up to 50% faster)</li>
+        <li>New REST API endpoints</li>
+      </ul>
+    </section>
+
+    <section product="v2-only">
+      <title>What's New in Version 2</title>
+      <p>Version 2 introduced:</p>
+      <ul>
+        <li>Docker container support</li>
+        <li>Enhanced security features</li>
+        <li>New configuration options</li>
+      </ul>
+    </section>
+  </body>
+</topic>

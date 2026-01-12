@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="installation">
+    <title>Installation</title>
+    <shortdesc>How DITA-OT and plugins are installed automatically.</shortdesc>
+    <body>
+        <section>
+            <title>DITA-OT Download</title>
+            <p>The project automatically downloads DITA-OT from GitHub releases. The version
+               is configurable via the <codeph>ditaOtVersion</codeph> property.</p>
+            <p>Download URL pattern:</p>
+            <codeblock>https://github.com/dita-ot/dita-ot/releases/download/{version}/dita-ot-{version}.zip</codeblock>
+        </section>
+
+        <section>
+            <title>Plugin Installation</title>
+            <p>Plugins are installed from the DITA-OT Plugin Registry using the
+               <codeph>dita install</codeph> command.</p>
+            <p>The registry is available at:
+               <xref href="https://www.dita-ot.org/plugins" format="html" scope="external">
+               https://www.dita-ot.org/plugins</xref></p>
+        </section>
+
+        <section>
+            <title>Available Tasks</title>
+            <p>Installation-related Gradle tasks:</p>
+            <ul>
+                <li><codeph>downloadDitaOt</codeph> - Download DITA-OT zip</li>
+                <li><codeph>extractDitaOt</codeph> - Extract the zip archive</li>
+                <li><codeph>installPlugin</codeph> - Install plugin from registry</li>
+                <li><codeph>listPlugins</codeph> - List installed plugins</li>
+                <li><codeph>listTranstypes</codeph> - List available transtypes</li>
+            </ul>
+        </section>
+    </body>
+</topic>

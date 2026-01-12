@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="installation">
+  <title>Installation</title>
+  <shortdesc>How to install the product.</shortdesc>
+  <body>
+    <section>
+      <title>System Requirements</title>
+      <p>Before installing, ensure your system meets these requirements:</p>
+      <ul>
+        <li>Java 8 or later (Java 11+ recommended)</li>
+        <li>2 GB RAM minimum (4 GB recommended)</li>
+        <li>500 MB disk space</li>
+        <li product="v2-v3">Docker 20.10+ (for containerized deployment)</li>
+        <li product="v3-only">Kubernetes 1.24+ (for K8s deployment)</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Standard Installation</title>
+      <p>To install using the standard method:</p>
+      <ol>
+        <li>Download the installation package</li>
+        <li>Extract the archive to your preferred location</li>
+        <li>Run the setup script:
+          <codeblock>./setup.sh</codeblock>
+        </li>
+        <li>Verify the installation:
+          <codeblock>product --version</codeblock>
+        </li>
+      </ol>
+    </section>
+
+    <section product="v2-v3">
+      <title>Docker Installation</title>
+      <p>To run in a Docker container:</p>
+      <codeblock>docker pull example/product:latest
+docker run -d -p 8080:8080 example/product:latest</codeblock>
+      <note type="tip">Use Docker Compose for multi-container setups.</note>
+    </section>
+
+    <section product="v3-only">
+      <title>Kubernetes Deployment</title>
+      <p>To deploy on Kubernetes:</p>
+      <codeblock>kubectl apply -f https://example.com/product/k8s-manifest.yaml</codeblock>
+      <p>For production deployments, use Helm:</p>
+      <codeblock>helm install product example/product-chart</codeblock>
+    </section>
+
+    <section product="v1" status="deprecated">
+      <title>Legacy Installation (Deprecated)</title>
+      <p>The legacy installation method using <codeph>install.bat</codeph> is deprecated and will be removed in version 2.0.</p>
+    </section>
+  </body>
+</topic>

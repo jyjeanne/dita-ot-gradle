@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="features">
+    <title>Features</title>
+    <shortdesc>Key features of this plugin test project.</shortdesc>
+    <body>
+        <section>
+            <title>Automatic Setup</title>
+            <ul>
+                <li>Downloads DITA-OT automatically from GitHub releases</li>
+                <li>Installs plugins from the official DITA-OT registry</li>
+                <li>Skips download/install if already present (incremental builds)</li>
+                <li>Cross-platform support (Windows, macOS, Linux)</li>
+            </ul>
+        </section>
+
+        <section>
+            <title>Flexible Configuration</title>
+            <ul>
+                <li>Configurable DITA-OT version</li>
+                <li>Configurable plugin selection</li>
+                <li>Configurable transformation type</li>
+                <li>Override via command line or properties file</li>
+            </ul>
+        </section>
+
+        <section>
+            <title>Output Verification</title>
+            <ul>
+                <li>Automatic verification of generated files</li>
+                <li>File type checking based on transtype</li>
+                <li>Detailed output reporting</li>
+                <li>Fail-fast on errors</li>
+            </ul>
+        </section>
+
+        <section>
+            <title>Integration with Gradle</title>
+            <ul>
+                <li>Full Gradle lifecycle integration</li>
+                <li>Incremental build support</li>
+                <li>Task caching</li>
+                <li>Parallel execution support</li>
+            </ul>
+        </section>
+    </body>
+</topic>

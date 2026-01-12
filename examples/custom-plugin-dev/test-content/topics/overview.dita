@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="overview">
+  <title>Custom Plugin Overview</title>
+  <shortdesc>This topic demonstrates custom plugin output styling.</shortdesc>
+  <body>
+    <p>Welcome to the custom plugin test documentation. This content is used to verify that your DITA-OT plugin is working correctly.</p>
+
+    <section>
+      <title>What This Plugin Does</title>
+      <p>The <codeph>my-custom-html</codeph> transtype extends the standard HTML5 output with:</p>
+      <ul>
+        <li>Custom CSS styling</li>
+        <li>Enhanced note formatting</li>
+        <li>Custom header content</li>
+      </ul>
+    </section>
+
+    <note type="tip">This is a tip note. It should have custom styling applied by your plugin.</note>
+
+    <note type="warning">This is a warning note. Notice the different border color.</note>
+  </body>
+</topic>

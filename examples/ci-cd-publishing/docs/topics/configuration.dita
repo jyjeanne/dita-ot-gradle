@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="configuration">
+  <title>Configuration</title>
+  <shortdesc>Configure the product for your environment.</shortdesc>
+  <body>
+    <section>
+      <title>Configuration File</title>
+      <p>The main configuration file is located at <filepath>config/settings.yaml</filepath>.</p>
+      <codeblock># Example configuration
+server:
+  port: 8080
+  host: localhost
+
+logging:
+  level: INFO
+  file: logs/app.log
+
+database:
+  url: jdbc:postgresql://localhost:5432/mydb
+  username: admin</codeblock>
+    </section>
+
+    <section>
+      <title>Environment Variables</title>
+      <p>The following environment variables can override configuration:</p>
+      <table>
+        <title>Environment Variables</title>
+        <tgroup cols="3">
+          <colspec colname="var" colwidth="1*"/>
+          <colspec colname="desc" colwidth="2*"/>
+          <colspec colname="default" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Variable</entry>
+              <entry>Description</entry>
+              <entry>Default</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><codeph>APP_PORT</codeph></entry>
+              <entry>Server port number</entry>
+              <entry>8080</entry>
+            </row>
+            <row>
+              <entry><codeph>APP_LOG_LEVEL</codeph></entry>
+              <entry>Logging verbosity</entry>
+              <entry>INFO</entry>
+            </row>
+            <row>
+              <entry><codeph>APP_DB_URL</codeph></entry>
+              <entry>Database connection URL</entry>
+              <entry>-</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <note type="warning">Never commit sensitive configuration values to version control.</note>
+  </body>
+</topic>

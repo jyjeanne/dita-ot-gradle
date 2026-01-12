@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="features">
+  <title>Features Overview</title>
+  <shortdesc>Overview of product features by version.</shortdesc>
+  <body>
+    <section>
+      <title>Core Features</title>
+      <p>All versions include these core features:</p>
+      <ul>
+        <li>RESTful API</li>
+        <li>User authentication</li>
+        <li>Role-based access control</li>
+        <li>Audit logging</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Feature Matrix</title>
+      <table>
+        <tgroup cols="4">
+          <colspec colname="feature" colwidth="2*"/>
+          <colspec colname="v1" colwidth="1*"/>
+          <colspec colname="v2" colwidth="1*"/>
+          <colspec colname="v3" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Feature</entry>
+              <entry>v1.x</entry>
+              <entry>v2.x</entry>
+              <entry>v3.x</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>REST API</entry>
+              <entry>Yes</entry>
+              <entry>Yes</entry>
+              <entry>Yes</entry>
+            </row>
+            <row>
+              <entry>Authentication</entry>
+              <entry>Basic</entry>
+              <entry>OAuth 2.0</entry>
+              <entry>OAuth 2.0 + OIDC</entry>
+            </row>
+            <row>
+              <entry>Docker Support</entry>
+              <entry>No</entry>
+              <entry>Yes</entry>
+              <entry>Yes</entry>
+            </row>
+            <row>
+              <entry>Kubernetes</entry>
+              <entry>No</entry>
+              <entry>No</entry>
+              <entry>Yes</entry>
+            </row>
+            <row>
+              <entry>GraphQL API</entry>
+              <entry>No</entry>
+              <entry>No</entry>
+              <entry>Yes</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+  </body>
+</topic>

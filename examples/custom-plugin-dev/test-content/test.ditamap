@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<!--
+  Test DITA Map for Custom Plugin Development
+
+  Use this map to test your custom plugin transformations.
+-->
+<map>
+  <title>Custom Plugin Test</title>
+  <topicref href="topics/overview.dita"/>
+  <topicref href="topics/features.dita"/>
+  <topicref href="topics/usage.dita"/>
+</map>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="getting-started">
+  <title>Getting Started</title>
+  <shortdesc>Quick start guide for new users.</shortdesc>
+  <body>
+    <section>
+      <title>Prerequisites</title>
+      <p>Before you begin, ensure you have:</p>
+      <ul>
+        <li>Java 11 or later installed</li>
+        <li>Network access to download dependencies</li>
+        <li>Administrative privileges (for installation)</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Installation Steps</title>
+      <ol>
+        <li>Download the installation package</li>
+        <li>Extract the archive to your preferred location</li>
+        <li>Run the setup script</li>
+        <li>Verify the installation</li>
+      </ol>
+    </section>
+
+    <section>
+      <title>Verification</title>
+      <p>To verify your installation, run:</p>
+      <codeblock>product --version</codeblock>
+      <p>You should see the version number displayed.</p>
+    </section>
+
+    <note type="important">Back up your data before upgrading from a previous version.</note>
+  </body>
+</topic>

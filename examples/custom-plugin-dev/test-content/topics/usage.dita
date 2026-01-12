@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="usage">
+  <title>Usage Instructions</title>
+  <shortdesc>How to use this custom plugin in your projects.</shortdesc>
+  <body>
+    <section>
+      <title>Installation</title>
+      <ol>
+        <li>Copy the plugin to your DITA-OT plugins directory</li>
+        <li>Run <codeph>dita install</codeph> to register the plugin</li>
+        <li>Use the <codeph>my-custom-html</codeph> transtype in your builds</li>
+      </ol>
+    </section>
+
+    <section>
+      <title>Command Line Usage</title>
+      <p>Run a transformation with the custom plugin:</p>
+      <codeblock>dita --input=your-map.ditamap \
+     --output=output \
+     --format=my-custom-html</codeblock>
+    </section>
+
+    <section>
+      <title>Gradle Integration</title>
+      <p>Use with the DITA-OT Gradle Plugin:</p>
+      <codeblock>dita {
+    ditaOt '/path/to/dita-ot'
+    input 'docs/guide.ditamap'
+    transtype 'my-custom-html'
+}</codeblock>
+    </section>
+
+    <note type="important">Remember to install the plugin into DITA-OT before running transformations.</note>
+  </body>
+</topic>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="configuration">
+    <title>Configuration</title>
+    <shortdesc>Configure the project using Gradle properties.</shortdesc>
+    <body>
+        <section>
+            <title>Gradle Properties</title>
+            <p>The following properties can be set on the command line or in
+               <codeph>gradle.properties</codeph>:</p>
+            <table>
+                <tgroup cols="3">
+                    <colspec colname="c1"/>
+                    <colspec colname="c2"/>
+                    <colspec colname="c3"/>
+                    <thead>
+                        <row>
+                            <entry>Property</entry>
+                            <entry>Default</entry>
+                            <entry>Description</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry><codeph>ditaOtVersion</codeph></entry>
+                            <entry>4.2.3</entry>
+                            <entry>DITA-OT version to download</entry>
+                        </row>
+                        <row>
+                            <entry><codeph>pluginId</codeph></entry>
+                            <entry>org.lwdita</entry>
+                            <entry>Plugin ID to install from registry</entry>
+                        </row>
+                        <row>
+                            <entry><codeph>transtype</codeph></entry>
+                            <entry>markdown</entry>
+                            <entry>Transformation type to run</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+        </section>
+
+        <section>
+            <title>Example Configurations</title>
+            <p>Test with different DITA-OT versions:</p>
+            <codeblock>./gradlew -PditaOtVersion=4.0.0 test
+./gradlew -PditaOtVersion=4.1.0 test
+./gradlew -PditaOtVersion=4.2.3 test</codeblock>
+
+            <p>Test different plugins:</p>
+            <codeblock>./gradlew -PpluginId=org.lwdita -Ptranstype=markdown test
+./gradlew -PpluginId=org.dita.normalize test</codeblock>
+        </section>
+    </body>
+</topic>

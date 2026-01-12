@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Version 2.x Filter
+
+  Includes content applicable to version 2.x.
+  Includes v1 content (unless deprecated) and v2 content.
+  Excludes v3-only content.
+-->
+<val>
+  <!-- Include v1 and v2 content -->
+  <prop action="include" att="product" val="v1"/>
+  <prop action="include" att="product" val="v2"/>
+  <prop action="include" att="product" val="v2-only"/>
+  <prop action="include" att="product" val="v2-v3"/>
+
+  <!-- Exclude deprecated v1 content -->
+  <prop action="exclude" att="status" val="deprecated"/>
+
+  <!-- Exclude v3-only content -->
+  <prop action="exclude" att="product" val="v3-only"/>
+
+  <!-- Flag new-in-v2 content -->
+  <prop action="flag" att="product" val="v2-only">
+    <startflag>
+      <alt-text>[New in v2]</alt-text>
+    </startflag>
+  </prop>
+</val>

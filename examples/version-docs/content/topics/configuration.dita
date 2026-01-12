@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="configuration">
+  <title>Configuration</title>
+  <shortdesc>Configure the product for your environment.</shortdesc>
+  <body>
+    <section>
+      <title>Configuration File</title>
+      <p>The main configuration file is <filepath>config/settings.yaml</filepath>:</p>
+      <codeblock>server:
+  port: 8080
+  host: localhost
+
+logging:
+  level: INFO</codeblock>
+    </section>
+
+    <section>
+      <title>Environment Variables</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="var" colwidth="1*"/>
+          <colspec colname="desc" colwidth="2*"/>
+          <colspec colname="version" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Variable</entry>
+              <entry>Description</entry>
+              <entry>Version</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><codeph>APP_PORT</codeph></entry>
+              <entry>Server port number</entry>
+              <entry>All</entry>
+            </row>
+            <row>
+              <entry><codeph>APP_LOG_LEVEL</codeph></entry>
+              <entry>Logging verbosity</entry>
+              <entry>All</entry>
+            </row>
+            <row product="v2-v3">
+              <entry><codeph>APP_CONTAINER_MODE</codeph></entry>
+              <entry>Enable container optimizations</entry>
+              <entry>v2+</entry>
+            </row>
+            <row product="v3-only">
+              <entry><codeph>APP_K8S_NAMESPACE</codeph></entry>
+              <entry>Kubernetes namespace</entry>
+              <entry>v3+</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section product="v3-only">
+      <title>Kubernetes ConfigMap</title>
+      <p>In Kubernetes, use a ConfigMap for configuration:</p>
+      <codeblock>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-config
+data:
+  settings.yaml: |
+    server:
+      port: 8080</codeblock>
+    </section>
+  </body>
+</topic>

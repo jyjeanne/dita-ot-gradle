@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="features">
+  <title>Plugin Features</title>
+  <shortdesc>Key features of the custom plugin.</shortdesc>
+  <body>
+    <section>
+      <title>Styling Features</title>
+      <p>The custom plugin provides the following styling enhancements:</p>
+
+      <table>
+        <title>Feature Comparison</title>
+        <tgroup cols="3">
+          <colspec colname="feature" colwidth="1*"/>
+          <colspec colname="standard" colwidth="1*"/>
+          <colspec colname="custom" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Feature</entry>
+              <entry>Standard HTML5</entry>
+              <entry>Custom Plugin</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Typography</entry>
+              <entry>Browser default</entry>
+              <entry>Custom font stack</entry>
+            </row>
+            <row>
+              <entry>Notes</entry>
+              <entry>Basic styling</entry>
+              <entry>Color-coded borders</entry>
+            </row>
+            <row>
+              <entry>Code blocks</entry>
+              <entry>Monospace</entry>
+              <entry>Syntax highlighting ready</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Code Example</title>
+      <p>Here is a sample code block:</p>
+      <codeblock>// Example code
+function greet(name) {
+  console.log(`Hello, ${name}!`);
+}
+
+greet('DITA Developer');</codeblock>
+    </section>
+  </body>
+</topic>

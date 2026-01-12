@@ -1,0 +1,140 @@
+# Documentation Build and Deploy Workflow
+#
+# This workflow demonstrates CI/CD integration for DITA documentation:
+# 1. Builds documentation on push to main or docs/** changes
+# 2. Tests builds with multiple DITA-OT versions
+# 3. Uploads artifacts for review
+# 4. Deploys to GitHub Pages on main branch
+
+name: Documentation Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'build.gradle.kts'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'build.gradle.kts'
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # Build Job: Generate documentation with matrix testing
+  # ============================================================================
+  build:
+    name: Build (${{ matrix.dita-version }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        dita-version: ['4.1.0', '4.2.3']
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Generate Documentation
+        run: ./gradlew generateDocs -PditaOtVersion=${{ matrix.dita-version }} --no-daemon
+
+      - name: Verify Output
+        run: ./gradlew verifyDocs -PditaOtVersion=${{ matrix.dita-version }} --no-daemon
+
+      - name: Upload HTML Documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-docs-${{ matrix.dita-version }}
+          path: build/output/html/
+          retention-days: 7
+
+      - name: Upload PDF Documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-docs-${{ matrix.dita-version }}
+          path: build/output/pdf/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ============================================================================
+  # Deploy Job: Publish to GitHub Pages
+  # ============================================================================
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Only deploy on main branch
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download HTML Documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: html-docs-4.2.3
+          path: docs-site/
+
+      - name: Download PDF Documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: pdf-docs-4.2.3
+          path: docs-site/pdf/
+        continue-on-error: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ============================================================================
+  # Notify Job: Send build status notifications
+  # ============================================================================
+  notify:
+    name: Build Notification
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Build Status Summary
+        run: |
+          echo "## Documentation Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | ${{ needs.deploy.result }} |" >> $GITHUB_STEP_SUMMARY

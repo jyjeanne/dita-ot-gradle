@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="introduction" xml:lang="de">
+  <title>Einfuhrung</title>
+  <shortdesc>Willkommen zum Benutzerhandbuch.</shortdesc>
+  <body>
+    <p>Dieses Handbuch bietet umfassende Informationen zur Installation, Konfiguration und Nutzung des Produkts.</p>
+
+    <section>
+      <title>Uber dieses Handbuch</title>
+      <p>Diese Dokumentation richtet sich an:</p>
+      <ul>
+        <li>Systemadministratoren</li>
+        <li>Entwickler</li>
+        <li>Endbenutzer</li>
+      </ul>
+    </section>
+
+    <note type="tip">Dieses Handbuch ist in mehreren Sprachen verfugbar.</note>
+  </body>
+</topic>

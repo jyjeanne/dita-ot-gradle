@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="getting-started" xml:lang="de">
+  <title>Erste Schritte</title>
+  <shortdesc>Schnellstartanleitung fur neue Benutzer.</shortdesc>
+  <body>
+    <section>
+      <title>Voraussetzungen</title>
+      <p>Bevor Sie beginnen, stellen Sie sicher, dass Sie haben:</p>
+      <ul>
+        <li>Java 11 oder hoher installiert</li>
+        <li>Netzwerkzugang</li>
+        <li>Administratorrechte</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Installationsschritte</title>
+      <ol>
+        <li>Laden Sie das Installationspaket herunter</li>
+        <li>Entpacken Sie das Archiv</li>
+        <li>Fuhren Sie das Setup-Skript aus</li>
+        <li>Uberprufen Sie die Installation</li>
+      </ol>
+    </section>
+
+    <note type="important">Sichern Sie Ihre Daten vor dem Upgrade.</note>
+  </body>
+</topic>

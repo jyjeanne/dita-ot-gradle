@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="migration" product="v2-v3">
+  <title>Migration Guide</title>
+  <shortdesc>How to migrate from previous versions.</shortdesc>
+  <body>
+    <section product="v2">
+      <title>Migrating from v1 to v2</title>
+      <p>Key changes when upgrading from v1.x to v2.x:</p>
+      <ol>
+        <li><b>Configuration format</b>: Configuration files changed from XML to YAML</li>
+        <li><b>API changes</b>: The <codeph>/api/v1/</codeph> endpoints are deprecated; use <codeph>/api/v2/</codeph></li>
+        <li><b>Authentication</b>: Basic auth is deprecated; migrate to OAuth 2.0</li>
+      </ol>
+
+      <p>Migration steps:</p>
+      <ol>
+        <li>Export your v1 configuration: <codeph>product export-config</codeph></li>
+        <li>Convert to YAML format: <codeph>product convert-config config.xml</codeph></li>
+        <li>Update your API clients to use v2 endpoints</li>
+        <li>Configure OAuth 2.0 authentication</li>
+      </ol>
+    </section>
+
+    <section product="v3-only">
+      <title>Migrating from v2 to v3</title>
+      <p>Key changes when upgrading from v2.x to v3.x:</p>
+      <ol>
+        <li><b>Container orchestration</b>: Native Kubernetes support added</li>
+        <li><b>API additions</b>: New GraphQL API available alongside REST</li>
+        <li><b>Authentication</b>: OpenID Connect (OIDC) support added</li>
+      </ol>
+
+      <p>Migration steps:</p>
+      <ol>
+        <li>Review Kubernetes deployment options</li>
+        <li>Update your Helm values if using Helm</li>
+        <li>Consider migrating to GraphQL for complex queries</li>
+        <li>Configure OIDC if using SSO</li>
+      </ol>
+    </section>
+
+    <section>
+      <title>Rollback Procedure</title>
+      <p>If you need to rollback:</p>
+      <ol>
+        <li>Stop the new version</li>
+        <li>Restore your database backup</li>
+        <li>Restore your old configuration</li>
+        <li>Start the previous version</li>
+      </ol>
+      <note type="warning">Always backup your data before upgrading.</note>
+    </section>
+  </body>
+</topic>

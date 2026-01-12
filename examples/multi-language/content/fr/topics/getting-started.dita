@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="getting-started" xml:lang="fr">
+  <title>Demarrage rapide</title>
+  <shortdesc>Guide de demarrage rapide pour les nouveaux utilisateurs.</shortdesc>
+  <body>
+    <section>
+      <title>Prerequis</title>
+      <p>Avant de commencer, assurez-vous d'avoir :</p>
+      <ul>
+        <li>Java 11 ou version ulterieure installee</li>
+        <li>Acces reseau</li>
+        <li>Privileges administrateur</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Etapes d'installation</title>
+      <ol>
+        <li>Telecharger le package d'installation</li>
+        <li>Extraire l'archive</li>
+        <li>Executer le script de configuration</li>
+        <li>Verifier l'installation</li>
+      </ol>
+    </section>
+
+    <note type="important">Sauvegardez vos donnees avant la mise a niveau.</note>
+  </body>
+</topic>

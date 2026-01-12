@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="introduction" xml:lang="en">
+  <title>Introduction</title>
+  <shortdesc>Welcome to the Product User Guide.</shortdesc>
+  <body>
+    <p>This guide provides comprehensive information about installing, configuring, and using the product.</p>
+
+    <section>
+      <title>About This Guide</title>
+      <p>This documentation is intended for:</p>
+      <ul>
+        <li>System administrators</li>
+        <li>Developers</li>
+        <li>End users</li>
+      </ul>
+    </section>
+
+    <note type="tip">This guide is available in multiple languages.</note>
+  </body>
+</topic>

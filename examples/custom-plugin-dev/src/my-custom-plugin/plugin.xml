@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="https://www.dita-ot.org/rng/plugin.rnc" type="application/relax-ng-compact-syntax"?>
+<!--
+  Sample DITA-OT Plugin
+
+  This is a minimal custom plugin that extends html5 output with custom styling.
+  Use this as a starting point for your own plugin development.
+
+  Plugin ID: com.example.my-custom-plugin
+  Transtype: my-custom-html
+-->
+<plugin id="com.example.my-custom-plugin">
+  <require plugin="org.dita.html5"/>
+
+  <!-- Plugin metadata -->
+  <feature extension="package.version" value="1.0.0"/>
+
+  <!-- Register custom transtype -->
+  <transtype name="my-custom-html" extends="html5" desc="Custom HTML5 output with enhanced styling">
+    <param name="args.css" desc="Custom CSS file" type="file"/>
+    <param name="args.copycss" desc="Copy CSS to output" type="enum">
+      <val>yes</val>
+      <val default="true">no</val>
+    </param>
+  </transtype>
+
+  <!-- Custom XSLT override -->
+  <feature extension="dita.xsl.html5" file="xsl/custom-html5.xsl"/>
+
+  <!-- Custom CSS -->
+  <feature extension="dita.conductor.html5.param">
+    <param name="args.css" value="custom-style.css"/>
+    <param name="args.copycss" value="yes"/>
+    <param name="args.cssroot" value="${dita.plugin.com.example.my-custom-plugin.dir}/css"/>
+  </feature>
+</plugin>

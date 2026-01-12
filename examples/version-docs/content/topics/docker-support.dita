@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="docker-support" product="v2-v3">
+  <title>Docker Support</title>
+  <shortdesc>Running the product in Docker containers.</shortdesc>
+  <body>
+    <p>Docker support was introduced in version 2.0, enabling containerized deployments.</p>
+
+    <section>
+      <title>Quick Start</title>
+      <codeblock>docker run -d -p 8080:8080 example/product:latest</codeblock>
+    </section>
+
+    <section>
+      <title>Docker Compose</title>
+      <p>For multi-container deployments:</p>
+      <codeblock>version: '3.8'
+services:
+  product:
+    image: example/product:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_LOG_LEVEL=INFO
+    volumes:
+      - ./config:/app/config</codeblock>
+    </section>
+
+    <section>
+      <title>Building Custom Images</title>
+      <p>To build a custom image with your configuration:</p>
+      <codeblock>FROM example/product:latest
+COPY config/settings.yaml /app/config/</codeblock>
+    </section>
+
+    <note type="tip" product="v3-only">In version 3, consider using Kubernetes for production deployments instead of Docker Compose.</note>
+  </body>
+</topic>

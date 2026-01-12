@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="features" xml:lang="de">
+  <title>Funktionen</title>
+  <shortdesc>Uberblick uber die Produktfunktionen.</shortdesc>
+  <body>
+    <section>
+      <title>Hauptfunktionen</title>
+      <p>Das Produkt umfasst folgende Funktionen:</p>
+      <ul>
+        <li><b>Leistung</b> - Optimiert fur Geschwindigkeit</li>
+        <li><b>Sicherheit</b> - Schutz auf Unternehmensniveau</li>
+        <li><b>Skalierbarkeit</b> - Wachst mit Ihren Anforderungen</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Funktionsvergleich</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="feature" colwidth="1*"/>
+          <colspec colname="basic" colwidth="1*"/>
+          <colspec colname="pro" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Funktion</entry>
+              <entry>Basis</entry>
+              <entry>Pro</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Benutzer</entry>
+              <entry>10</entry>
+              <entry>Unbegrenzt</entry>
+            </row>
+            <row>
+              <entry>Speicher</entry>
+              <entry>1 GB</entry>
+              <entry>100 GB</entry>
+            </row>
+            <row>
+              <entry>Support</entry>
+              <entry>E-Mail</entry>
+              <entry>24/7 Telefon</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+  </body>
+</topic>
