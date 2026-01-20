@@ -1,9 +1,9 @@
 /**
- * DITA-OT Plugin Test Example
+ * DITA-OT Plugin Test Example (using built-in tasks)
  *
  * This example demonstrates how to:
- * 1. Download DITA-OT from GitHub releases (configurable version)
- * 2. Install plugins from the DITA-OT Plugin Registry
+ * 1. Download DITA-OT using built-in DitaOtDownloadTask
+ * 2. Install plugins using built-in DitaOtInstallPluginTask
  * 3. Run transformations using installed plugins
  * 4. Verify the output
  *
@@ -15,15 +15,16 @@
  *
  * Available tasks:
  *   downloadDitaOt    - Download DITA-OT from GitHub releases
- *   extractDitaOt     - Extract DITA-OT zip archive
  *   installPlugin     - Install plugin from DITA-OT registry
  *   ditaTransform     - Run DITA-OT transformation
  *   verifyOutput      - Verify transformation output
  *   test              - Run full test (download, install, transform, verify)
+ *
+ * No external plugins required! Everything is built-in.
  */
 
 plugins {
-    id 'de.undercouch.download' version '5.5.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
 }
 
 // ============================================================================
@@ -40,8 +41,7 @@ def pluginId = project.findProperty('pluginId') ?: 'org.lwdita'
 def selectedTranstype = project.findProperty('transtype') ?: 'markdown'
 
 // Paths
-def ditaOtZip = layout.buildDirectory.file("downloads/dita-ot-${ditaOtVersion}.zip")
-def ditaOtDir = layout.buildDirectory.dir("dita-ot-${ditaOtVersion}")
+def ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
 def outputDir = layout.buildDirectory.dir("output")
 
 // Log configuration
@@ -51,93 +51,42 @@ logger.lifecycle("  Plugin ID: ${pluginId}")
 logger.lifecycle("  Transtype: ${selectedTranstype}")
 
 // ============================================================================
-// Task: Download DITA-OT
+// Task: Download DITA-OT (built-in)
 // ============================================================================
 
-task downloadDitaOt(type: de.undercouch.gradle.tasks.download.Download) {
+tasks.register('downloadDitaOt', com.github.jyjeanne.DitaOtDownloadTask) {
     description = 'Download DITA-OT from GitHub releases'
     group = 'DITA-OT Setup'
 
-    src "https://github.com/dita-ot/dita-ot/releases/download/${ditaOtVersion}/dita-ot-${ditaOtVersion}.zip"
-    dest ditaOtZip
-    overwrite false
-
-    doFirst {
-        logger.lifecycle("Downloading DITA-OT ${ditaOtVersion}...")
-    }
-
-    doLast {
-        logger.lifecycle("Downloaded: ${ditaOtZip.get().asFile.absolutePath}")
-    }
+    version = ditaOtVersion
+    destinationDir = layout.buildDirectory.dir('dita-ot')
+    retries = 3
 }
 
 // ============================================================================
-// Task: Extract DITA-OT
+// Task: Install Plugin (built-in)
 // ============================================================================
 
-task extractDitaOt(type: Copy, dependsOn: downloadDitaOt) {
-    description = 'Extract DITA-OT zip archive'
-    group = 'DITA-OT Setup'
-
-    // Disable state tracking to avoid MD5 hash issues with some DITA-OT files
-    doNotTrackState('DITA-OT contains files that cannot be hashed')
-
-    from zipTree(ditaOtZip)
-    into layout.buildDirectory
-
-    doFirst {
-        logger.lifecycle("Extracting DITA-OT...")
-    }
-
-    doLast {
-        logger.lifecycle("Extracted to: ${ditaOtDir.get().asFile.absolutePath}")
-    }
-}
-
-// ============================================================================
-// Task: Install Plugin from Registry
-// ============================================================================
-
-task installPlugin(type: Exec, dependsOn: extractDitaOt) {
+tasks.register('installPlugin', com.github.jyjeanne.DitaOtInstallPluginTask) {
     description = "Install plugin '${pluginId}' from DITA-OT registry"
     group = 'DITA-OT Setup'
 
-    def ditaHomePath = ditaOtDir.get().asFile.absolutePath
-    def pluginDir = file("${ditaHomePath}/plugins/${pluginId}")
+    dependsOn downloadDitaOt
 
-    // Only install if not already installed
-    onlyIf { !pluginDir.exists() }
-
-    workingDir ditaOtDir.get().asFile
-
-    // Use dita.bat on Windows, dita on Unix
-    def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
-    def ditaCmd = isWindows ? 'bin/dita.bat' : 'bin/dita'
-
-    commandLine ditaCmd, 'install', pluginId
-
-    // Declare outputs for up-to-date checking
-    outputs.dir(pluginDir)
-
-    doFirst {
-        logger.lifecycle("Installing plugin: ${pluginId}")
-        logger.lifecycle("Using DITA-OT at: ${ditaHomePath}")
-    }
-
-    doLast {
-        if (pluginDir.exists()) {
-            logger.lifecycle("Plugin installed successfully: ${pluginDir.absolutePath}")
-        }
-    }
+    ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
+    plugins = [pluginId]
+    retries = 2
 }
 
 // ============================================================================
 // Task: List Installed Plugins
 // ============================================================================
 
-task listPlugins(type: Exec, dependsOn: extractDitaOt) {
+tasks.register('listPlugins', Exec) {
     description = 'List installed DITA-OT plugins'
     group = 'DITA-OT Setup'
+
+    dependsOn downloadDitaOt
 
     workingDir ditaOtDir.get().asFile
 
@@ -151,9 +100,11 @@ task listPlugins(type: Exec, dependsOn: extractDitaOt) {
 // Task: List Available Transtypes
 // ============================================================================
 
-task listTranstypes(type: Exec, dependsOn: extractDitaOt) {
+tasks.register('listTranstypes', Exec) {
     description = 'List available DITA-OT transtypes'
     group = 'DITA-OT Setup'
+
+    dependsOn downloadDitaOt
 
     workingDir ditaOtDir.get().asFile
 
@@ -167,9 +118,11 @@ task listTranstypes(type: Exec, dependsOn: extractDitaOt) {
 // Task: DITA Transformation
 // ============================================================================
 
-task ditaTransform(type: Exec, dependsOn: installPlugin) {
+tasks.register('ditaTransform', Exec) {
     description = "Run DITA-OT transformation with ${selectedTranstype}"
     group = 'DITA-OT Build'
+
+    dependsOn installPlugin
 
     // Work from DITA-OT directory to keep paths short (Windows command line length limit)
     workingDir ditaOtDir.get().asFile
@@ -202,7 +155,7 @@ task ditaTransform(type: Exec, dependsOn: installPlugin) {
 // Task: Verify Output
 // ============================================================================
 
-task verifyOutput {
+tasks.register('verifyOutput') {
     description = 'Verify that transformation produced expected output'
     group = 'DITA-OT Test'
 
@@ -272,7 +225,7 @@ task verifyOutput {
 // Task: Full Test
 // ============================================================================
 
-task test {
+tasks.register('test') {
     description = 'Run full test: download, install plugin, transform, verify'
     group = 'DITA-OT Test'
 
@@ -294,7 +247,7 @@ task test {
 // Task: Clean All
 // ============================================================================
 
-task cleanAll(type: Delete) {
+tasks.register('cleanAll', Delete) {
     description = 'Clean all build outputs including downloaded DITA-OT'
     group = 'DITA-OT Build'
 

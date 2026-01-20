@@ -7,13 +7,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.3.2)
+## Highlights (v2.4.0)
 
 | Feature | Description |
 |---------|-------------|
+| **DitaOtDownloadTask** | Built-in DITA-OT download with retries, checksums, and caching |
+| **DitaOtInstallPluginTask** | Install plugins from registry, URL, or local files |
 | **Configuration Cache** | Up to **77% faster** incremental builds |
-| **Implicit Dependency Fix** | Multiple DitaOtTask instances work independently |
-| **Groovy Closure Fix** | `properties { }` syntax fully restored |
+| **Improved Error Messages** | Clear, actionable errors with troubleshooting steps |
 | **Cross-Platform** | Windows, macOS, Linux support |
 | **Modern Architecture** | Provider API, Gradle 9.0 compatible |
 
@@ -30,28 +31,43 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
 }
 ```
 
-### 2. Configure the Task
+### 2. Download DITA-OT (Built-in)
+
+```groovy
+// Groovy DSL
+tasks.register('downloadDitaOt', com.github.jyjeanne.DitaOtDownloadTask) {
+    version = '4.2.3'
+}
+
+// Kotlin DSL
+val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
+    version.set("4.2.3")
+}
+```
+
+### 3. Configure the Task
 
 ```groovy
 dita {
-    ditaOt '/path/to/dita-ot'
+    dependsOn downloadDitaOt
+    ditaOt layout.buildDirectory.dir('dita-ot/dita-ot-4.2.3')
     input 'docs/guide.ditamap'
     transtype 'html5'
 }
 ```
 
-### 3. Run
+### 4. Run
 
 ```bash
 ./gradlew dita
@@ -104,32 +120,30 @@ examples/plugin-test/
 | `verifyOutput` | Validates output files exist |
 | `test` | Full workflow: download → install → transform → verify |
 
-**Sample `build.gradle`:**
+**Sample `build.gradle` (using built-in tasks):**
 
 ```groovy
 plugins {
-    id 'de.undercouch.download' version '5.5.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
 def pluginId = project.findProperty('pluginId') ?: 'org.lwdita'
 def selectedTranstype = project.findProperty('transtype') ?: 'markdown'
 
-task downloadDitaOt(type: de.undercouch.gradle.tasks.download.Download) {
-    src "https://github.com/dita-ot/dita-ot/releases/download/${ditaOtVersion}/dita-ot-${ditaOtVersion}.zip"
-    dest layout.buildDirectory.file("downloads/dita-ot-${ditaOtVersion}.zip")
-    overwrite false
+// Built-in download task - no external plugins needed!
+tasks.register('downloadDitaOt', com.github.jyjeanne.DitaOtDownloadTask) {
+    version = ditaOtVersion
+    destinationDir = layout.buildDirectory.dir('dita-ot')
+    retries = 3  // Automatic retry on failure
 }
 
-task extractDitaOt(type: Copy, dependsOn: downloadDitaOt) {
-    from zipTree(layout.buildDirectory.file("downloads/dita-ot-${ditaOtVersion}.zip"))
-    into layout.buildDirectory
-}
-
-task installPlugin(type: Exec, dependsOn: extractDitaOt) {
-    workingDir layout.buildDirectory.dir("dita-ot-${ditaOtVersion}")
-    def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
-    commandLine isWindows ? 'bin/dita.bat' : 'bin/dita', 'install', pluginId
+// Built-in plugin installation task
+tasks.register('installPlugin', com.github.jyjeanne.DitaOtInstallPluginTask) {
+    dependsOn downloadDitaOt
+    ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
+    plugins = [pluginId]
+    retries = 2
 }
 ```
 
@@ -165,57 +179,51 @@ my-dita-plugin/
     └── topics/
 ```
 
-**Sample `build.gradle`:**
+**Sample `build.gradle` (using built-in tasks):**
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
-    id 'de.undercouch.download' version '5.5.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
 }
 
 def ditaOtVersion = '4.2.3'
-def ditaOtDir = layout.buildDirectory.dir("dita-ot-${ditaOtVersion}")
+def ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
 def myPluginDir = file('src/my-plugin')
 
 // ============================================================================
-// Download and Setup DITA-OT
+// Download DITA-OT (built-in - no external plugins needed!)
 // ============================================================================
 
-task downloadDitaOt(type: de.undercouch.gradle.tasks.download.Download) {
-    src "https://github.com/dita-ot/dita-ot/releases/download/${ditaOtVersion}/dita-ot-${ditaOtVersion}.zip"
-    dest layout.buildDirectory.file("dita-ot-${ditaOtVersion}.zip")
-    overwrite false
-}
-
-task extractDitaOt(type: Copy, dependsOn: downloadDitaOt) {
-    from zipTree(layout.buildDirectory.file("dita-ot-${ditaOtVersion}.zip"))
-    into layout.buildDirectory
+tasks.register('downloadDitaOt', com.github.jyjeanne.DitaOtDownloadTask) {
+    version = ditaOtVersion
+    destinationDir = layout.buildDirectory.dir('dita-ot')
+    retries = 3
 }
 
 // ============================================================================
-// Install Your Custom Plugin
+// Install Your Custom Plugin (built-in)
 // ============================================================================
 
-task installMyPlugin(type: Exec, dependsOn: extractDitaOt) {
+tasks.register('installMyPlugin', com.github.jyjeanne.DitaOtInstallPluginTask) {
     description = 'Install custom plugin into DITA-OT'
     group = 'Plugin Development'
 
-    workingDir ditaOtDir
+    dependsOn downloadDitaOt
 
-    def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
-    commandLine isWindows ? 'bin/dita.bat' : 'bin/dita', 'install', myPluginDir.absolutePath
-
-    // Re-install if plugin source changes
-    inputs.dir(myPluginDir)
+    ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
+    plugins = [myPluginDir.absolutePath]  // Local plugin path
+    force = true  // Reinstall to pick up changes
 }
 
 // ============================================================================
 // Test Your Plugin
 // ============================================================================
 
-task testMyPlugin(type: com.github.jyjeanne.DitaOtTask, dependsOn: installMyPlugin) {
+tasks.register('testMyPlugin', com.github.jyjeanne.DitaOtTask) {
     description = 'Test custom plugin transformation'
     group = 'Plugin Development'
+
+    dependsOn installMyPlugin
 
     ditaOt ditaOtDir
     input file('test-content/test.ditamap')
@@ -289,33 +297,26 @@ docs-project/
         └── docs.yml
 ```
 
-**Sample `build.gradle.kts`:**
+**Sample `build.gradle.kts` (using built-in tasks):**
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.2"
-    id("de.undercouch.download") version "5.5.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
-val ditaOtDir = layout.buildDirectory.dir("dita-ot-$ditaOtVersion")
+val ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
 
-// Download DITA-OT
-val downloadDitaOt by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
-    src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
-    dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
-    overwrite(false)
-}
-
-val extractDitaOt by tasks.registering(Copy::class) {
-    dependsOn(downloadDitaOt)
-    from(zipTree(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip")))
-    into(layout.buildDirectory)
+// Download DITA-OT (built-in - no external plugins needed!)
+val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
+    version.set(ditaOtVersion)
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
+    retries.set(3)  // Automatic retry on failure
 }
 
 // Generate HTML documentation
 tasks.register<com.github.jyjeanne.DitaOtTask>("generateHtml") {
-    dependsOn(extractDitaOt)
+    dependsOn(downloadDitaOt)
 
     ditaOt(ditaOtDir)
     input("docs/guide.ditamap")
@@ -332,7 +333,7 @@ tasks.register<com.github.jyjeanne.DitaOtTask>("generateHtml") {
 
 // Generate PDF documentation
 tasks.register<com.github.jyjeanne.DitaOtTask>("generatePdf") {
-    dependsOn(extractDitaOt)
+    dependsOn(downloadDitaOt)
 
     ditaOt(ditaOtDir)
     input("docs/guide.ditamap")
@@ -554,7 +555,59 @@ cd examples/version-docs
 
 ## Configuration Reference
 
-### Task Options
+### Built-in Task Types
+
+#### DitaOtDownloadTask
+
+Automatically downloads and extracts DITA-OT from GitHub releases. **No external plugins required!**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `version` | `String` | `4.2.3` | DITA-OT version to download |
+| `destinationDir` | `Directory` | `build/dita-ot` | Where to extract DITA-OT |
+| `retries` | `Int` | `3` | Number of retry attempts |
+| `checksum` | `String` | - | Optional checksum (e.g., `sha256:abc123...`) |
+| `connectTimeout` | `Int` | `30000` | Connection timeout (ms) |
+| `readTimeout` | `Int` | `60000` | Read timeout (ms) |
+| `quiet` | `Boolean` | `false` | Suppress progress output |
+
+**Example:**
+```kotlin
+tasks.register<com.github.jyjeanne.DitaOtDownloadTask>("downloadDitaOt") {
+    version.set("4.2.3")
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
+    retries.set(3)
+}
+```
+
+#### DitaOtInstallPluginTask
+
+Installs DITA-OT plugins from registry, URL, or local files.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `ditaOtDir` | `Directory` | - | DITA-OT installation directory (required) |
+| `plugins` | `List<String>` | - | Plugin IDs, URLs, or file paths (required) |
+| `force` | `Boolean` | `false` | Force reinstall existing plugins |
+| `failOnError` | `Boolean` | `true` | Fail build on installation error |
+| `retries` | `Int` | `0` | Number of retry attempts |
+| `quiet` | `Boolean` | `false` | Suppress progress output |
+
+**Example:**
+```kotlin
+tasks.register<com.github.jyjeanne.DitaOtInstallPluginTask>("installPlugins") {
+    dependsOn(downloadDitaOt)
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    plugins.set(listOf(
+        "org.dita.pdf2",                    // From registry
+        "https://example.com/plugin.zip",   // From URL
+        "/path/to/local/plugin.zip"         // Local file
+    ))
+    retries.set(2)
+}
+```
+
+### DitaOtTask Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -696,7 +749,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
 }
 ```
 
@@ -704,11 +757,13 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.3.2 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.4.0 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8+ | No | Yes |
 | Gradle 9+ | No | Yes |
 | Configuration Cache | No | Yes (77% faster) |
+| **Built-in DITA-OT Download** | No | **Yes** (DitaOtDownloadTask) |
+| **Built-in Plugin Install** | No | **Yes** (DitaOtInstallPluginTask) |
 | Kotlin DSL | Limited | Full support |
 | Cross-platform | Partial | Full (Win/Mac/Linux) |
 | Active maintenance | No (since 2020) | Yes |

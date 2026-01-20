@@ -7,11 +7,29 @@
     <p>This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
 
     <section>
-      <title>Critical Priority (P0)</title>
+      <title>Completed in Version 2.4.0</title>
       <ul>
-        <li><b>Built-in DITA-OT Download:</b> Automatic download and caching of DITA-OT distributions</li>
-        <li><b>Plugin Installation Task:</b> First-class support for installing DITA-OT plugins</li>
-        <li><b>Improved Error Messages:</b> Clear, actionable error messages with suggestions</li>
+        <li><b>DitaOtDownloadTask:</b> Built-in DITA-OT download from GitHub releases
+          <ul>
+            <li>Automatic version management and caching</li>
+            <li>Configurable retries with exponential backoff</li>
+            <li>Checksum verification (MD5, SHA1, SHA256, SHA512)</li>
+            <li>Temp-and-move pattern for safe downloads</li>
+            <li>Configurable timeouts (connect/read)</li>
+            <li>Quiet mode for CI environments</li>
+          </ul>
+        </li>
+        <li><b>DitaOtInstallPluginTask:</b> Built-in plugin installation
+          <ul>
+            <li>Install from registry, URL, or local files</li>
+            <li>Configurable retries with exponential backoff</li>
+            <li>Force reinstall option</li>
+            <li>Quiet mode for CI environments</li>
+            <li>Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+        <li><b>Improved Error Messages:</b> Clear, actionable error messages with contextual suggestions and troubleshooting steps</li>
+        <li><b>No External Dependencies:</b> Examples no longer require the de.undercouch.download plugin</li>
       </ul>
     </section>
 

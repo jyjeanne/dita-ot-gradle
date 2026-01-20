@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
 <topic id="highlights">
-  <title>Highlights (v2.3.2)</title>
+  <title>Highlights (v2.4.0)</title>
   <shortdesc>Key features and improvements in the current version.</shortdesc>
   <body>
+    <section>
+      <title>What's New in 2.4.0</title>
+      <p>This release introduces major new features to simplify DITA-OT setup and usage:</p>
+      <ul>
+        <li><b>DitaOtDownloadTask:</b> Automatic download and caching of DITA-OT distributions from GitHub releases</li>
+        <li><b>DitaOtInstallPluginTask:</b> First-class support for installing DITA-OT plugins from registry, URL, or local files</li>
+        <li><b>Improved Error Messages:</b> Clear, actionable error messages with contextual suggestions and troubleshooting steps</li>
+        <li><b>Cross-Platform Support:</b> Full support for Windows, macOS, and Linux in all tasks</li>
+      </ul>
+    </section>
+
     <section>
       <title>Feature Overview</title>
       <table>
@@ -18,16 +29,20 @@
           </thead>
           <tbody>
             <row>
+              <entry><b>DitaOtDownloadTask</b></entry>
+              <entry>Download DITA-OT automatically with version management and caching</entry>
+            </row>
+            <row>
+              <entry><b>DitaOtInstallPluginTask</b></entry>
+              <entry>Install DITA-OT plugins from registry, URL, or local files</entry>
+            </row>
+            <row>
               <entry><b>Configuration Cache</b></entry>
               <entry>Up to 77% faster incremental builds</entry>
             </row>
             <row>
-              <entry><b>Implicit Dependency Fix</b></entry>
-              <entry>Multiple DitaOtTask instances work independently</entry>
-            </row>
-            <row>
-              <entry><b>Groovy Closure Fix</b></entry>
-              <entry><codeph>properties { }</codeph> syntax fully restored</entry>
+              <entry><b>Improved Error Messages</b></entry>
+              <entry>Contextual error messages with suggestions and troubleshooting</entry>
             </row>
             <row>
               <entry><b>Cross-Platform</b></entry>
@@ -40,6 +55,26 @@
           </tbody>
         </tgroup>
       </table>
+    </section>
+
+    <section>
+      <title>New Task Types</title>
+
+      <p><b>DitaOtDownloadTask</b> - Automatically download DITA-OT:</p>
+      <codeblock>val downloadDitaOt by tasks.registering(DitaOtDownloadTask::class) {
+    version.set("4.2.3")  // DITA-OT version
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
+}</codeblock>
+
+      <p><b>DitaOtInstallPluginTask</b> - Install DITA-OT plugins:</p>
+      <codeblock>val installPlugins by tasks.registering(DitaOtInstallPluginTask::class) {
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    plugins.set(listOf(
+        "org.dita.pdf2",                    // From registry
+        "https://example.com/plugin.zip",   // From URL
+        "/path/to/local/plugin.zip"         // Local file
+    ))
+}</codeblock>
     </section>
 
     <section>
@@ -79,13 +114,10 @@
     </section>
 
     <section>
-      <title>What's New in 2.3.2</title>
-      <ul>
-        <li>Fixed implicit task dependency bug with multiple DitaOtTask instances</li>
-        <li>Added comprehensive example projects</li>
-        <li>Improved documentation and roadmap</li>
-        <li>Enhanced Gradle 9.0 compatibility</li>
-      </ul>
+      <title>Version History</title>
+      <p><b>2.4.0</b> - New task types: DitaOtDownloadTask, DitaOtInstallPluginTask, improved error messages</p>
+      <p><b>2.3.2</b> - Fixed implicit task dependency bug, added example projects, improved documentation</p>
+      <p><b>2.3.0</b> - Configuration cache support, Gradle 9.0 compatibility</p>
     </section>
   </body>
 </topic>

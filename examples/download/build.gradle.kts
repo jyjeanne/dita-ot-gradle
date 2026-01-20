@@ -1,52 +1,61 @@
-// See the 'simple' example for comments on the basic properties.
-
-import de.undercouch.gradle.tasks.download.Download
+/**
+ * DITA-OT Download Example (using built-in tasks)
+ *
+ * This example demonstrates how to:
+ * 1. Download DITA-OT automatically using DitaOtDownloadTask
+ * 2. Install plugins using DitaOtInstallPluginTask
+ * 3. Run transformations
+ *
+ * Usage:
+ *   ./gradlew dita                    # Download, install plugins, transform
+ *   ./gradlew downloadDitaOt          # Just download DITA-OT
+ *   ./gradlew installPlugins          # Install plugins
+ *
+ * No external plugins required! Everything is built-in.
+ */
 
 plugins {
-    id("de.undercouch.download") version "4.1.1"
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
 }
 
-val ditaOtVersion = "3.4"
+val ditaOtVersion = "4.2.3"
 
-// Download and install DITA-OT
+// ============================================================================
+// Task: Download DITA-OT (built-in)
+// ============================================================================
 
-val downloadDitaOt by tasks.registering(Download::class) {
-    src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
-    dest(File(layout.buildDirectory.asFile.get(), "dita-ot-$ditaOtVersion.zip"))
-    overwrite(false)
+val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
+    version.set(ditaOtVersion)
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
+
+    // Optional: Configure retries and timeouts
+    retries.set(3)
+    connectTimeout.set(30000)
+    readTimeout.set(60000)
 }
 
-val extract by tasks.registering(Copy::class) {
+// ============================================================================
+// Task: Install Plugins (built-in)
+// ============================================================================
+
+val installPlugins by tasks.registering(com.github.jyjeanne.DitaOtInstallPluginTask::class) {
     dependsOn(downloadDitaOt)
-    from(zipTree(downloadDitaOt.get().dest))
-    into(layout.buildDirectory)
+
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion"))
+    plugins.set(listOf("org.lwdita", "org.dita.normalize"))
+
+    // Optional: Configure retries
+    retries.set(2)
 }
 
-val ditaHome = "${layout.buildDirectory.asFile.get()}/dita-ot-$ditaOtVersion"
-
-// Install DITA-OT plugins from DITA-OT Plugin Registry
-
-val pluginIds = listOf("org.lwdita", "org.dita.normalize")
-
-val pluginTasks = pluginIds.map { id ->
-    tasks.register<Exec>(id) {
-        // Install plugin if not already installed, otherwise build will fail
-        onlyIf { !file("$ditaHome/plugins/$id").exists() }
-        outputs.dir("$ditaHome/plugins/$id")
-        workingDir(file(ditaHome))
-        commandLine("bin/dita", "--install", id)
-    }
-}
-
-val install by tasks.registering {
-    dependsOn(extract)
-    dependsOn(pluginTasks)
-}
+// ============================================================================
+// Task: DITA Transformation
+// ============================================================================
 
 tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
-    dependsOn(install)
-    ditaOt(ditaHome)
+    dependsOn(installPlugins)
+
+    ditaOt(layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion"))
     input("dita/root.ditamap")
     transtype("markdown")
 }

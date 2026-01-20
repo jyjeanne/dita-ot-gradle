@@ -1,22 +1,24 @@
 /**
- * CI/CD Documentation Publishing Example
+ * CI/CD Documentation Publishing Example (using built-in tasks)
  *
  * This example demonstrates how to:
  * 1. Automate DITA documentation builds in CI/CD pipelines
- * 2. Generate multiple output formats (HTML, PDF)
- * 3. Use configuration cache for faster builds
- * 4. Integrate with GitHub Actions
+ * 2. Download DITA-OT using built-in DitaOtDownloadTask
+ * 3. Generate multiple output formats (HTML, PDF)
+ * 4. Use configuration cache for faster builds
+ * 5. Integrate with GitHub Actions
  *
  * Usage:
  *   ./gradlew generateDocs              # Generate all formats
  *   ./gradlew generateHtml              # Generate HTML only
  *   ./gradlew generatePdf               # Generate PDF only
  *   ./gradlew generateDocs -PditaOtVersion=4.1.0  # Use specific DITA-OT version
+ *
+ * No external plugins required! Everything is built-in.
  */
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.2"
-    id("de.undercouch.download") version "5.5.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
 }
 
 // ============================================================================
@@ -24,44 +26,23 @@ plugins {
 // ============================================================================
 
 val ditaOtVersion: String = project.findProperty("ditaOtVersion")?.toString() ?: "4.2.3"
-val ditaOtDir = layout.buildDirectory.dir("dita-ot-$ditaOtVersion")
+val ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
 
 // ============================================================================
-// Task: Download DITA-OT
+// Task: Download DITA-OT (built-in)
 // ============================================================================
 
-val downloadDitaOt by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
+val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
     description = "Download DITA-OT from GitHub releases"
     group = "DITA-OT Setup"
 
-    src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
-    dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
-    overwrite(false)
+    version.set(ditaOtVersion)
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
 
-    doFirst {
-        logger.lifecycle("Downloading DITA-OT $ditaOtVersion...")
-    }
-}
-
-// ============================================================================
-// Task: Extract DITA-OT
-// ============================================================================
-
-val extractDitaOt by tasks.registering(Copy::class) {
-    description = "Extract DITA-OT zip archive"
-    group = "DITA-OT Setup"
-
-    dependsOn(downloadDitaOt)
-
-    // Disable state tracking for DITA-OT files
-    doNotTrackState("DITA-OT contains files that cannot be hashed")
-
-    from(zipTree(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip")))
-    into(layout.buildDirectory)
-
-    doFirst {
-        logger.lifecycle("Extracting DITA-OT...")
-    }
+    // Configure retries for CI reliability
+    retries.set(3)
+    connectTimeout.set(60000)  // 60 seconds for CI environments
+    readTimeout.set(120000)    // 2 minutes for slow connections
 }
 
 // ============================================================================
@@ -72,7 +53,7 @@ val generateHtml by tasks.registering(com.github.jyjeanne.DitaOtTask::class) {
     description = "Generate HTML5 documentation"
     group = "Documentation"
 
-    dependsOn(extractDitaOt)
+    dependsOn(downloadDitaOt)
 
     ditaOt(ditaOtDir)
     input("docs/guide.ditamap")
@@ -99,7 +80,7 @@ val generatePdf by tasks.registering(com.github.jyjeanne.DitaOtTask::class) {
     description = "Generate PDF documentation"
     group = "Documentation"
 
-    dependsOn(extractDitaOt)
+    dependsOn(downloadDitaOt)
 
     ditaOt(ditaOtDir)
     input("docs/guide.ditamap")

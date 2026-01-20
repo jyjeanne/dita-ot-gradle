@@ -1,46 +1,61 @@
-// See the 'simple' example for comments on the basic properties.
+/**
+ * DITA-OT Download Example (using built-in tasks) - Groovy DSL
+ *
+ * This example demonstrates how to:
+ * 1. Download DITA-OT automatically using DitaOtDownloadTask
+ * 2. Install plugins using DitaOtInstallPluginTask
+ * 3. Run transformations
+ *
+ * Usage:
+ *   ./gradlew dita                    # Download, install plugins, transform
+ *   ./gradlew downloadDitaOt          # Just download DITA-OT
+ *   ./gradlew installPlugins          # Install plugins
+ *
+ * No external plugins required! Everything is built-in.
+ */
 
 plugins {
-    id 'de.undercouch.download' version '4.1.1'
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
 }
 
-def ditaOtVersion = '3.4'
+def ditaOtVersion = '4.2.3'
 
-// Download and install DITA-OT
+// ============================================================================
+// Task: Download DITA-OT (built-in)
+// ============================================================================
 
-task downloadDitaOt(type: Download) {
-    src "https://github.com/dita-ot/dita-ot/releases/download/${ditaOtVersion}/dita-ot-${ditaOtVersion}.zip"
-    dest new File(buildDir, "dita-ot-${ditaOtVersion}.zip")
-    overwrite false
+tasks.register('downloadDitaOt', com.github.jyjeanne.DitaOtDownloadTask) {
+    version = ditaOtVersion
+    destinationDir = layout.buildDirectory.dir('dita-ot')
+
+    // Optional: Configure retries and timeouts
+    retries = 3
+    connectTimeout = 30000
+    readTimeout = 60000
 }
 
-task extract(dependsOn: downloadDitaOt, type: Copy) {
-    from zipTree(downloadDitaOt.dest)
-    into buildDir
+// ============================================================================
+// Task: Install Plugins (built-in)
+// ============================================================================
+
+tasks.register('installPlugins', com.github.jyjeanne.DitaOtInstallPluginTask) {
+    dependsOn downloadDitaOt
+
+    ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
+    plugins = ['org.lwdita', 'org.dita.normalize']
+
+    // Optional: Configure retries
+    retries = 2
 }
 
-def ditaHome = "${buildDir}/dita-ot-${ditaOtVersion}"
-
-// Install DITA-OT plugins from DITA-OT Plugin Registry
-
-def plugins = ['org.lwdita', 'org.dita.normalize']
-
-plugins.each { id ->
-    tasks.create(id, Exec) {
-        // Install plugin if not already installed, otherwise build will fail
-        onlyIf { !file("$ditaHome/plugins/$id").exists() }
-        outputs.dir("$ditaHome/plugins/$id")
-        workingDir ditaHome
-        commandLine 'bin/dita', '--install', id
-    }
-}
-
-task install(dependsOn: [extract, plugins])
+// ============================================================================
+// Task: DITA Transformation
+// ============================================================================
 
 dita {
-    dependsOn install
-    ditaOt ditaHome
+    dependsOn installPlugins
+
+    ditaOt layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
     input 'dita/root.ditamap'
     transtype 'markdown'
 }
