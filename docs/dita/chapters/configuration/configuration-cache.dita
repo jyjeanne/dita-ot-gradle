@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="configuration-cache">
+  <title>Configuration Cache Support</title>
+  <shortdesc>Enable Configuration Cache for faster incremental builds.</shortdesc>
+  <body>
+    <p>Gradle's Configuration Cache can dramatically improve build performance by caching the result of the configuration phase.</p>
+
+    <section>
+      <title>Performance Benchmarks</title>
+      <p>Tested on Windows 11, Gradle 8.5, DITA-OT 3.6:</p>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="scenario" colwidth="2*"/>
+          <colspec colname="time" colwidth="1*"/>
+          <colspec colname="improvement" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Scenario</entry>
+              <entry>Time</entry>
+              <entry>Improvement</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Without Configuration Cache</entry>
+              <entry>20.8s</entry>
+              <entry>baseline</entry>
+            </row>
+            <row>
+              <entry>With Cache (first run)</entry>
+              <entry>22.8s</entry>
+              <entry>-10% (stores cache)</entry>
+            </row>
+            <row>
+              <entry><b>With Cache (up-to-date)</b></entry>
+              <entry><b>4.8s</b></entry>
+              <entry><b>77% faster</b></entry>
+            </row>
+            <row>
+              <entry>With Cache (clean build)</entry>
+              <entry>22.4s</entry>
+              <entry>reuses configuration</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Enabling Configuration Cache</title>
+      <p>Per-command:</p>
+      <codeblock>./gradlew dita --configuration-cache</codeblock>
+
+      <p>Globally in <filepath>gradle.properties</filepath>:</p>
+      <codeblock>org.gradle.configuration-cache=true</codeblock>
+    </section>
+
+    <section>
+      <title>Best Practices</title>
+      <ul>
+        <li>Use <codeph>ditaProperties.put()</codeph> instead of Groovy closures for full compatibility</li>
+        <li>Enable parallel execution with <codeph>org.gradle.parallel=true</codeph></li>
+        <li>Use Provider API methods when possible</li>
+      </ul>
+    </section>
+
+    <note type="tip">Configuration Cache requires Gradle 6.5 or later. For best results, use Gradle 9.0+.</note>
+  </body>
+</topic>

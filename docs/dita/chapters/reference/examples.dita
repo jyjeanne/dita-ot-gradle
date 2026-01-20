@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="examples">
+  <title>Example Projects</title>
+  <shortdesc>Overview of all example projects included with the plugin.</shortdesc>
+  <body>
+    <p>The plugin includes several example projects demonstrating various use cases.</p>
+
+    <section>
+      <title>Available Examples</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="project" colwidth="1*"/>
+          <colspec colname="description" colwidth="2*"/>
+          <colspec colname="features" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Project</entry>
+              <entry>Description</entry>
+              <entry>Key Features</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><filepath>simple</filepath></entry>
+              <entry>Minimal project setup</entry>
+              <entry>Single DITA map to HTML5</entry>
+            </row>
+            <row>
+              <entry><filepath>plugin-test</filepath></entry>
+              <entry>Test DITA-OT plugins from registry</entry>
+              <entry>Plugin installation, version testing</entry>
+            </row>
+            <row>
+              <entry><filepath>custom-plugin-dev</filepath></entry>
+              <entry>Plugin development workflow</entry>
+              <entry>Continuous mode, local plugin</entry>
+            </row>
+            <row>
+              <entry><filepath>ci-cd-publishing</filepath></entry>
+              <entry>Automated publishing pipeline</entry>
+              <entry>GitHub Actions, multi-format</entry>
+            </row>
+            <row>
+              <entry><filepath>multi-language</filepath></entry>
+              <entry>Multi-language documentation</entry>
+              <entry>Parallel builds, localization</entry>
+            </row>
+            <row>
+              <entry><filepath>version-docs</filepath></entry>
+              <entry>Version-specific documentation</entry>
+              <entry>DITAVAL filtering, profiling</entry>
+            </row>
+            <row>
+              <entry><filepath>download</filepath></entry>
+              <entry>Download DITA-OT automatically</entry>
+              <entry>CI/CD setup, automated download</entry>
+            </row>
+            <row>
+              <entry><filepath>filetree</filepath></entry>
+              <entry>Process multiple files</entry>
+              <entry>Bulk processing, file tree input</entry>
+            </row>
+            <row>
+              <entry><filepath>multi-task</filepath></entry>
+              <entry>Multiple output formats</entry>
+              <entry>Multi-format publishing</entry>
+            </row>
+            <row>
+              <entry><filepath>multi-project</filepath></entry>
+              <entry>Multi-project Gradle build</entry>
+              <entry>Large projects, modular builds</entry>
+            </row>
+            <row>
+              <entry><filepath>classpath</filepath></entry>
+              <entry>Custom classpath configuration</entry>
+              <entry>Advanced customization</entry>
+            </row>
+            <row>
+              <entry><filepath>configuration-cache</filepath></entry>
+              <entry>Configuration cache demo</entry>
+              <entry>Performance optimization</entry>
+            </row>
+            <row>
+              <entry><filepath>dita-ot-gradle-plugin-documentation</filepath></entry>
+              <entry>Generate plugin documentation</entry>
+              <entry>Self-documentation, HTML/PDF output</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Running Examples</title>
+      <p>Each example can be run independently:</p>
+      <codeblock># Navigate to example directory
+cd examples/simple
+
+# Run the default task
+./gradlew dita
+
+# Or run with specific options
+./gradlew dita --info</codeblock>
+    </section>
+
+    <section>
+      <title>Customizing Examples</title>
+      <p>Examples are designed to be modified for your needs:</p>
+      <ol>
+        <li>Copy the example directory to a new location</li>
+        <li>Update <filepath>build.gradle</filepath> or <filepath>build.gradle.kts</filepath></li>
+        <li>Replace sample DITA content with your own</li>
+        <li>Adjust output settings as needed</li>
+      </ol>
+    </section>
+  </body>
+</topic>

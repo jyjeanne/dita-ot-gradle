@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="roadmap">
+  <title>Roadmap</title>
+  <shortdesc>Planned features and improvements.</shortdesc>
+  <body>
+    <p>This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
+
+    <section>
+      <title>Critical Priority (P0)</title>
+      <ul>
+        <li><b>Built-in DITA-OT Download:</b> Automatic download and caching of DITA-OT distributions</li>
+        <li><b>Plugin Installation Task:</b> First-class support for installing DITA-OT plugins</li>
+        <li><b>Improved Error Messages:</b> Clear, actionable error messages with suggestions</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>High Priority (P1)</title>
+      <ul>
+        <li><b>DITA Validation Task:</b> Validate DITA content before transformation</li>
+        <li><b>Incremental Build Support:</b> Smart change detection for faster builds</li>
+        <li><b>Link Checker:</b> Verify internal and external links</li>
+        <li><b>Gradle Wrapper Integration:</b> Include wrapper setup in examples</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Medium Priority (P2)</title>
+      <ul>
+        <li><b>Watch Mode:</b> Automatic rebuild on file changes</li>
+        <li><b>Multi-Format Task:</b> Generate multiple outputs from single task</li>
+        <li><b>Kotlin DSL Examples:</b> More Kotlin DSL documentation</li>
+        <li><b>Build Progress:</b> Visual progress indicators</li>
+        <li><b>DITA-OT Version Management:</b> Switch between versions easily</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Lower Priority (P3-P4)</title>
+      <ul>
+        <li><b>Preview Server:</b> Live preview with auto-refresh</li>
+        <li><b>Build Metrics:</b> Performance tracking and reporting</li>
+        <li><b>Docker Support:</b> Containerized DITA-OT execution</li>
+        <li><b>IDE Plugins:</b> IntelliJ and VS Code integration</li>
+        <li><b>Build Cache:</b> Distributed caching for CI/CD</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Contributing</title>
+      <p>We welcome contributions! See the <xref href="https://github.com/jyjeanne/dita-ot-gradle" format="html" scope="external">GitHub repository</xref> for:</p>
+      <ul>
+        <li>Feature requests and bug reports</li>
+        <li>Pull requests</li>
+        <li>Documentation improvements</li>
+      </ul>
+    </section>
+  </body>
+</topic>

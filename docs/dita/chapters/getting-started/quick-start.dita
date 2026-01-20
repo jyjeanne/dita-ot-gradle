@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="quick-start">
+  <title>Quick Start</title>
+  <shortdesc>Get started with DITA-OT Gradle Plugin in minutes.</shortdesc>
+  <body>
+    <section>
+      <title>Step 1: Add the Plugin</title>
+      <p>Add the plugin to your <filepath>build.gradle</filepath>:</p>
+      <codeblock>plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Step 2: Configure the Task</title>
+      <p>Configure the <codeph>dita</codeph> task with your DITA-OT installation and input files:</p>
+      <codeblock>dita {
+    ditaOt '/path/to/dita-ot'
+    input 'docs/guide.ditamap'
+    transtype 'html5'
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Step 3: Run the Build</title>
+      <p>Execute the transformation:</p>
+      <codeblock>./gradlew dita</codeblock>
+      <p>The output will be generated in the <filepath>build</filepath> directory.</p>
+    </section>
+
+    <section>
+      <title>Complete Example</title>
+      <p>Here's a complete <filepath>build.gradle</filepath> example:</p>
+      <codeblock>plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
+}
+
+dita {
+    ditaOt '/path/to/dita-ot'
+    input 'docs/guide.ditamap'
+    output file('build/docs')
+    transtype 'html5'
+
+    properties {
+        property(name: 'nav-toc', value: 'partial')
+        property(name: 'args.copycss', value: 'yes')
+    }
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Next Steps</title>
+      <ul>
+        <li>Learn about <xref href="../configuration/task-options.dita">configuration options</xref></li>
+        <li>Explore <xref href="../use-cases/ci-cd-publishing.dita">CI/CD integration</xref></li>
+        <li>See the <xref href="../reference/examples.dita">example projects</xref></li>
+      </ul>
+    </section>
+  </body>
+</topic>

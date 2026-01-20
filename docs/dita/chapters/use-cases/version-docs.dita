@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="version-docs">
+  <title>Product Version Documentation</title>
+  <shortdesc>Generate version-specific documentation using DITA profiling.</shortdesc>
+  <body>
+    <p>The <filepath>examples/version-docs</filepath> project demonstrates conditional content processing for different product versions.</p>
+
+    <section>
+      <title>Quick Start</title>
+      <codeblock>cd examples/version-docs
+
+# Build all versions
+./gradlew buildAll
+
+# Build specific version
+./gradlew buildV1
+./gradlew buildV2
+./gradlew buildV3</codeblock>
+    </section>
+
+    <section>
+      <title>DITAVAL Filtering</title>
+      <p>Create version-specific filters in <filepath>filters/</filepath>:</p>
+      <codeblock>&lt;!-- filters/v2.ditaval --&gt;
+&lt;val&gt;
+  &lt;prop action="include" att="product" val="v2"/&gt;
+  &lt;prop action="include" att="product" val="v2-v3"/&gt;
+  &lt;prop action="exclude" att="product" val="v1"/&gt;
+  &lt;prop action="exclude" att="product" val="v3"/&gt;
+&lt;/val&gt;</codeblock>
+    </section>
+
+    <section>
+      <title>Conditional Content</title>
+      <p>Mark content with product attributes:</p>
+      <codeblock>&lt;!-- Content for all versions --&gt;
+&lt;p&gt;This feature is available in all versions.&lt;/p&gt;
+
+&lt;!-- Content for specific version --&gt;
+&lt;p product="v3"&gt;New in v3: Advanced analytics dashboard.&lt;/p&gt;
+
+&lt;!-- Content for multiple versions --&gt;
+&lt;p product="v2-v3"&gt;Available in v2 and v3.&lt;/p&gt;</codeblock>
+    </section>
+
+    <section>
+      <title>Task Configuration</title>
+      <codeblock>tasks.register&lt;DitaOtTask&gt;("buildV2") {
+    input(file("content/guide.ditamap"))
+    output(layout.buildDirectory.dir("output/v2"))
+    transtype("html5")
+    filter(file("filters/v2.ditaval"))
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Best Practices</title>
+      <ul>
+        <li>Use consistent profiling attribute values (e.g., <codeph>v2-v3</codeph> for shared content)</li>
+        <li>Keep version-specific content minimal</li>
+        <li>Test all version outputs to ensure correct filtering</li>
+        <li>Document profiling conventions in your style guide</li>
+      </ul>
+    </section>
+  </body>
+</topic>

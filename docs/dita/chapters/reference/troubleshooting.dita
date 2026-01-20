@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="troubleshooting">
+  <title>Troubleshooting</title>
+  <shortdesc>Common issues and solutions.</shortdesc>
+  <body>
+    <section>
+      <title>DITA-OT Not Found</title>
+      <p><b>Error:</b> <codeph>DITA-OT directory not found</codeph></p>
+      <p><b>Solution:</b> Ensure the <codeph>ditaOt</codeph> path is correct and DITA-OT is extracted:</p>
+      <codeblock>dita {
+    ditaOt '/correct/path/to/dita-ot-4.2.3'
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Input File Not Found</title>
+      <p><b>Error:</b> <codeph>Input file does not exist</codeph></p>
+      <p><b>Solution:</b> Verify the input path is relative to the project directory:</p>
+      <codeblock>dita {
+    input 'docs/guide.ditamap'  // Relative to project root
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Configuration Cache Issues</title>
+      <p><b>Error:</b> <codeph>Configuration cache state could not be cached</codeph></p>
+      <p><b>Solution:</b> Use Provider API methods instead of closures:</p>
+      <codeblock>// Instead of:
+properties {
+    property(name: 'key', value: someVar)
+}
+
+// Use:
+ditaProperties.put('key', 'value')</codeblock>
+    </section>
+
+    <section>
+      <title>Out of Memory</title>
+      <p><b>Error:</b> <codeph>Java heap space</codeph></p>
+      <p><b>Solution:</b> Increase memory in <filepath>gradle.properties</filepath>:</p>
+      <codeblock>org.gradle.jvmargs=-Xmx2g</codeblock>
+    </section>
+
+    <section>
+      <title>Transformation Fails</title>
+      <p><b>Error:</b> DITA-OT transformation errors</p>
+      <p><b>Solution:</b> Run with debug output to see detailed logs:</p>
+      <codeblock>./gradlew dita --info
+# Or for even more detail:
+./gradlew dita --debug</codeblock>
+    </section>
+
+    <section>
+      <title>Plugin Installation Fails</title>
+      <p><b>Error:</b> Plugin cannot be installed</p>
+      <p><b>Solutions:</b></p>
+      <ul>
+        <li>Verify plugin ID is correct</li>
+        <li>Check network connectivity to plugin registry</li>
+        <li>Ensure DITA-OT version supports the plugin</li>
+        <li>Try installing manually: <codeph>dita install &lt;plugin-id&gt;</codeph></li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Getting Help</title>
+      <ul>
+        <li>Check the <xref href="https://github.com/jyjeanne/dita-ot-gradle/issues" format="html" scope="external">GitHub Issues</xref></li>
+        <li>Review DITA-OT documentation for transformation-specific issues</li>
+        <li>Enable verbose logging with <codeph>--info</codeph> or <codeph>--debug</codeph></li>
+      </ul>
+    </section>
+  </body>
+</topic>

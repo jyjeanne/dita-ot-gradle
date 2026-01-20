@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="installation">
+  <title>Installation</title>
+  <shortdesc>How to add the DITA-OT Gradle Plugin to your project.</shortdesc>
+  <body>
+    <p>The plugin is published to the <xref href="https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle" format="html" scope="external">Gradle Plugin Portal</xref> and can be easily added to your project.</p>
+
+    <section>
+      <title>Prerequisites</title>
+      <ul>
+        <li>Gradle 6.5 or later (Gradle 9.0+ recommended)</li>
+        <li>Java 8 or later</li>
+        <li>DITA-OT 3.0 or later</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Groovy DSL</title>
+      <p>Add the following to your <filepath>build.gradle</filepath>:</p>
+      <codeblock>plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Kotlin DSL</title>
+      <p>Add the following to your <filepath>build.gradle.kts</filepath>:</p>
+      <codeblock>plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.2"
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Verify Installation</title>
+      <p>After adding the plugin, verify it's available by running:</p>
+      <codeblock>./gradlew tasks --group="DITA-OT"</codeblock>
+      <p>You should see the <codeph>dita</codeph> task listed.</p>
+    </section>
+  </body>
+</topic>

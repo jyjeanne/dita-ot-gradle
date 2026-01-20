@@ -548,6 +548,7 @@ cd examples/version-docs
 | [`multi-project`](examples/multi-project) | Multi-project Gradle build | Large projects |
 | [`classpath`](examples/classpath) | Custom classpath configuration | Advanced customization |
 | [`configuration-cache`](examples/configuration-cache) | Configuration cache demo | Performance optimization |
+| [`dita-ot-gradle-plugin-documentation`](examples/dita-ot-gradle-plugin-documentation) | Generate plugin docs from DITA | Self-documentation |
 
 ---
 

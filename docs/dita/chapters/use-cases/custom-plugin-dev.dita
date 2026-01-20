@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="custom-plugin-dev">
+  <title>Developing Custom Plugins</title>
+  <shortdesc>Fast iteration workflow for DITA-OT plugin development.</shortdesc>
+  <body>
+    <p>The <filepath>examples/custom-plugin-dev</filepath> project provides a complete plugin development environment.</p>
+
+    <section>
+      <title>Quick Start</title>
+      <codeblock>cd examples/custom-plugin-dev
+
+# Run development build (download DITA-OT, install plugin, transform)
+./gradlew dev
+
+# Auto-rebuild when plugin source changes
+./gradlew dev --continuous</codeblock>
+    </section>
+
+    <section>
+      <title>Project Structure</title>
+      <codeblock>custom-plugin-dev/
+├── build.gradle
+├── src/
+│   └── my-custom-plugin/
+│       ├── plugin.xml
+│       ├── css/
+│       └── xsl/
+└── test-content/
+    ├── test.ditamap
+    └── topics/</codeblock>
+    </section>
+
+    <section>
+      <title>Development Workflow</title>
+      <ol>
+        <li><b>Initial Setup:</b> <codeph>./gradlew extractDitaOt</codeph></li>
+        <li><b>Development:</b> <codeph>./gradlew dev --continuous</codeph></li>
+        <li><b>Debug:</b> <codeph>./gradlew installMyPlugin --info</codeph></li>
+        <li><b>Clean Rebuild:</b> <codeph>./gradlew cleanAll dev</codeph></li>
+      </ol>
+    </section>
+
+    <section>
+      <title>Tips</title>
+      <ul>
+        <li>Use <codeph>--continuous</codeph> mode for rapid iteration</li>
+        <li>Check logs with <codeph>--info</codeph> when debugging</li>
+        <li>Test with different DITA-OT versions using <codeph>-PditaOtVersion</codeph></li>
+      </ul>
+    </section>
+  </body>
+</topic>

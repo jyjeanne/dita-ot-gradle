@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="properties">
+  <title>Passing Properties to DITA-OT</title>
+  <shortdesc>How to pass properties to DITA-OT transformations.</shortdesc>
+  <body>
+    <p>Properties are passed to DITA-OT as Ant properties, controlling various aspects of the transformation process.</p>
+
+    <section>
+      <title>Groovy DSL Syntax</title>
+      <p>Use the <codeph>properties</codeph> closure:</p>
+      <codeblock>dita {
+    ditaOt '/path/to/dita-ot'
+    input 'guide.ditamap'
+    transtype 'html5'
+
+    properties {
+        property(name: 'processing-mode', value: 'strict')
+        property(name: 'args.css', value: 'custom.css')
+        property(name: 'args.cssroot', value: "${projectDir}/css")
+    }
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Kotlin DSL Syntax</title>
+      <p>Use the <codeph>properties</codeph> lambda:</p>
+      <codeblock>tasks.named&lt;com.github.jyjeanne.DitaOtTask&gt;("dita") {
+    ditaOt(file("/path/to/dita-ot"))
+    input("guide.ditamap")
+    transtype("html5")
+
+    properties {
+        "processing-mode" to "strict"
+        "args.css" to "custom.css"
+        "args.cssroot" to "$projectDir/css"
+    }
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Direct API (Recommended for Configuration Cache)</title>
+      <p>For best Configuration Cache compatibility, use <codeph>ditaProperties.put()</codeph>:</p>
+      <codeblock>tasks.named&lt;com.github.jyjeanne.DitaOtTask&gt;("dita") {
+    ditaProperties.put("processing-mode", "strict")
+    ditaProperties.put("args.css", "custom.css")
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Common Properties</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="property" colwidth="1*"/>
+          <colspec colname="transtype" colwidth="1*"/>
+          <colspec colname="description" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Property</entry>
+              <entry>Transtype</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><codeph>processing-mode</codeph></entry>
+              <entry>All</entry>
+              <entry>Processing mode: strict, lax, skip</entry>
+            </row>
+            <row>
+              <entry><codeph>args.css</codeph></entry>
+              <entry>HTML</entry>
+              <entry>CSS file to include</entry>
+            </row>
+            <row>
+              <entry><codeph>args.copycss</codeph></entry>
+              <entry>HTML</entry>
+              <entry>Copy CSS to output (yes/no)</entry>
+            </row>
+            <row>
+              <entry><codeph>nav-toc</codeph></entry>
+              <entry>HTML5</entry>
+              <entry>TOC navigation: none, partial, full</entry>
+            </row>
+            <row>
+              <entry><codeph>outputFile.base</codeph></entry>
+              <entry>PDF</entry>
+              <entry>Output PDF filename (without extension)</entry>
+            </row>
+            <row>
+              <entry><codeph>args.chapter.layout</codeph></entry>
+              <entry>PDF</entry>
+              <entry>Chapter layout: MINITOC, BASIC</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+  </body>
+</topic>

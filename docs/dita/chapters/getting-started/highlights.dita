@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="highlights">
+  <title>Highlights (v2.3.2)</title>
+  <shortdesc>Key features and improvements in the current version.</shortdesc>
+  <body>
+    <section>
+      <title>Feature Overview</title>
+      <table>
+        <tgroup cols="2">
+          <colspec colname="feature" colwidth="1*"/>
+          <colspec colname="description" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Feature</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><b>Configuration Cache</b></entry>
+              <entry>Up to 77% faster incremental builds</entry>
+            </row>
+            <row>
+              <entry><b>Implicit Dependency Fix</b></entry>
+              <entry>Multiple DitaOtTask instances work independently</entry>
+            </row>
+            <row>
+              <entry><b>Groovy Closure Fix</b></entry>
+              <entry><codeph>properties { }</codeph> syntax fully restored</entry>
+            </row>
+            <row>
+              <entry><b>Cross-Platform</b></entry>
+              <entry>Windows, macOS, Linux support</entry>
+            </row>
+            <row>
+              <entry><b>Modern Architecture</b></entry>
+              <entry>Provider API, Gradle 9.0 compatible</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Performance Improvements</title>
+      <p>With Configuration Cache enabled, you can achieve significant build time improvements:</p>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="scenario" colwidth="2*"/>
+          <colspec colname="time" colwidth="1*"/>
+          <colspec colname="improvement" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Scenario</entry>
+              <entry>Time</entry>
+              <entry>Improvement</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Without Configuration Cache</entry>
+              <entry>20.8s</entry>
+              <entry>baseline</entry>
+            </row>
+            <row>
+              <entry>With Cache (first run)</entry>
+              <entry>22.8s</entry>
+              <entry>-10%</entry>
+            </row>
+            <row>
+              <entry><b>With Cache (up-to-date)</b></entry>
+              <entry><b>4.8s</b></entry>
+              <entry><b>77% faster</b></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>What's New in 2.3.2</title>
+      <ul>
+        <li>Fixed implicit task dependency bug with multiple DitaOtTask instances</li>
+        <li>Added comprehensive example projects</li>
+        <li>Improved documentation and roadmap</li>
+        <li>Enhanced Gradle 9.0 compatibility</li>
+      </ul>
+    </section>
+  </body>
+</topic>

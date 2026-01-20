@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="whats-new">
+  <title>What's New in 2.3.x</title>
+  <shortdesc>Release highlights and new features.</shortdesc>
+  <body>
+    <section>
+      <title>Version 2.3.2</title>
+      <ul>
+        <li>Comprehensive DITA documentation</li>
+        <li>New example projects for common use cases</li>
+        <li>Improved Gradle compatibility documentation</li>
+        <li>Project roadmap published</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.3.1</title>
+      <ul>
+        <li>Fixed Groovy closure properties regression</li>
+        <li>Added regression tests for closure handling</li>
+        <li>Fixed GitHub Actions warnings</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.3.0</title>
+      <p><b>Major Release: Full Configuration Cache Support</b></p>
+      <ul>
+        <li><b>Configuration Cache:</b> Up to 77% faster incremental builds</li>
+        <li><b>Provider API:</b> New <codeph>ditaProperties.put()</codeph> method</li>
+        <li><b>Gradle 9 Support:</b> Full compatibility with Gradle 9.x</li>
+        <li><b>Fixed Implicit Task Dependencies:</b> Proper handling of Provider inputs</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Performance Improvements</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="scenario" colwidth="2*"/>
+          <colspec colname="before" colwidth="1*"/>
+          <colspec colname="after" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Scenario</entry>
+              <entry>Before</entry>
+              <entry>After (2.3.x)</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Incremental build (up-to-date)</entry>
+              <entry>20.8s</entry>
+              <entry>4.8s</entry>
+            </row>
+            <row>
+              <entry>Configuration phase</entry>
+              <entry>~3s</entry>
+              <entry>&lt;0.5s (cached)</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Upgrade Recommendations</title>
+      <p>To get the most from version 2.3.x:</p>
+      <ol>
+        <li>Enable Configuration Cache in <filepath>gradle.properties</filepath></li>
+        <li>Use <codeph>ditaProperties.put()</codeph> instead of closures</li>
+        <li>Upgrade to Gradle 9.0 or later</li>
+        <li>Enable parallel execution with <codeph>org.gradle.parallel=true</codeph></li>
+      </ol>
+    </section>
+  </body>
+</topic>

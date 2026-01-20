@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="plugin-testing">
+  <title>Testing DITA-OT Plugins</title>
+  <shortdesc>Test existing plugins from the DITA-OT registry with different versions.</shortdesc>
+  <body>
+    <p>The <filepath>examples/plugin-test</filepath> project demonstrates how to test DITA-OT plugins from the official registry.</p>
+
+    <section>
+      <title>Quick Start</title>
+      <codeblock>cd examples/plugin-test
+
+# Test with defaults (DITA-OT 4.2.3, org.lwdita plugin)
+./gradlew test
+
+# Test with specific DITA-OT version
+./gradlew -PditaOtVersion=4.1.0 test
+
+# Test different plugin and transtype
+./gradlew -PpluginId=org.dita.normalize -Ptranstype=normalize test</codeblock>
+    </section>
+
+    <section>
+      <title>Available Tasks</title>
+      <table>
+        <tgroup cols="2">
+          <colspec colname="task" colwidth="1*"/>
+          <colspec colname="description" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Task</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><codeph>downloadDitaOt</codeph></entry>
+              <entry>Downloads DITA-OT from GitHub releases</entry>
+            </row>
+            <row>
+              <entry><codeph>installPlugin</codeph></entry>
+              <entry>Installs plugin from official registry</entry>
+            </row>
+            <row>
+              <entry><codeph>ditaTransform</codeph></entry>
+              <entry>Runs the transformation</entry>
+            </row>
+            <row>
+              <entry><codeph>verifyOutput</codeph></entry>
+              <entry>Validates output files exist</entry>
+            </row>
+            <row>
+              <entry><codeph>test</codeph></entry>
+              <entry>Full workflow: download, install, transform, verify</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Use Cases</title>
+      <ul>
+        <li>Testing plugin compatibility with new DITA-OT versions</li>
+        <li>Validating plugin behavior before deployment</li>
+        <li>CI/CD integration for plugin testing</li>
+      </ul>
+    </section>
+  </body>
+</topic>

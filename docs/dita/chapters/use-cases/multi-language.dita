@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="multi-language">
+  <title>Multi-Language Documentation</title>
+  <shortdesc>Build documentation in multiple languages with parallel execution.</shortdesc>
+  <body>
+    <p>The <filepath>examples/multi-language</filepath> project demonstrates how to build localized documentation efficiently.</p>
+
+    <section>
+      <title>Quick Start</title>
+      <codeblock>cd examples/multi-language
+
+# Build all languages (parallel)
+./gradlew buildAll
+
+# Build specific language
+./gradlew buildEn
+./gradlew buildFr
+./gradlew buildDe</codeblock>
+    </section>
+
+    <section>
+      <title>Project Structure</title>
+      <codeblock>multi-language/
+├── build.gradle.kts
+├── content/
+│   ├── en/           # English content
+│   │   ├── guide.ditamap
+│   │   └── topics/
+│   ├── fr/           # French content
+│   │   ├── guide.ditamap
+│   │   └── topics/
+│   └── de/           # German content
+│       ├── guide.ditamap
+│       └── topics/
+└── shared/
+    └── images/       # Shared images across languages</codeblock>
+    </section>
+
+    <section>
+      <title>Parallel Execution</title>
+      <p>Enable parallel builds in <filepath>gradle.properties</filepath>:</p>
+      <codeblock>org.gradle.parallel=true
+org.gradle.configuration-cache=true</codeblock>
+      <p>This allows all language builds to run simultaneously, significantly reducing total build time.</p>
+    </section>
+
+    <section>
+      <title>Dynamic Task Generation</title>
+      <p>Tasks are created dynamically for each language:</p>
+      <codeblock>val languages = listOf("en", "fr", "de")
+
+languages.forEach { lang ->
+    tasks.register&lt;DitaOtTask&gt;("build${lang.capitalize()}") {
+        input(file("content/$lang/guide.ditamap"))
+        output(layout.buildDirectory.dir("output/$lang"))
+        transtype("html5")
+    }
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Content Sharing</title>
+      <p>Use conrefs and keyrefs to share common content:</p>
+      <ul>
+        <li>Store reusable content in <filepath>shared/</filepath> directory</li>
+        <li>Use conrefs for boilerplate text</li>
+        <li>Share images across all language versions</li>
+      </ul>
+    </section>
+  </body>
+</topic>

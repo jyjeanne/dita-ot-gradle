@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map>
+  <title>Getting Started</title>
+  <topicref href="introduction.dita"/>
+  <topicref href="installation.dita"/>
+  <topicref href="quick-start.dita"/>
+  <topicref href="highlights.dita"/>
+</map>

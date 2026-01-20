@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="introduction">
+  <title>Introduction</title>
+  <shortdesc>A modern Gradle plugin for publishing DITA documents with DITA Open Toolkit.</shortdesc>
+  <body>
+    <p>The DITA-OT Gradle Plugin provides seamless integration between Gradle build automation and DITA Open Toolkit transformations. This plugin enables you to incorporate DITA documentation publishing into your standard Gradle build workflow.</p>
+
+    <section>
+      <title>What is DITA-OT?</title>
+      <p>DITA Open Toolkit (DITA-OT) is an open-source publishing engine for content authored in the Darwin Information Typing Architecture (DITA). It transforms DITA content into various output formats including:</p>
+      <ul>
+        <li>HTML5</li>
+        <li>PDF</li>
+        <li>Markdown</li>
+        <li>Eclipse Help</li>
+        <li>And many more through plugins</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Why Use This Plugin?</title>
+      <p>This plugin offers several advantages for documentation teams:</p>
+      <ul>
+        <li><b>Configuration Cache Support</b> - Up to 77% faster incremental builds</li>
+        <li><b>Modern Architecture</b> - Built with Provider API for Gradle 9.0 compatibility</li>
+        <li><b>Cross-Platform</b> - Works on Windows, macOS, and Linux</li>
+        <li><b>Full DSL Support</b> - Both Groovy and Kotlin DSL configurations</li>
+        <li><b>Active Maintenance</b> - Regular updates and bug fixes</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>About This Documentation</title>
+      <p>This guide covers:</p>
+      <ul>
+        <li>Installation and quick start</li>
+        <li>Configuration options</li>
+        <li>Common use cases with examples</li>
+        <li>Migration from the original eerohele plugin</li>
+        <li>Troubleshooting and reference</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Credits</title>
+      <p><b>Author:</b> Jeremy Jeanne</p>
+      <p><b>Original Author:</b> Eero Helenius</p>
+      <p>This plugin is a continuation of the original <xref href="https://github.com/eerohele/dita-ot-gradle" format="html" scope="external">com.github.eerohele.dita-ot-gradle</xref> plugin, migrated to Kotlin with modern Gradle support.</p>
+    </section>
+  </body>
+</topic>

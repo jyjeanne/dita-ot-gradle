@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map>
+  <title>Common Use Cases</title>
+  <topicref href="plugin-testing.dita"/>
+  <topicref href="custom-plugin-dev.dita"/>
+  <topicref href="ci-cd-publishing.dita"/>
+  <topicref href="multi-language.dita"/>
+  <topicref href="version-docs.dita"/>
+</map>

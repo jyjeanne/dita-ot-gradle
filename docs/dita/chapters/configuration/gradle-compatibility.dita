@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="gradle-compatibility">
+  <title>Gradle Version Compatibility</title>
+  <shortdesc>Supported Gradle versions and benefits of upgrading.</shortdesc>
+  <body>
+    <section>
+      <title>Version Recommendations</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="version" colwidth="1*"/>
+          <colspec colname="support" colwidth="1*"/>
+          <colspec colname="recommendation" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Gradle Version</entry>
+              <entry>Support Level</entry>
+              <entry>Recommendation</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><b>9.0+</b></entry>
+              <entry>Full</entry>
+              <entry><b>Recommended</b> - Best performance and features</entry>
+            </row>
+            <row>
+              <entry>8.5 - 8.14</entry>
+              <entry>Full</entry>
+              <entry>Stable, production-ready</entry>
+            </row>
+            <row>
+              <entry>7.0 - 8.4</entry>
+              <entry>Compatible</entry>
+              <entry>Works, but upgrade recommended</entry>
+            </row>
+            <row>
+              <entry>6.5 - 6.9</entry>
+              <entry>Limited</entry>
+              <entry>Minimum for configuration cache</entry>
+            </row>
+            <row>
+              <entry>&lt; 6.5</entry>
+              <entry>Not supported</entry>
+              <entry>Upgrade required</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Benefits of Gradle 9+</title>
+      <p>Gradle 9 introduces significant improvements:</p>
+      <table>
+        <tgroup cols="2">
+          <colspec colname="feature" colwidth="1*"/>
+          <colspec colname="benefit" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Feature</entry>
+              <entry>Benefit</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><b>Improved Configuration Cache</b></entry>
+              <entry>More reliable caching with fewer invalidations</entry>
+            </row>
+            <row>
+              <entry><b>Faster Dependency Resolution</b></entry>
+              <entry>Up to 25% faster build initialization</entry>
+            </row>
+            <row>
+              <entry><b>Kotlin DSL Performance</b></entry>
+              <entry>2x faster script compilation</entry>
+            </row>
+            <row>
+              <entry><b>Better Parallel Execution</b></entry>
+              <entry>Improved task scheduling for multi-language builds</entry>
+            </row>
+            <row>
+              <entry><b>Reduced Memory Usage</b></entry>
+              <entry>Lower heap consumption for large projects</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Upgrading Gradle</title>
+      <p>To upgrade to Gradle 9:</p>
+      <codeblock>./gradlew wrapper --gradle-version 9.0</codeblock>
+      <p>Or edit <filepath>gradle/wrapper/gradle-wrapper.properties</filepath>:</p>
+      <codeblock>distributionUrl=https\://services.gradle.org/distributions/gradle-9.0-bin.zip</codeblock>
+    </section>
+  </body>
+</topic>

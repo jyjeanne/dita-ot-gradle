@@ -26,6 +26,13 @@ docs/*
 !docs/app.js
 !docs/data.json
 
+# DITA source files (keep)
+!docs/dita/
+
+# Generated documentation output (ignore)
+docs/html/
+docs/pdf/
+
 *.hprof
 
 # Claude Code
