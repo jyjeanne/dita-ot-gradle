@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
 }
 
 val ditaOtVersion = "4.2.3"

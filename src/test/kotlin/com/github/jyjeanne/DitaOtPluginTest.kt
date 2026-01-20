@@ -44,4 +44,50 @@ class DitaOtPluginTest : StringSpec({
         ditaTask.shouldNotBeNull()
         (ditaTask is DitaOtTask) shouldBe true
     }
+
+    "DitaOtTask showProgress default is true" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.showProgress.get() shouldBe true
+    }
+
+    "DitaOtTask progressStyle default is DETAILED" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.progressStyle.get() shouldBe "DETAILED"
+    }
+
+    "DitaOtTask showProgress can be disabled" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.showProgress(false)
+        ditaTask.showProgress.get() shouldBe false
+    }
+
+    "DitaOtTask progressStyle can be changed to SIMPLE" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.progressStyle("SIMPLE")
+        ditaTask.progressStyle.get() shouldBe "SIMPLE"
+    }
+
+    "DitaOtTask progressStyle can be changed to MINIMAL" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.progressStyle("MINIMAL")
+        ditaTask.progressStyle.get() shouldBe "MINIMAL"
+    }
+
+    "DitaOtTask progressStyle can be changed to QUIET" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.progressStyle("QUIET")
+        ditaTask.progressStyle.get() shouldBe "QUIET"
+    }
 })

@@ -1,5 +1,5 @@
 /**
- * Multi-Language Documentation Example
+ * Multi-Language Documentation Example (using built-in tasks)
  *
  * This example demonstrates how to:
  * 1. Build documentation in multiple languages from localized DITA sources
@@ -13,11 +13,12 @@
  *   ./gradlew buildFrench              # Build French only
  *   ./gradlew buildGerman              # Build German only
  *   ./gradlew release                  # Build all languages + PDF
+ *
+ * No external plugins required! Everything is built-in.
  */
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.2"
-    id("de.undercouch.download") version "5.5.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
 }
 
 // ============================================================================
@@ -25,7 +26,7 @@ plugins {
 // ============================================================================
 
 val ditaOtVersion: String = project.findProperty("ditaOtVersion")?.toString() ?: "4.2.3"
-val ditaOtDir = layout.buildDirectory.dir("dita-ot-$ditaOtVersion")
+val ditaOtHome = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
 
 // Supported languages
 val languages = listOf("en", "fr", "de")
@@ -36,27 +37,20 @@ val languageNames = mapOf(
 )
 
 // ============================================================================
-// DITA-OT Setup Tasks
+// DITA-OT Setup Tasks (built-in)
 // ============================================================================
 
-val downloadDitaOt by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
+val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
     description = "Download DITA-OT from GitHub releases"
     group = "DITA-OT Setup"
 
-    src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
-    dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
-    overwrite(false)
-}
+    version.set(ditaOtVersion)
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
 
-val extractDitaOt by tasks.registering(Copy::class) {
-    description = "Extract DITA-OT zip archive"
-    group = "DITA-OT Setup"
-
-    dependsOn(downloadDitaOt)
-    doNotTrackState("DITA-OT contains files that cannot be hashed")
-
-    from(zipTree(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip")))
-    into(layout.buildDirectory)
+    // Configure retries for reliability
+    retries.set(3)
+    connectTimeout.set(30000)
+    readTimeout.set(60000)
 }
 
 // ============================================================================
@@ -69,11 +63,11 @@ val htmlTasks = languages.map { lang ->
         description = "Build ${languageNames[lang]} HTML documentation"
         group = "Documentation"
 
-        dependsOn(extractDitaOt)
+        dependsOn(downloadDitaOt)
 
-        ditaOt(ditaOtDir)
+        ditaOt(ditaOtHome)
         input("content/$lang/guide.ditamap")
-        output(layout.buildDirectory.dir("output/$lang/html"))
+        output("build/output/$lang/html")
         transtype("html5")
 
         // Language-specific properties
@@ -92,11 +86,11 @@ val pdfTasks = languages.map { lang ->
         description = "Build ${languageNames[lang]} PDF documentation"
         group = "Documentation"
 
-        dependsOn(extractDitaOt)
+        dependsOn(downloadDitaOt)
 
-        ditaOt(ditaOtDir)
+        ditaOt(ditaOtHome)
         input("content/$lang/guide.ditamap")
-        output(layout.buildDirectory.dir("output/$lang/pdf"))
+        output("build/output/$lang/pdf")
         transtype("pdf")
 
         ditaProperties.put("outputFile.base", "guide-$lang")

@@ -7,6 +7,74 @@
     <p>This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
 
     <section>
+      <title>Completed in Version 2.8.0</title>
+      <ul>
+        <li><b>Progress Reporting:</b> Visual progress indicators during builds
+          <ul>
+            <li>Visual progress bar with percentage</li>
+            <li>Stage detection from DITA-OT output (20 stages)</li>
+            <li>File count tracking</li>
+            <li>Configurable display styles (DETAILED, SIMPLE, MINIMAL, QUIET)</li>
+            <li>Error and warning collection with summary</li>
+            <li>Duration reporting</li>
+            <li>Terminal-aware output (in-place updates when supported)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.7.0</title>
+      <ul>
+        <li><b>DitaLinkCheckTask:</b> Check for broken links in DITA content
+          <ul>
+            <li>Internal link checking (xref, conref, topicref, image)</li>
+            <li>Optional external URL verification</li>
+            <li>Recursive scanning of referenced files</li>
+            <li>Configurable timeouts for external checks</li>
+            <li>URL pattern exclusion</li>
+            <li>Detailed results with file locations</li>
+            <li>scope="external" attribute detection</li>
+            <li>Keyref/conkeyref skipping (requires DITA-OT resolution)</li>
+            <li>Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.6.0</title>
+      <ul>
+        <li><b>Gradle Wrapper in Examples:</b> All standalone example projects now include Gradle wrapper
+          <ul>
+            <li>Self-contained example projects for easy testing</li>
+            <li>All examples use built-in DitaOtDownloadTask</li>
+            <li>Local plugin development with includeBuild</li>
+            <li>No external plugins required</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.5.0</title>
+      <ul>
+        <li><b>DitaOtValidateTask:</b> Validate DITA content without full transformation
+          <ul>
+            <li>Fast validation during development</li>
+            <li>Strict mode (fail on warnings)</li>
+            <li>Configurable processing mode (strict, lax, skip)</li>
+            <li>Configurable timeout</li>
+            <li>Clear error messages with file locations</li>
+            <li>Summary report with error/warning counts</li>
+            <li>Automatic temp directory cleanup</li>
+            <li>Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
       <title>Completed in Version 2.4.0</title>
       <ul>
         <li><b>DitaOtDownloadTask:</b> Built-in DITA-OT download from GitHub releases
@@ -36,20 +104,16 @@
     <section>
       <title>High Priority (P1)</title>
       <ul>
-        <li><b>DITA Validation Task:</b> Validate DITA content before transformation</li>
+        <li><b>Multi-Format Task:</b> Generate multiple outputs from single task</li>
         <li><b>Incremental Build Support:</b> Smart change detection for faster builds</li>
-        <li><b>Link Checker:</b> Verify internal and external links</li>
-        <li><b>Gradle Wrapper Integration:</b> Include wrapper setup in examples</li>
       </ul>
     </section>
 
     <section>
       <title>Medium Priority (P2)</title>
       <ul>
+        <li><b>Kotlin DSL Extensions:</b> Cleaner Kotlin DSL syntax</li>
         <li><b>Watch Mode:</b> Automatic rebuild on file changes</li>
-        <li><b>Multi-Format Task:</b> Generate multiple outputs from single task</li>
-        <li><b>Kotlin DSL Examples:</b> More Kotlin DSL documentation</li>
-        <li><b>Build Progress:</b> Visual progress indicators</li>
         <li><b>DITA-OT Version Management:</b> Switch between versions easily</li>
       </ul>
     </section>

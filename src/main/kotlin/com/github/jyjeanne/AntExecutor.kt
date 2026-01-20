@@ -1,8 +1,8 @@
 package com.github.jyjeanne
 
-import org.gradle.api.GradleException
 import org.gradle.api.logging.Logger
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * Alternative ANT execution strategies for invoking DITA-OT.
@@ -41,6 +41,7 @@ object AntExecutor {
      * @param filterFile Optional DITAVAL filter file
      * @param properties Map of additional ANT/DITA properties
      * @param logger Gradle logger for output
+     * @param progressReporter Optional progress reporter for visual feedback
      * @return Exit code (0 for success)
      */
     fun executeViaDitaScript(
@@ -51,7 +52,8 @@ object AntExecutor {
         tempDir: File,
         filterFile: File? = null,
         properties: Map<String, String> = emptyMap(),
-        logger: Logger
+        logger: Logger,
+        progressReporter: ProgressReporter? = null
     ): Int {
         logger.debug("Workaround: Using DITA-OT script for ANT execution (DITA_SCRIPT strategy)")
 
@@ -95,6 +97,11 @@ object AntExecutor {
                 command.add("--filter=${filterFile.absolutePath}")
             }
 
+            // Add verbose flag when progress reporting is enabled for better stage detection
+            if (progressReporter != null) {
+                command.add("--verbose")
+            }
+
             // Add custom properties using -D prefix (ANT style)
             properties.forEach { (name, value) ->
                 // Only add if not already handled by the command above
@@ -109,17 +116,36 @@ object AntExecutor {
             val processBuilder = ProcessBuilder(command)
             processBuilder.directory(ditaHome)
 
-            // Merge stderr to stdout and inherit all I/O
+            // Merge stderr to stdout
             processBuilder.redirectErrorStream(true)
-            processBuilder.inheritIO()
 
             // Set environment variables
             val env = processBuilder.environment()
             env["DITA_HOME"] = ditaHome.absolutePath
 
-            // Execute and wait for completion
-            val process = processBuilder.start()
-            val exitCode = process.waitFor()
+            // Execute the process based on whether progress reporting is enabled
+            val exitCode = if (progressReporter != null) {
+                // Capture output for progress reporting
+                val process = processBuilder.start()
+                processOutputWithProgress(process, progressReporter, logger)
+            } else {
+                // Legacy: inherit IO and wait (output goes directly to console)
+                processBuilder.inheritIO()
+                val process = processBuilder.start()
+                try {
+                    process.waitFor()
+                } catch (e: InterruptedException) {
+                    logger.warn("DITA-OT process was interrupted")
+                    process.destroyForcibly()
+                    Thread.currentThread().interrupt()
+                    -1
+                } finally {
+                    // Ensure process is destroyed if still running
+                    if (process.isAlive) {
+                        process.destroyForcibly()
+                    }
+                }
+            }
 
             if (exitCode == 0) {
                 logger.info("✓ DITA-OT transformation successful (exit code: $exitCode)")
@@ -131,6 +157,125 @@ object AntExecutor {
         } catch (e: Exception) {
             logger.error("Failed to execute DITA script workaround: ${e.message}", e)
             return -1
+        }
+    }
+
+    /**
+     * Process output from a running DITA-OT process with progress reporting.
+     *
+     * Thread-safe and resource-safe implementation that ensures:
+     * - Process is always destroyed on error/timeout
+     * - All process streams are properly closed
+     * - Output reader thread is properly interrupted and joined
+     *
+     * @param process The running process
+     * @param progressReporter The progress reporter to use
+     * @param logger Gradle logger
+     * @return The process exit code
+     */
+    private fun processOutputWithProgress(
+        process: Process,
+        progressReporter: ProgressReporter,
+        logger: Logger
+    ): Int {
+        var exitCode = -1
+        val startTime = System.currentTimeMillis()
+        var outputThread: Thread? = null
+
+        try {
+            // Close the process stdin - we don't write to it
+            try {
+                process.outputStream.close()
+            } catch (e: Exception) {
+                logger.debug("Error closing process stdin: ${e.message}")
+            }
+
+            // Start a named thread to read output and report progress
+            outputThread = Thread({
+                progressReporter.processOutput(process.inputStream) { /* callback not used here */ }
+            }, "DITA-OT-Progress-Reader")
+            outputThread.start()
+
+            // Wait for process to complete (with timeout)
+            val completed = process.waitFor(30, TimeUnit.MINUTES)
+            exitCode = if (completed) {
+                process.exitValue()
+            } else {
+                logger.error("DITA-OT process timed out after 30 minutes")
+                destroyProcessSafely(process, logger)
+                -1
+            }
+
+            // Print summary (thread-safe even if output thread is still running)
+            val duration = System.currentTimeMillis() - startTime
+            progressReporter.printSummary(exitCode == 0, duration)
+
+        } catch (e: InterruptedException) {
+            logger.warn("DITA-OT processing was interrupted")
+            Thread.currentThread().interrupt()
+            exitCode = -1
+        } catch (e: Exception) {
+            logger.error("Error processing DITA-OT output: ${e.message}")
+            exitCode = -1
+        } finally {
+            // Always clean up: destroy process and join thread
+            cleanupProcessAndThread(process, outputThread, logger)
+        }
+
+        return exitCode
+    }
+
+    /**
+     * Safely destroy a process and close its streams.
+     */
+    private fun destroyProcessSafely(process: Process, logger: Logger) {
+        try {
+            // Close streams before destroying
+            closeProcessStreams(process, logger)
+
+            // Destroy the process
+            process.destroyForcibly()
+
+            // Wait briefly for process to terminate
+            process.waitFor(5, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            logger.debug("Error destroying process: ${e.message}")
+        }
+    }
+
+    /**
+     * Close all process streams safely.
+     */
+    private fun closeProcessStreams(process: Process, logger: Logger) {
+        try { process.inputStream.close() } catch (e: Exception) { logger.debug("Error closing inputStream: ${e.message}") }
+        try { process.errorStream.close() } catch (e: Exception) { logger.debug("Error closing errorStream: ${e.message}") }
+        try { process.outputStream.close() } catch (e: Exception) { logger.debug("Error closing outputStream: ${e.message}") }
+    }
+
+    /**
+     * Clean up process and output thread after execution.
+     */
+    private fun cleanupProcessAndThread(process: Process, outputThread: Thread?, logger: Logger) {
+        // Interrupt and wait for output thread to finish
+        outputThread?.let { thread ->
+            if (thread.isAlive) {
+                thread.interrupt()
+            }
+            try {
+                thread.join(5000)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+
+            // Warn if thread is still alive (shouldn't happen normally)
+            if (thread.isAlive) {
+                logger.warn("Progress reader thread did not terminate within timeout")
+            }
+        }
+
+        // Ensure process is destroyed if still running
+        if (process.isAlive) {
+            destroyProcessSafely(process, logger)
         }
     }
 
@@ -163,10 +308,11 @@ object AntExecutor {
     ): Int {
         logger.debug("Attempting ANT execution via custom classloader")
 
+        var classloader: java.net.URLClassLoader? = null
         try {
             // Create URL classloader with all classpath files
             val urls = classpathFiles.map { it.toURI().toURL() }.toTypedArray()
-            val classloader = java.net.URLClassLoader(urls, ClassLoader.getSystemClassLoader())
+            classloader = java.net.URLClassLoader(urls, ClassLoader.getSystemClassLoader())
 
             // Load ANT Project class dynamically
             val projectClass = classloader.loadClass("org.apache.tools.ant.Project")
@@ -183,6 +329,13 @@ object AntExecutor {
         } catch (e: Exception) {
             logger.error("Failed to execute ANT via custom classloader", e)
             return -1
+        } finally {
+            // Close classloader to prevent memory leaks
+            try {
+                classloader?.close()
+            } catch (e: Exception) {
+                logger.debug("Error closing classloader: ${e.message}")
+            }
         }
     }
 

@@ -5,9 +5,12 @@ import org.apache.commons.io.FilenameUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import org.gradle.api.internal.project.IsolatedAntBuilder
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
@@ -131,6 +134,21 @@ abstract class DitaOtTask @Inject constructor(
     abstract val antExecutionStrategy: Property<String>
 
     /**
+     * Enable visual progress reporting during transformation.
+     * Default: true
+     */
+    @get:Input
+    abstract val showProgress: Property<Boolean>
+
+    /**
+     * Progress display style.
+     * Options: DETAILED, SIMPLE, MINIMAL, QUIET
+     * Default: DETAILED
+     */
+    @get:Input
+    abstract val progressStyle: Property<String>
+
+    /**
      * Custom classpath for DITA-OT (optional).
      */
     @get:InputFiles
@@ -158,6 +176,8 @@ abstract class DitaOtTask @Inject constructor(
         antExecutionStrategy.convention(Options.Companion.AntExecutionStrategy.DITA_SCRIPT.name)
         outputDir.convention(projectLayout.buildDirectory)
         tempDir.convention(projectLayout.buildDirectory.dir("dita-temp"))
+        showProgress.convention(true)
+        progressStyle.convention(ProgressReporter.ProgressStyle.DETAILED.name)
     }
 
     // ==================== Configuration Methods (DSL) ====================
@@ -169,13 +189,44 @@ abstract class DitaOtTask @Inject constructor(
 
     fun ditaOt(d: Any?) {
         if (d != null) {
-            val file = when (d) {
-                is File -> d
-                is String -> projectLayout.projectDirectory.dir(d).asFile
-                else -> projectLayout.projectDirectory.file(d.toString()).asFile
+            when (d) {
+                is File -> {
+                    ditaOtDir.set(d)
+                    options.ditaOt = d
+                }
+                is Directory -> {
+                    ditaOtDir.set(d)
+                    options.ditaOt = d.asFile
+                }
+                is RegularFile -> {
+                    ditaOtDir.set(d.asFile)
+                    options.ditaOt = d.asFile
+                }
+                is Provider<*> -> {
+                    // Handle Provider<Directory> - resolve the value now since the provider
+                    // should have a value at task configuration time (after dependent tasks configure)
+                    // We need to get the actual File to avoid circular provider chains in Gradle
+                    @Suppress("UNCHECKED_CAST")
+                    val value = (d as Provider<*>).get()
+                    val file = when (value) {
+                        is Directory -> value.asFile
+                        is File -> value
+                        else -> projectLayout.projectDirectory.dir(value.toString()).asFile
+                    }
+                    ditaOtDir.set(file)
+                    options.ditaOt = file
+                }
+                is String -> {
+                    val file = projectLayout.projectDirectory.dir(d).asFile
+                    ditaOtDir.set(file)
+                    options.ditaOt = file
+                }
+                else -> {
+                    val file = projectLayout.projectDirectory.dir(d.toString()).asFile
+                    ditaOtDir.set(file)
+                    options.ditaOt = file
+                }
             }
-            ditaOtDir.set(file)
-            options.ditaOt = file
         }
     }
 
@@ -261,6 +312,30 @@ abstract class DitaOtTask @Inject constructor(
             throw GradleException(
                 "Invalid ANT execution strategy: $strategy. " +
                 "Valid options are: ${Options.Companion.AntExecutionStrategy.values().joinToString(", ")}",
+                e
+            )
+        }
+    }
+
+    /**
+     * Enable or disable visual progress reporting.
+     */
+    fun showProgress(show: Boolean) {
+        showProgress.set(show)
+    }
+
+    /**
+     * Configure progress display style.
+     * @param style One of: DETAILED, SIMPLE, MINIMAL, QUIET
+     */
+    fun progressStyle(style: String) {
+        try {
+            ProgressReporter.ProgressStyle.valueOf(style)
+            progressStyle.set(style)
+        } catch (e: IllegalArgumentException) {
+            throw GradleException(
+                "Invalid progress style: $style. " +
+                "Valid options are: ${ProgressReporter.ProgressStyle.values().joinToString(", ")}",
                 e
             )
         }
@@ -492,6 +567,18 @@ abstract class DitaOtTask @Inject constructor(
     ): Boolean {
         var hasErrors = false
 
+        // Create progress reporter if enabled
+        val progressReporter = if (showProgress.get()) {
+            val style = try {
+                ProgressReporter.ProgressStyle.valueOf(progressStyle.get())
+            } catch (e: IllegalArgumentException) {
+                ProgressReporter.ProgressStyle.DETAILED
+            }
+            ProgressReporter(logger, style)
+        } else {
+            null
+        }
+
         inputs.forEach { inputFile ->
             logger.info("Processing: ${inputFile.name}")
 
@@ -535,7 +622,8 @@ abstract class DitaOtTask @Inject constructor(
                         tempDir = tempDir.asFile.get(),
                         filterFile = filter,
                         properties = properties,
-                        logger = logger
+                        logger = logger,
+                        progressReporter = progressReporter
                     )
 
                     if (exitCode == 0) {
@@ -544,9 +632,13 @@ abstract class DitaOtTask @Inject constructor(
                         logger.error("  [FAIL] Failed to generate $transtype output (exit code: $exitCode)")
                         hasErrors = true
                     }
+
+                    // Reset progress reporter for next transformation
+                    progressReporter?.reset()
                 } catch (e: Exception) {
                     logger.error("  [FAIL] Failed to generate $transtype output", e)
                     hasErrors = true
+                    progressReporter?.reset()
                 }
             }
         }

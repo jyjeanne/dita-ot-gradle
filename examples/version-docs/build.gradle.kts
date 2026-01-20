@@ -1,5 +1,5 @@
 /**
- * Product Version Documentation Example
+ * Product Version Documentation Example (using built-in tasks)
  *
  * This example demonstrates how to:
  * 1. Generate documentation for multiple product versions from a single source
@@ -13,11 +13,12 @@
  *   ./gradlew buildV2                  # Build v2.x documentation
  *   ./gradlew buildV3                  # Build v3.x (latest) documentation
  *   ./gradlew buildLatest              # Build only the latest version
+ *
+ * No external plugins required! Everything is built-in.
  */
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.2"
-    id("de.undercouch.download") version "5.5.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
 }
 
 // ============================================================================
@@ -25,7 +26,7 @@ plugins {
 // ============================================================================
 
 val ditaOtVersion: String = project.findProperty("ditaOtVersion")?.toString() ?: "4.2.3"
-val ditaOtDir = layout.buildDirectory.dir("dita-ot-$ditaOtVersion")
+val ditaOtHome = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
 
 // Supported product versions
 val productVersions = listOf("v1", "v2", "v3")
@@ -37,27 +38,20 @@ val versionLabels = mapOf(
 )
 
 // ============================================================================
-// DITA-OT Setup Tasks
+// DITA-OT Setup Tasks (built-in)
 // ============================================================================
 
-val downloadDitaOt by tasks.registering(de.undercouch.gradle.tasks.download.Download::class) {
+val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
     description = "Download DITA-OT from GitHub releases"
     group = "DITA-OT Setup"
 
-    src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
-    dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
-    overwrite(false)
-}
+    version.set(ditaOtVersion)
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
 
-val extractDitaOt by tasks.registering(Copy::class) {
-    description = "Extract DITA-OT zip archive"
-    group = "DITA-OT Setup"
-
-    dependsOn(downloadDitaOt)
-    doNotTrackState("DITA-OT contains files that cannot be hashed")
-
-    from(zipTree(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip")))
-    into(layout.buildDirectory)
+    // Configure retries for reliability
+    retries.set(3)
+    connectTimeout.set(30000)
+    readTimeout.set(60000)
 }
 
 // ============================================================================
@@ -70,11 +64,11 @@ val htmlTasks = productVersions.map { version ->
         description = "Build ${versionLabels[version]} HTML documentation"
         group = "Documentation"
 
-        dependsOn(extractDitaOt)
+        dependsOn(downloadDitaOt)
 
-        ditaOt(ditaOtDir)
+        ditaOt(ditaOtHome)
         input("content/guide.ditamap")
-        output(layout.buildDirectory.dir("output/$version/html"))
+        output("build/output/$version/html")
         transtype("html5")
         filter("filters/$version.ditaval")
 
@@ -94,11 +88,11 @@ val pdfTasks = productVersions.map { version ->
         description = "Build ${versionLabels[version]} PDF documentation"
         group = "Documentation"
 
-        dependsOn(extractDitaOt)
+        dependsOn(downloadDitaOt)
 
-        ditaOt(ditaOtDir)
+        ditaOt(ditaOtHome)
         input("content/guide.ditamap")
-        output(layout.buildDirectory.dir("output/$version/pdf"))
+        output("build/output/$version/pdf")
         transtype("pdf")
         filter("filters/$version.ditaval")
 

@@ -18,7 +18,7 @@
  */
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
 }
 
 // ============================================================================
@@ -26,7 +26,7 @@ plugins {
 // ============================================================================
 
 val ditaOtVersion: String = project.findProperty("ditaOtVersion")?.toString() ?: "4.2.3"
-val ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
+val ditaOtHome = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
 
 // ============================================================================
 // Task: Download DITA-OT (built-in)
@@ -55,9 +55,9 @@ val generateHtml by tasks.registering(com.github.jyjeanne.DitaOtTask::class) {
 
     dependsOn(downloadDitaOt)
 
-    ditaOt(ditaOtDir)
+    ditaOt(ditaOtHome)
     input("docs/guide.ditamap")
-    output(layout.buildDirectory.dir("output/html"))
+    output("build/output/html")
     transtype("html5")
     filter("docs/release.ditaval")
 
@@ -82,9 +82,9 @@ val generatePdf by tasks.registering(com.github.jyjeanne.DitaOtTask::class) {
 
     dependsOn(downloadDitaOt)
 
-    ditaOt(ditaOtDir)
+    ditaOt(ditaOtHome)
     input("docs/guide.ditamap")
-    output(layout.buildDirectory.dir("output/pdf"))
+    output("build/output/pdf")
     transtype("pdf")
     filter("docs/release.ditaval")
 

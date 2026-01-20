@@ -1,9 +1,9 @@
 /**
- * Custom DITA-OT Plugin Development Example
+ * Custom DITA-OT Plugin Development Example (using built-in tasks)
  *
  * This example demonstrates how to:
- * 1. Download DITA-OT automatically
- * 2. Install your custom plugin from local source
+ * 1. Download DITA-OT automatically using built-in DitaOtDownloadTask
+ * 2. Install your custom plugin using built-in DitaOtInstallPluginTask
  * 3. Test transformations with your plugin
  * 4. Use continuous build for rapid development
  *
@@ -12,11 +12,12 @@
  *   ./gradlew dev --continuous       # Auto-rebuild when files change
  *   ./gradlew installMyPlugin --info # Debug plugin installation
  *   ./gradlew clean dev              # Full clean rebuild
+ *
+ * No external plugins required! Everything is built-in.
  */
 
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.3.2'
-    id 'de.undercouch.download' version '5.5.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.0'
 }
 
 // ============================================================================
@@ -24,7 +25,7 @@ plugins {
 // ============================================================================
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
-def ditaOtDir = layout.buildDirectory.dir("dita-ot-${ditaOtVersion}")
+def ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
 def myPluginDir = file('src/my-custom-plugin')
 
 logger.lifecycle("Custom Plugin Development Configuration:")
@@ -32,16 +33,20 @@ logger.lifecycle("  DITA-OT Version: ${ditaOtVersion}")
 logger.lifecycle("  Plugin Source: ${myPluginDir.absolutePath}")
 
 // ============================================================================
-// Task: Download DITA-OT
+// Task: Download DITA-OT (built-in)
 // ============================================================================
 
-task downloadDitaOt(type: de.undercouch.gradle.tasks.download.Download) {
+task downloadDitaOt(type: com.github.jyjeanne.DitaOtDownloadTask) {
     description = 'Download DITA-OT from GitHub releases'
     group = 'DITA-OT Setup'
 
-    src "https://github.com/dita-ot/dita-ot/releases/download/${ditaOtVersion}/dita-ot-${ditaOtVersion}.zip"
-    dest layout.buildDirectory.file("dita-ot-${ditaOtVersion}.zip")
-    overwrite false
+    version = ditaOtVersion
+    destinationDir = layout.buildDirectory.dir('dita-ot')
+
+    // Configure retries for reliability
+    retries = 3
+    connectTimeout = 30000
+    readTimeout = 60000
 
     doFirst {
         logger.lifecycle("Downloading DITA-OT ${ditaOtVersion}...")
@@ -49,62 +54,26 @@ task downloadDitaOt(type: de.undercouch.gradle.tasks.download.Download) {
 }
 
 // ============================================================================
-// Task: Extract DITA-OT
+// Task: Install Custom Plugin (built-in)
 // ============================================================================
 
-task extractDitaOt(type: Copy, dependsOn: downloadDitaOt) {
-    description = 'Extract DITA-OT zip archive'
-    group = 'DITA-OT Setup'
-
-    doNotTrackState('DITA-OT contains files that cannot be hashed')
-
-    from zipTree(layout.buildDirectory.file("dita-ot-${ditaOtVersion}.zip"))
-    into layout.buildDirectory
-
-    doFirst {
-        logger.lifecycle("Extracting DITA-OT...")
-    }
-}
-
-// ============================================================================
-// Task: Install Custom Plugin
-// ============================================================================
-
-task installMyPlugin(type: Exec, dependsOn: extractDitaOt) {
+task installMyPlugin(type: com.github.jyjeanne.DitaOtInstallPluginTask, dependsOn: downloadDitaOt) {
     description = 'Install custom plugin into DITA-OT'
     group = 'Plugin Development'
 
-    def ditaHomePath = ditaOtDir.get().asFile.absolutePath
-    def installedPluginDir = file("${ditaHomePath}/plugins/com.example.my-custom-plugin")
+    ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
+    plugins = [myPluginDir.absolutePath]
 
-    // Re-install if plugin source changes
-    inputs.dir(myPluginDir)
-    outputs.dir(installedPluginDir)
-
-    // Only install if not already installed or source changed
-    onlyIf { !installedPluginDir.exists() || inputs.files.any { it.lastModified() > installedPluginDir.lastModified() } }
-
-    workingDir ditaOtDir.get().asFile
-
-    def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
-    def ditaCmd = isWindows ? 'bin/dita.bat' : 'bin/dita'
-
-    commandLine ditaCmd, 'install', myPluginDir.absolutePath
+    // Force reinstall if plugin source changed
+    force = true
+    retries = 2
 
     doFirst {
         logger.lifecycle("Installing custom plugin from: ${myPluginDir.absolutePath}")
-
-        // Uninstall existing plugin if present (for updates)
-        if (installedPluginDir.exists()) {
-            logger.lifecycle("Removing existing plugin installation...")
-            delete installedPluginDir
-        }
     }
 
     doLast {
-        if (installedPluginDir.exists()) {
-            logger.lifecycle("Plugin installed successfully!")
-        }
+        logger.lifecycle("Plugin installed successfully!")
     }
 }
 
@@ -118,7 +87,7 @@ task testMyPlugin(type: com.github.jyjeanne.DitaOtTask, dependsOn: installMyPlug
 
     ditaOt ditaOtDir
     input file('test-content/test.ditamap')
-    output layout.buildDirectory.dir('test-output')
+    output 'build/test-output'
     transtype 'my-custom-html'  // Your plugin's transtype
 
     properties {
@@ -160,7 +129,7 @@ task dev {
 // Task: List Installed Plugins
 // ============================================================================
 
-task listPlugins(type: Exec, dependsOn: extractDitaOt) {
+task listPlugins(type: Exec, dependsOn: downloadDitaOt) {
     description = 'List installed DITA-OT plugins'
     group = 'Plugin Development'
 

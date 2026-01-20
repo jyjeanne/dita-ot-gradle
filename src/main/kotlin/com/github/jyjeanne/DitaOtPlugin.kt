@@ -10,6 +10,8 @@ import org.gradle.api.Project
  * - `dita` task for transforming DITA documents
  * - `DitaOtDownloadTask` for automatic DITA-OT download
  * - `DitaOtInstallPluginTask` for installing DITA-OT plugins
+ * - `DitaOtValidateTask` for validating DITA content
+ * - `DitaLinkCheckTask` for checking broken links
  *
  * **Quick Start (Kotlin DSL):**
  * ```kotlin
@@ -69,6 +71,8 @@ class DitaOtPlugin : Plugin<Project> {
         project.logger.info("    - DitaOtTask: Main transformation task")
         project.logger.info("    - DitaOtDownloadTask: Download DITA-OT automatically")
         project.logger.info("    - DitaOtInstallPluginTask: Install DITA-OT plugins")
+        project.logger.info("    - DitaOtValidateTask: Validate DITA content")
+        project.logger.info("    - DitaLinkCheckTask: Check for broken links")
     }
 
     companion object {

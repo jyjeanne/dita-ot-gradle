@@ -2,11 +2,14 @@ package com.github.jyjeanne
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFile
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -141,10 +144,23 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
 
     /**
      * Set DITA-OT directory (Groovy DSL friendly).
+     * Supports File, Directory, Provider<Directory>, and String types.
      */
     fun ditaOtDir(dir: Any) {
         when (dir) {
             is File -> ditaOtDir.set(dir)
+            is Directory -> ditaOtDir.set(dir)
+            is Provider<*> -> {
+                // Handle Provider<Directory> - resolve the value now since the provider
+                // should have a value at task configuration time (after dependent tasks configure)
+                @Suppress("UNCHECKED_CAST")
+                val value = (dir as Provider<*>).get()
+                when (value) {
+                    is Directory -> ditaOtDir.set(value)
+                    is File -> ditaOtDir.set(value)
+                    else -> ditaOtDir.set(projectLayout.projectDirectory.dir(value.toString()))
+                }
+            }
             is String -> ditaOtDir.set(projectLayout.projectDirectory.dir(dir))
             else -> ditaOtDir.set(projectLayout.projectDirectory.dir(dir.toString()))
         }

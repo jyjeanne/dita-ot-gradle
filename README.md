@@ -7,10 +7,13 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.4.0)
+## Highlights (v2.8.0)
 
 | Feature | Description |
 |---------|-------------|
+| **Progress Reporting** | Visual progress indicators during builds |
+| **DitaLinkCheckTask** | Check for broken internal and external links |
+| **DitaOtValidateTask** | Validate DITA content without full transformation |
 | **DitaOtDownloadTask** | Built-in DITA-OT download with retries, checksums, and caching |
 | **DitaOtInstallPluginTask** | Install plugins from registry, URL, or local files |
 | **Configuration Cache** | Up to **77% faster** incremental builds |
@@ -31,14 +34,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.0'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
 }
 ```
 
@@ -124,7 +127,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.0'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
@@ -183,7 +186,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.0'
 }
 
 def ditaOtVersion = '4.2.3'
@@ -301,7 +304,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -607,6 +610,96 @@ tasks.register<com.github.jyjeanne.DitaOtInstallPluginTask>("installPlugins") {
 }
 ```
 
+#### DitaOtValidateTask
+
+Validates DITA content without running full transformation. Fast feedback during development.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `ditaOtDir` | `Directory` | - | DITA-OT installation directory (required) |
+| `inputFiles` | `FileCollection` | - | DITA maps or topics to validate (required) |
+| `filterFile` | `FileCollection` | - | DITAVAL filter file (optional) |
+| `strictMode` | `Boolean` | `false` | Fail on warnings (not just errors) |
+| `failOnError` | `Boolean` | `true` | Fail build on validation errors |
+| `processingMode` | `String` | `strict` | DITA-OT processing mode (strict, lax, skip) |
+| `validationTimeout` | `Long` | `600000` | Timeout in milliseconds (10 minutes) |
+| `quiet` | `Boolean` | `false` | Suppress progress output |
+
+**Example:**
+```kotlin
+tasks.register<com.github.jyjeanne.DitaOtValidateTask>("validateDita") {
+    dependsOn(downloadDitaOt)
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    input("docs/guide.ditamap")
+    strictMode.set(true)  // Fail on warnings too
+    validationTimeout.set(300000)  // 5 minutes
+}
+```
+
+**Validation Checks:**
+- XML well-formedness
+- DTD/Schema validity
+- Reference integrity (conrefs, topicrefs, xrefs)
+- Key definitions and references
+- Image and resource references
+
+#### DitaLinkCheckTask
+
+Checks for broken links in DITA content. Verifies internal file references and optionally checks external URLs.
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `inputFiles` | `FileCollection` | - | DITA maps or topics to check (required) |
+| `checkExternal` | `Boolean` | `false` | Also check external URLs |
+| `failOnBroken` | `Boolean` | `true` | Fail build on broken links |
+| `recursive` | `Boolean` | `true` | Follow topic references recursively |
+| `quiet` | `Boolean` | `false` | Suppress detailed output |
+| `connectTimeout` | `Int` | `5000` | Connection timeout for external URLs (ms) |
+| `readTimeout` | `Int` | `10000` | Read timeout for external URLs (ms) |
+| `excludeUrlPatterns` | `List<String>` | `[]` | URL patterns to exclude from checking |
+
+**Example:**
+```kotlin
+tasks.register<com.github.jyjeanne.DitaLinkCheckTask>("checkLinks") {
+    input("docs/guide.ditamap")
+    checkExternal.set(true)   // Also verify external URLs
+    failOnBroken.set(true)    // Fail build on broken links
+    excludeUrl("localhost")   // Exclude localhost URLs
+}
+```
+
+**Link Types Checked:**
+- `xref` - Cross-references to other topics or elements
+- `conref` - Content references
+- `topicref` - Topic references in maps
+- `image` - Image file references
+- `href` attributes on various elements
+- `scope="external"` - Detected and handled appropriately
+
+**Limitations:**
+- `keyref` and `conkeyref` links are skipped (require DITA-OT key resolution)
+- Fragment identifiers (`#element-id`) are not validated against target file content
+- Peer scope links (`scope="peer"`) are checked as regular internal links
+
+**Sample Output:**
+```
+Link Check Results
+═══════════════════════════════════════════════════════
+Files scanned:      12
+Total links found:  145
+───────────────────────────────────────────────────────
+Internal links:     120
+  ✓ Valid:          118
+  ✗ Broken:         2
+───────────────────────────────────────────────────────
+External links:     25
+  ✓ Valid:          23
+  ✗ Broken:         2
+───────────────────────────────────────────────────────
+Status:             FAILED
+═══════════════════════════════════════════════════════
+```
+
 ### DitaOtTask Options
 
 | Option | Type | Default | Description |
@@ -618,6 +711,8 @@ tasks.register<com.github.jyjeanne.DitaOtInstallPluginTask>("installPlugins") {
 | `filter` | `String` or `File` | - | DITAVAL filter file |
 | `singleOutputDir` | `Boolean` | `false` | Multiple inputs → single output |
 | `useAssociatedFilter` | `Boolean` | `false` | Use DITAVAL with same basename |
+| `showProgress` | `Boolean` | `true` | Show visual progress during builds |
+| `progressStyle` | `String` | `DETAILED` | Progress display style (DETAILED, SIMPLE, MINIMAL, QUIET) |
 
 ### Passing Properties to DITA-OT
 
@@ -686,6 +781,74 @@ org.gradle.configuration-cache=true
 
 ---
 
+## Progress Reporting
+
+The plugin provides visual progress indicators during DITA-OT transformations, showing processing stages and file counts.
+
+### Progress Display Styles
+
+| Style | Description |
+|-------|-------------|
+| `DETAILED` | Shows progress bar, percentage, stage name, and file count (default) |
+| `SIMPLE` | Shows progress bar and percentage only |
+| `MINIMAL` | Shows only major stage transitions |
+| `QUIET` | No progress output, only errors |
+
+### Example Output (DETAILED style)
+
+```
+> Task :dita
+  [=====>                        ] 18% - Preprocessing (12 files)
+  [===============>              ] 52% - Resolving content references (24 files)
+  [=========================>    ] 85% - Generating content (34 files)
+  [==============================] 100% - Complete (45 files, 3.2s)
+```
+
+### Configuration
+
+**Groovy DSL:**
+```groovy
+dita {
+    ditaOt '/path/to/dita-ot'
+    input 'guide.ditamap'
+    transtype 'html5'
+
+    showProgress true         // Enable progress (default)
+    progressStyle 'DETAILED'  // DETAILED, SIMPLE, MINIMAL, QUIET
+}
+```
+
+**Kotlin DSL:**
+```kotlin
+tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
+    showProgress(true)
+    progressStyle("SIMPLE")
+}
+```
+
+### Disabling Progress for CI/CD
+
+For CI/CD environments where terminal features may not be available:
+
+```groovy
+dita {
+    showProgress false  // Disable progress reporting
+}
+
+// Or use QUIET style to only show errors
+dita {
+    progressStyle 'QUIET'
+}
+```
+
+**Notes:**
+- Progress reporting automatically enables DITA-OT verbose mode (`--verbose`) for better stage detection
+- 20 processing stages are tracked (init, preprocess, conref, keyref, transform, etc.)
+- Progress is reset between multiple input files/transtypes
+- Thread-safe error and warning collection
+
+---
+
 ## Compatibility
 
 | Component | Tested | Supported | Notes |
@@ -749,7 +912,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.0'
 }
 ```
 
@@ -793,6 +956,18 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for full version history.
 > Configuration cache problems found
 ```
 **Solution:** Use Kotlin DSL `properties { }` block instead of Groovy closures for full compatibility.
+
+**Windows path length limit (La ligne entrée est trop longue / The input line is too long):**
+```
+> DITA-OT execution failed with exit code: 255
+> La ligne entrée est trop longue
+```
+**Solution:** This occurs when the project path is deeply nested, causing Windows command line length to exceed ~8191 characters. DITA-OT's `env.bat` adds many JARs to CLASSPATH, which can overflow this limit.
+
+Workarounds:
+1. Move your project to a shorter path (e.g., `C:\projects\` instead of deep nested folders)
+2. Use shorter DITA-OT installation paths
+3. Consider using Windows Long Path support (requires Windows 10 1607+ and registry configuration)
 
 ---
 
