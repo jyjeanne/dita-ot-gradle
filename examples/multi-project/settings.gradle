@@ -1,5 +1,6 @@
 rootProject.name = 'dita-ot-gradle-multi-project'
 
-includeBuild '../../'
+// For local development, uncomment the following line:
+// includeBuild '../../'
 
 include 'one', 'two'

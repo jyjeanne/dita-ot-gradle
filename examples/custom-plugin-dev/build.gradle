@@ -47,10 +47,6 @@ task downloadDitaOt(type: com.github.jyjeanne.DitaOtDownloadTask) {
     retries = 3
     connectTimeout = 30000
     readTimeout = 60000
-
-    doFirst {
-        logger.lifecycle("Downloading DITA-OT ${ditaOtVersion}...")
-    }
 }
 
 // ============================================================================
@@ -67,14 +63,6 @@ task installMyPlugin(type: com.github.jyjeanne.DitaOtInstallPluginTask, dependsO
     // Force reinstall if plugin source changed
     force = true
     retries = 2
-
-    doFirst {
-        logger.lifecycle("Installing custom plugin from: ${myPluginDir.absolutePath}")
-    }
-
-    doLast {
-        logger.lifecycle("Plugin installed successfully!")
-    }
 }
 
 // ============================================================================
@@ -94,13 +82,6 @@ task testMyPlugin(type: com.github.jyjeanne.DitaOtTask, dependsOn: installMyPlug
         property(name: 'processing-mode', value: 'strict')
         property(name: 'args.debug', value: 'yes')
     }
-
-    doFirst {
-        logger.lifecycle("Running test transformation with custom plugin...")
-        logger.lifecycle("  Input: test-content/test.ditamap")
-        logger.lifecycle("  Output: build/test-output")
-        logger.lifecycle("  Transtype: my-custom-html")
-    }
 }
 
 // ============================================================================
@@ -111,18 +92,6 @@ task dev {
     description = 'Quick development cycle: install plugin and test'
     group = 'Plugin Development'
     dependsOn testMyPlugin
-
-    doLast {
-        logger.lifecycle("")
-        logger.lifecycle("=" * 60)
-        logger.lifecycle("Development build complete!")
-        logger.lifecycle("=" * 60)
-        logger.lifecycle("Output: build/test-output")
-        logger.lifecycle("")
-        logger.lifecycle("TIP: Run with --continuous for auto-rebuild:")
-        logger.lifecycle("  ./gradlew dev --continuous")
-        logger.lifecycle("=" * 60)
-    }
 }
 
 // ============================================================================

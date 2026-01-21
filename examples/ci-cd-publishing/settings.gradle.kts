@@ -1,4 +1,4 @@
 rootProject.name = "ci-cd-publishing"
 
-// Include the local plugin for development
-includeBuild("../..")
+// For local development, uncomment the following line:
+// includeBuild("../..")

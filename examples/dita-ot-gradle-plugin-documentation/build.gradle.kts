@@ -3,6 +3,10 @@
  *
  * Cross-platform build script that works on both Windows and Linux/macOS.
  *
+ * Note: This build script is NOT configuration cache compatible because it
+ * uses doLast blocks with captured variables for essential file operations.
+ * This is a special-purpose build for generating the plugin's documentation.
+ *
  * Usage:
  *   ./gradlew buildDocs       - Generate both HTML and PDF
  *   ./gradlew generateHtml    - Generate HTML only

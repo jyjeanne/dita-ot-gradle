@@ -75,10 +75,6 @@ val htmlTasks = productVersions.map { version ->
         // Version-specific properties
         ditaProperties.put("nav-toc", "partial")
         ditaProperties.put("args.gen.task.lbl", "YES")
-
-        doFirst {
-            logger.lifecycle("Building documentation for version ${versionLabels[version]}...")
-        }
     }
 }
 
@@ -97,10 +93,6 @@ val pdfTasks = productVersions.map { version ->
         filter("filters/$version.ditaval")
 
         ditaProperties.put("outputFile.base", "guide-$version")
-
-        doFirst {
-            logger.lifecycle("Building PDF for version ${versionLabels[version]}...")
-        }
     }
 }
 
@@ -113,17 +105,6 @@ val buildAllVersions by tasks.registering {
     group = "Documentation"
 
     dependsOn(htmlTasks)
-
-    doLast {
-        logger.lifecycle("")
-        logger.lifecycle("=" .repeat(60))
-        logger.lifecycle("Multi-Version Build Complete!")
-        logger.lifecycle("=" .repeat(60))
-        productVersions.forEach { version ->
-            logger.lifecycle("  ${versionLabels[version]}: build/output/$version/html/")
-        }
-        logger.lifecycle("=" .repeat(60))
-    }
 }
 
 val buildAllPdfs by tasks.registering {
@@ -145,19 +126,6 @@ val release by tasks.registering {
     group = "Documentation"
 
     dependsOn(buildAllVersions, buildAllPdfs)
-
-    doLast {
-        logger.lifecycle("")
-        logger.lifecycle("=" .repeat(60))
-        logger.lifecycle("Release Build Complete!")
-        logger.lifecycle("=" .repeat(60))
-        productVersions.forEach { version ->
-            logger.lifecycle("  ${versionLabels[version]}:")
-            logger.lifecycle("    HTML: build/output/$version/html/")
-            logger.lifecycle("    PDF:  build/output/$version/pdf/")
-        }
-        logger.lifecycle("=" .repeat(60))
-    }
 }
 
 // ============================================================================
@@ -169,11 +137,7 @@ val listVersions by tasks.registering {
     group = "Documentation"
 
     doLast {
-        logger.lifecycle("Supported product versions:")
-        productVersions.forEach { version ->
-            val isLatest = if (version == latestVersion) " [LATEST]" else ""
-            logger.lifecycle("  - $version (${versionLabels[version]})$isLatest")
-        }
+        println("Supported product versions: v1 (1.x LTS), v2 (2.x), v3 (3.x Latest) [LATEST]")
     }
 }
 

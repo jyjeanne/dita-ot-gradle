@@ -73,10 +73,6 @@ val htmlTasks = languages.map { lang ->
         // Language-specific properties
         ditaProperties.put("args.gen.task.lbl", "YES")
         ditaProperties.put("nav-toc", "partial")
-
-        doFirst {
-            logger.lifecycle("Building ${languageNames[lang]} documentation...")
-        }
     }
 }
 
@@ -94,10 +90,6 @@ val pdfTasks = languages.map { lang ->
         transtype("pdf")
 
         ditaProperties.put("outputFile.base", "guide-$lang")
-
-        doFirst {
-            logger.lifecycle("Building ${languageNames[lang]} PDF...")
-        }
     }
 }
 
@@ -110,17 +102,6 @@ val buildAllLanguages by tasks.registering {
     group = "Documentation"
 
     dependsOn(htmlTasks)
-
-    doLast {
-        logger.lifecycle("")
-        logger.lifecycle("=" .repeat(60))
-        logger.lifecycle("Multi-Language Build Complete!")
-        logger.lifecycle("=" .repeat(60))
-        languages.forEach { lang ->
-            logger.lifecycle("  ${languageNames[lang]}: build/output/$lang/html/")
-        }
-        logger.lifecycle("=" .repeat(60))
-    }
 }
 
 val buildAllPdfs by tasks.registering {
@@ -135,19 +116,6 @@ val release by tasks.registering {
     group = "Documentation"
 
     dependsOn(buildAllLanguages, buildAllPdfs)
-
-    doLast {
-        logger.lifecycle("")
-        logger.lifecycle("=" .repeat(60))
-        logger.lifecycle("Release Build Complete!")
-        logger.lifecycle("=" .repeat(60))
-        languages.forEach { lang ->
-            logger.lifecycle("  ${languageNames[lang]}:")
-            logger.lifecycle("    HTML: build/output/$lang/html/")
-            logger.lifecycle("    PDF:  build/output/$lang/pdf/")
-        }
-        logger.lifecycle("=" .repeat(60))
-    }
 }
 
 // ============================================================================
@@ -159,10 +127,7 @@ val listLanguages by tasks.registering {
     group = "Documentation"
 
     doLast {
-        logger.lifecycle("Supported languages:")
-        languages.forEach { lang ->
-            logger.lifecycle("  - $lang (${languageNames[lang]})")
-        }
+        println("Supported languages: en (English), fr (French), de (German)")
     }
 }
 
