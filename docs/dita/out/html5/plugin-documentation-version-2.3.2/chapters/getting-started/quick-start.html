@@ -1,0 +1,109 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="en"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Get started with DITA-OT Gradle Plugin in minutes."><title>Quick Start</title><link rel="stylesheet" type="text/css" href="../../commonltr.css"></head><body id="quick-start"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Quick Start</h1>
+  
+  <div class="body"><p class="shortdesc">Get started with DITA-OT Gradle Plugin in minutes.</p>
+    <section class="section"><h2 class="title sectiontitle">Step 1: Add the Plugin</h2>
+      
+      <p class="p">Add the plugin to your <span class="ph filepath">build.gradle.kts</span> (Kotlin DSL):</p>
+      <pre class="pre codeblock"><code>plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
+}</code></pre>
+      <p class="p">Or in <span class="ph filepath">build.gradle</span> (Groovy DSL):</p>
+      <pre class="pre codeblock"><code>plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.4.0'
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Step 2: Download DITA-OT (Optional)</h2>
+      
+      <p class="p">The plugin can automatically download DITA-OT for you:</p>
+      <pre class="pre codeblock"><code>// Kotlin DSL
+val downloadDitaOt by tasks.registering(DitaOtDownloadTask::class) {
+    version.set("4.2.3")
+}
+
+// Groovy DSL
+tasks.register('downloadDitaOt', DitaOtDownloadTask) {
+    version = '4.2.3'
+}</code></pre>
+      <p class="p">This downloads DITA-OT to <span class="ph filepath">build/dita-ot/dita-ot-4.2.3</span>.</p>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Step 3: Configure the Task</h2>
+      
+      <p class="p">Configure the <code class="ph codeph">dita</code> task with your input files:</p>
+      <pre class="pre codeblock"><code>// Kotlin DSL
+dita {
+    ditaOt(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    input("docs/guide.ditamap")
+    transtype("html5")
+}
+
+// Groovy DSL
+dita {
+    ditaOt layout.buildDirectory.dir('dita-ot/dita-ot-4.2.3')
+    input 'docs/guide.ditamap'
+    transtype 'html5'
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Step 4: Run the Build</h2>
+      
+      <p class="p">Execute the transformation:</p>
+      <pre class="pre codeblock"><code>./gradlew downloadDitaOt dita</code></pre>
+      <p class="p">The output will be generated in the <span class="ph filepath">build</span> directory.</p>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Complete Example (Kotlin DSL)</h2>
+      
+      <p class="p">Here's a complete <span class="ph filepath">build.gradle.kts</span> example:</p>
+      <pre class="pre codeblock"><code>plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.4.0"
+}
+
+// Download DITA-OT automatically
+val downloadDitaOt by tasks.registering(DitaOtDownloadTask::class) {
+    version.set("4.2.3")
+}
+
+// Configure transformation
+dita {
+    ditaOt(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    input("docs/guide.ditamap")
+    output("build/docs")
+    transtype("html5")
+
+    properties {
+        "nav-toc" to "partial"
+        "args.copycss" to "yes"
+    }
+}
+
+// Make dita depend on download
+tasks.named("dita") {
+    dependsOn(downloadDitaOt)
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Installing DITA-OT Plugins</h2>
+      
+      <p class="p">You can also install additional DITA-OT plugins:</p>
+      <pre class="pre codeblock"><code>val installPlugins by tasks.registering(DitaOtInstallPluginTask::class) {
+    dependsOn(downloadDitaOt)
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    plugins.set(listOf("org.dita.pdf2", "com.example.custom-plugin"))
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Next Steps</h2>
+      
+      <ul class="ul">
+        <li class="li">Learn about <a class="xref" href="../configuration/task-options.html" title="Configuration options for the DitaOtTask.">configuration options</a></li>
+        <li class="li">Explore <a class="xref" href="../use-cases/ci-cd-publishing.html" title="Automated documentation publishing pipeline with GitHub Actions.">CI/CD integration</a></li>
+        <li class="li">See the <a class="xref" href="../reference/examples.html" title="Overview of all example projects included with the plugin.">example projects</a></li>
+      </ul>
+    </section>
+  </div>
+</article></main></body></html>

@@ -175,6 +175,49 @@ tasks.register<DitaLinkCheckTask>("checkLinks") {
 
 ---
 
+## ✅ v2.8.1 Bug Fixes and Improvements (COMPLETED)
+
+### Bug Fixes
+
+#### Cross-Platform Path with Spaces Fix
+**Status**: ✅ COMPLETED (v2.8.1)
+
+Fixed command building for paths containing spaces on Windows. Changed from combined format (`--input=path`) to separate arguments (`--input path`) for ProcessBuilder compatibility.
+
+**Files Fixed:**
+- `AntExecutor.kt` - DITA-OT script execution
+- `DitaOtValidateTask.kt` - Validation command building
+
+#### DITA-OT Version Detection Fix
+**Status**: ✅ COMPLETED (v2.8.1)
+
+Fixed version detection that was returning "unknown". Now correctly reads version from multiple sources:
+1. `plugins/org.dita.base/plugin.xml` (primary, DITA-OT 3.x+)
+2. `lib/dost.jar` manifest (fallback)
+3. Directory name pattern (last resort)
+
+**Tested with:**
+- DITA-OT 3.5.4 ✓
+- DITA-OT 4.2.3 ✓
+- DITA-OT 4.3.0 ✓
+
+#### DitaOtValidateTask DITA-OT 4.x Compatibility
+**Status**: ✅ COMPLETED (v2.8.1)
+
+Changed validation transtype from deprecated `preprocess` to `dita` for DITA-OT 4.x compatibility.
+
+### New Unit Tests
+
+Added 20 new tests for v2.8.1 bug fixes (total: 199 tests):
+
+| Test Class | New Tests | Description |
+|------------|-----------|-------------|
+| `DitaOtTaskSpec.kt` | 6 | Version detection from plugin.xml, manifest, directory name |
+| `DitaOtValidateTaskTest.kt` | 2 | DITA-OT 4.x transtype compatibility |
+| `AntExecutorTest.kt` | 7 | Command building with paths containing spaces |
+
+---
+
 ### 6. Incremental Build Support
 **Status**: 🔜 Next Up
 **Impact**: Very High
@@ -510,6 +553,10 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
+| **Unit Tests for Bug Fixes** | 2.8.1 | Jan 2026 |
+| **Cross-Platform Path with Spaces Fix** | 2.8.1 | Jan 2026 |
+| **DITA-OT Version Detection Fix** | 2.8.1 | Jan 2026 |
+| **DitaOtValidateTask DITA-OT 4.x Compatibility** | 2.8.1 | Jan 2026 |
 | **Progress Reporting** | 2.8.0 | Jan 2026 |
 | **Thread Safety Improvements** | 2.8.0 | Jan 2026 |
 | **Provider<Directory> DSL Fix** | 2.8.0 | Jan 2026 |

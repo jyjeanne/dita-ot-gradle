@@ -841,4 +841,138 @@ class DitaOtTaskSpec : StringSpec({
         val directInputFiles = task.inputFiles.files
         directInputFiles.none { it.absolutePath == File(ditaHome).absolutePath } shouldBe true
     }
+
+    // ============================================================================
+    // DITA-OT Version Detection Tests (v2.8.1)
+    // These tests ensure the version detection works correctly from multiple sources
+    // ============================================================================
+
+    "detectDitaOtVersion should detect version from plugin.xml" {
+        // Create a temporary DITA-OT structure with plugin.xml
+        val tempDitaOt = Files.createTempDirectory("dita-ot-version-test").toFile()
+        try {
+            // Create required structure
+            File(tempDitaOt, "build.xml").writeText("<project/>")
+            val pluginDir = File(tempDitaOt, "plugins/org.dita.base")
+            pluginDir.mkdirs()
+            pluginDir.resolve("plugin.xml").writeText("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <plugin id="org.dita.base" version="4.2.3">
+                  <feature extension="package.support.name" value="DITA-OT"/>
+                </plugin>
+            """.trimIndent())
+
+            val task = project.tasks.create("versionTest1", DitaOtTask::class.java).apply {
+                ditaOt(tempDitaOt)
+                input("$examplesDir/simple/dita/root.ditamap")
+            }
+
+            task.detectDitaOtVersion() shouldBe "4.2.3"
+        } finally {
+            tempDitaOt.deleteRecursively()
+        }
+    }
+
+    "detectDitaOtVersion should handle plugin.xml with version on separate line" {
+        // Test multiline handling in plugin.xml
+        val tempDitaOt = Files.createTempDirectory("dita-ot-version-multiline").toFile()
+        try {
+            File(tempDitaOt, "build.xml").writeText("<project/>")
+            val pluginDir = File(tempDitaOt, "plugins/org.dita.base")
+            pluginDir.mkdirs()
+            pluginDir.resolve("plugin.xml").writeText("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <plugin
+                    id="org.dita.base"
+                    version="3.7.4">
+                </plugin>
+            """.trimIndent())
+
+            val task = project.tasks.create("versionTest2", DitaOtTask::class.java).apply {
+                ditaOt(tempDitaOt)
+                input("$examplesDir/simple/dita/root.ditamap")
+            }
+
+            task.detectDitaOtVersion() shouldBe "3.7.4"
+        } finally {
+            tempDitaOt.deleteRecursively()
+        }
+    }
+
+    "detectDitaOtVersion should handle plugin.xml with single quotes" {
+        // Test single quotes in version attribute
+        val tempDitaOt = Files.createTempDirectory("dita-ot-version-single-quotes").toFile()
+        try {
+            File(tempDitaOt, "build.xml").writeText("<project/>")
+            val pluginDir = File(tempDitaOt, "plugins/org.dita.base")
+            pluginDir.mkdirs()
+            pluginDir.resolve("plugin.xml").writeText("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <plugin id='org.dita.base' version='4.1.0'>
+                </plugin>
+            """.trimIndent())
+
+            val task = project.tasks.create("versionTest3", DitaOtTask::class.java).apply {
+                ditaOt(tempDitaOt)
+                input("$examplesDir/simple/dita/root.ditamap")
+            }
+
+            task.detectDitaOtVersion() shouldBe "4.1.0"
+        } finally {
+            tempDitaOt.deleteRecursively()
+        }
+    }
+
+    "detectDitaOtVersion should fallback to directory name when plugin.xml missing" {
+        // Create a minimal DITA-OT structure without plugin.xml
+        val tempDitaOt = Files.createTempDirectory("dita-ot-").toFile()
+        val ditaOtWithVersion = File(tempDitaOt.parentFile, "dita-ot-4.0.2")
+        try {
+            ditaOtWithVersion.mkdirs()
+            File(ditaOtWithVersion, "build.xml").writeText("<project/>")
+
+            val task = project.tasks.create("versionTest4", DitaOtTask::class.java).apply {
+                ditaOt(ditaOtWithVersion)
+                input("$examplesDir/simple/dita/root.ditamap")
+            }
+
+            task.detectDitaOtVersion() shouldBe "4.0.2"
+        } finally {
+            tempDitaOt.deleteRecursively()
+            ditaOtWithVersion.deleteRecursively()
+        }
+    }
+
+    "detectDitaOtVersion should return unknown when no version info available" {
+        // Create a minimal DITA-OT structure without version information
+        val tempDitaOt = Files.createTempDirectory("custom-dita-toolkit").toFile()
+        try {
+            File(tempDitaOt, "build.xml").writeText("<project/>")
+
+            val task = project.tasks.create("versionTest5", DitaOtTask::class.java).apply {
+                ditaOt(tempDitaOt)
+                input("$examplesDir/simple/dita/root.ditamap")
+            }
+
+            task.detectDitaOtVersion() shouldBe "unknown"
+        } finally {
+            tempDitaOt.deleteRecursively()
+        }
+    }
+
+    "detectDitaOtVersion detects version from real DITA-OT installation" {
+        // Test with the actual DITA-OT installation used for testing
+        val task = project.tasks.create("versionTestReal", DitaOtTask::class.java).apply {
+            ditaOt(ditaHome)
+            input("$examplesDir/simple/dita/root.ditamap")
+        }
+
+        val version = task.detectDitaOtVersion()
+
+        // Should not be "unknown" for a real DITA-OT installation
+        version shouldNotBe "unknown"
+
+        // Should match version pattern (X.Y or X.Y.Z)
+        version.matches(Regex("""\d+\.\d+(\.\d+)?""")) shouldBe true
+    }
 })

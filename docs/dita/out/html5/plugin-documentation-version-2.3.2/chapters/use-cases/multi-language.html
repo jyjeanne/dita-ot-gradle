@@ -1,0 +1,72 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="en"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Build documentation in multiple languages with parallel execution."><title>Multi-Language Documentation</title><link rel="stylesheet" type="text/css" href="../../commonltr.css"></head><body id="multi-language"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Multi-Language Documentation</h1>
+  
+  <div class="body"><p class="shortdesc">Build documentation in multiple languages with parallel execution.</p>
+    <p class="p">The <span class="ph filepath">examples/multi-language</span> project demonstrates how to build localized documentation efficiently.</p>
+
+    <section class="section"><h2 class="title sectiontitle">Quick Start</h2>
+      
+      <pre class="pre codeblock"><code>cd examples/multi-language
+
+# Build all languages (parallel)
+./gradlew buildAll
+
+# Build specific language
+./gradlew buildEn
+./gradlew buildFr
+./gradlew buildDe</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Project Structure</h2>
+      
+      <pre class="pre codeblock"><code>multi-language/
+├── build.gradle.kts
+├── content/
+│   ├── en/           # English content
+│   │   ├── guide.ditamap
+│   │   └── topics/
+│   ├── fr/           # French content
+│   │   ├── guide.ditamap
+│   │   └── topics/
+│   └── de/           # German content
+│       ├── guide.ditamap
+│       └── topics/
+└── shared/
+    └── images/       # Shared images across languages</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Parallel Execution</h2>
+      
+      <p class="p">Enable parallel builds in <span class="ph filepath">gradle.properties</span>:</p>
+      <pre class="pre codeblock"><code>org.gradle.parallel=true
+org.gradle.configuration-cache=true</code></pre>
+      <p class="p">This allows all language builds to run simultaneously, significantly reducing total build time.</p>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Dynamic Task Generation</h2>
+      
+      <p class="p">Tasks are created dynamically for each language:</p>
+      <pre class="pre codeblock"><code>val languages = listOf("en", "fr", "de")
+
+languages.forEach { lang -&gt;
+    tasks.register&lt;DitaOtTask&gt;("build${lang.capitalize()}") {
+        input(file("content/$lang/guide.ditamap"))
+        output(layout.buildDirectory.dir("output/$lang"))
+        transtype("html5")
+    }
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Content Sharing</h2>
+      
+      <p class="p">Use conrefs and keyrefs to share common content:</p>
+      <ul class="ul">
+        <li class="li">Store reusable content in <span class="ph filepath">shared/</span> directory</li>
+        <li class="li">Use conrefs for boilerplate text</li>
+        <li class="li">Share images across all language versions</li>
+      </ul>
+    </section>
+  </div>
+</article></main></body></html>

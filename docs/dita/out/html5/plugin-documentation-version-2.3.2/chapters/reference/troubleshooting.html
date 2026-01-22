@@ -1,0 +1,75 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="en"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Common issues and solutions."><title>Troubleshooting</title><link rel="stylesheet" type="text/css" href="../../commonltr.css"></head><body id="troubleshooting"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Troubleshooting</h1>
+  
+  <div class="body"><p class="shortdesc">Common issues and solutions.</p>
+    <section class="section"><h2 class="title sectiontitle">DITA-OT Not Found</h2>
+      
+      <p class="p"><strong class="ph b">Error:</strong> <code class="ph codeph">DITA-OT directory not found</code></p>
+      <p class="p"><strong class="ph b">Solution:</strong> Ensure the <code class="ph codeph">ditaOt</code> path is correct and DITA-OT is extracted:</p>
+      <pre class="pre codeblock"><code>dita {
+    ditaOt '/correct/path/to/dita-ot-4.2.3'
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Input File Not Found</h2>
+      
+      <p class="p"><strong class="ph b">Error:</strong> <code class="ph codeph">Input file does not exist</code></p>
+      <p class="p"><strong class="ph b">Solution:</strong> Verify the input path is relative to the project directory:</p>
+      <pre class="pre codeblock"><code>dita {
+    input 'docs/guide.ditamap'  // Relative to project root
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Configuration Cache Issues</h2>
+      
+      <p class="p"><strong class="ph b">Error:</strong> <code class="ph codeph">Configuration cache state could not be cached</code></p>
+      <p class="p"><strong class="ph b">Solution:</strong> Use Provider API methods instead of closures:</p>
+      <pre class="pre codeblock"><code>// Instead of:
+properties {
+    property(name: 'key', value: someVar)
+}
+
+// Use:
+ditaProperties.put('key', 'value')</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Out of Memory</h2>
+      
+      <p class="p"><strong class="ph b">Error:</strong> <code class="ph codeph">Java heap space</code></p>
+      <p class="p"><strong class="ph b">Solution:</strong> Increase memory in <span class="ph filepath">gradle.properties</span>:</p>
+      <pre class="pre codeblock"><code>org.gradle.jvmargs=-Xmx2g</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Transformation Fails</h2>
+      
+      <p class="p"><strong class="ph b">Error:</strong> DITA-OT transformation errors</p>
+      <p class="p"><strong class="ph b">Solution:</strong> Run with debug output to see detailed logs:</p>
+      <pre class="pre codeblock"><code>./gradlew dita --info
+# Or for even more detail:
+./gradlew dita --debug</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Plugin Installation Fails</h2>
+      
+      <p class="p"><strong class="ph b">Error:</strong> Plugin cannot be installed</p>
+      <p class="p"><strong class="ph b">Solutions:</strong></p>
+      <ul class="ul">
+        <li class="li">Verify plugin ID is correct</li>
+        <li class="li">Check network connectivity to plugin registry</li>
+        <li class="li">Ensure DITA-OT version supports the plugin</li>
+        <li class="li">Try installing manually: <code class="ph codeph">dita install &lt;plugin-id&gt;</code></li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Getting Help</h2>
+      
+      <ul class="ul">
+        <li class="li">Check the <a class="xref" href="https://github.com/jyjeanne/dita-ot-gradle/issues" target="_blank" rel="external noopener">GitHub Issues</a></li>
+        <li class="li">Review DITA-OT documentation for transformation-specific issues</li>
+        <li class="li">Enable verbose logging with <code class="ph codeph">--info</code> or <code class="ph codeph">--debug</code></li>
+      </ul>
+    </section>
+  </div>
+</article></main></body></html>

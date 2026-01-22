@@ -475,20 +475,28 @@ abstract class DitaOtValidateTask @Inject constructor(
 
         command.add(ditaExecutable.absolutePath)
 
-        // Use preprocess transtype for validation (minimal output)
-        // This runs all preprocessing steps including validation
-        command.add("--input=${inputFile.absolutePath}")
-        command.add("--format=preprocess")
+        // Use 'dita' transtype for validation (compatible with DITA-OT 3.x+)
+        // Note: 'preprocess' transtype was removed in DITA-OT 4.x
+        // The 'dita' transtype performs preprocessing and outputs normalized DITA
+        // Using separate arguments for cross-platform compatibility with paths containing spaces
+        command.add("--input")
+        command.add(inputFile.absolutePath)
+
+        command.add("--format")
+        command.add("dita")
 
         // Use the provided temporary output directory
-        command.add("--output=${tempDir.absolutePath}")
+        command.add("--output")
+        command.add(tempDir.absolutePath)
 
         // Set processing mode
-        command.add("--processing-mode=${processingMode.get()}")
+        command.add("--processing-mode")
+        command.add(processingMode.get())
 
         // Add filter if specified
         filterFile.files.firstOrNull()?.let { filter ->
-            command.add("--filter=${filter.absolutePath}")
+            command.add("--filter")
+            command.add(filter.absolutePath)
         }
 
         // Verbose output for better error messages

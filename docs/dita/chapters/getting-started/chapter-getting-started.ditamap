@@ -5,5 +5,7 @@
   <topicref href="introduction.dita"/>
   <topicref href="installation.dita"/>
   <topicref href="quick-start.dita"/>
+  <<p>Paragraph content</p>>
   <topicref href="highlights.dita"/>
+  <<p>Paragraph content</p>>
 </map>

@@ -77,24 +77,32 @@ object AntExecutor {
 
         try {
             // Build command with all required parameters
+            // Using separate arguments for cross-platform compatibility with paths containing spaces
             val command = mutableListOf<String>()
 
             // Add script
             command.add(ditaScript.absolutePath)
 
-            // Add required properties (in DITA-OT format)
-            command.add("--input=${inputFile.absolutePath}")
-            command.add("--format=$transtype")
-            command.add("--output=${outputDir.absolutePath}")
+            // Add required properties using separate arguments (handles paths with spaces)
+            command.add("--input")
+            command.add(inputFile.absolutePath)
+
+            command.add("--format")
+            command.add(transtype)
+
+            command.add("--output")
+            command.add(outputDir.absolutePath)
 
             // Add temp directory
             if (tempDir.absolutePath.isNotEmpty()) {
-                command.add("--temp=${tempDir.absolutePath}")
+                command.add("--temp")
+                command.add(tempDir.absolutePath)
             }
 
             // Add filter if specified
             if (filterFile != null && filterFile.exists()) {
-                command.add("--filter=${filterFile.absolutePath}")
+                command.add("--filter")
+                command.add(filterFile.absolutePath)
             }
 
             // Add verbose flag when progress reporting is enabled for better stage detection
@@ -103,6 +111,8 @@ object AntExecutor {
             }
 
             // Add custom properties using -D prefix (ANT style)
+            // Note: With ProcessBuilder, each list element is a single argument,
+            // so "-Dname=value with spaces" works correctly (no shell interpretation)
             properties.forEach { (name, value) ->
                 // Only add if not already handled by the command above
                 if (name !in listOf("args.input", "output.dir", "dita.temp.dir", "args.filter")) {
@@ -111,7 +121,7 @@ object AntExecutor {
             }
 
             logger.info("DITA-OT script workaround: Executing command...")
-            logger.debug("Command: ${command.joinToString(" ")}")
+            logger.debug("Command arguments: $command")
 
             val processBuilder = ProcessBuilder(command)
             processBuilder.directory(ditaHome)

@@ -1,0 +1,67 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="en"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Generate version-specific documentation using DITA profiling."><title>Product Version Documentation</title><link rel="stylesheet" type="text/css" href="../../commonltr.css"></head><body id="version-docs"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Product Version Documentation</h1>
+  
+  <div class="body"><p class="shortdesc">Generate version-specific documentation using DITA profiling.</p>
+    <p class="p">The <span class="ph filepath">examples/version-docs</span> project demonstrates conditional content processing for different product versions.</p>
+
+    <section class="section"><h2 class="title sectiontitle">Quick Start</h2>
+      
+      <pre class="pre codeblock"><code>cd examples/version-docs
+
+# Build all versions
+./gradlew buildAll
+
+# Build specific version
+./gradlew buildV1
+./gradlew buildV2
+./gradlew buildV3</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">DITAVAL Filtering</h2>
+      
+      <p class="p">Create version-specific filters in <span class="ph filepath">filters/</span>:</p>
+      <pre class="pre codeblock"><code>&lt;!-- filters/v2.ditaval --&gt;
+&lt;val&gt;
+  &lt;prop action="include" att="product" val="v2"/&gt;
+  &lt;prop action="include" att="product" val="v2-v3"/&gt;
+  &lt;prop action="exclude" att="product" val="v1"/&gt;
+  &lt;prop action="exclude" att="product" val="v3"/&gt;
+&lt;/val&gt;</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Conditional Content</h2>
+      
+      <p class="p">Mark content with product attributes:</p>
+      <pre class="pre codeblock"><code>&lt;!-- Content for all versions --&gt;
+&lt;p&gt;This feature is available in all versions.&lt;/p&gt;
+
+&lt;!-- Content for specific version --&gt;
+&lt;p product="v3"&gt;New in v3: Advanced analytics dashboard.&lt;/p&gt;
+
+&lt;!-- Content for multiple versions --&gt;
+&lt;p product="v2-v3"&gt;Available in v2 and v3.&lt;/p&gt;</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Task Configuration</h2>
+      
+      <pre class="pre codeblock"><code>tasks.register&lt;DitaOtTask&gt;("buildV2") {
+    input(file("content/guide.ditamap"))
+    output(layout.buildDirectory.dir("output/v2"))
+    transtype("html5")
+    filter(file("filters/v2.ditaval"))
+}</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Best Practices</h2>
+      
+      <ul class="ul">
+        <li class="li">Use consistent profiling attribute values (e.g., <code class="ph codeph">v2-v3</code> for shared content)</li>
+        <li class="li">Keep version-specific content minimal</li>
+        <li class="li">Test all version outputs to ensure correct filtering</li>
+        <li class="li">Document profiling conventions in your style guide</li>
+      </ul>
+    </section>
+  </div>
+</article></main></body></html>

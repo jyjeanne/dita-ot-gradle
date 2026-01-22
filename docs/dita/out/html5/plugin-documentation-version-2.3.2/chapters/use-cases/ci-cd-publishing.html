@@ -1,0 +1,71 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="en"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Automated documentation publishing pipeline with GitHub Actions."><title>CI/CD Documentation Publishing</title><link rel="stylesheet" type="text/css" href="../../commonltr.css"></head><body id="ci-cd-publishing"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">CI/CD Documentation Publishing</h1>
+  
+  <div class="body"><p class="shortdesc">Automated documentation publishing pipeline with GitHub Actions.</p>
+    <p class="p">The <span class="ph filepath">examples/ci-cd-publishing</span> project demonstrates automated documentation generation and deployment.</p>
+
+    <section class="section"><h2 class="title sectiontitle">Quick Start</h2>
+      
+      <pre class="pre codeblock"><code>cd examples/ci-cd-publishing
+
+# Build all formats locally
+./gradlew buildAll
+
+# Generate only HTML
+./gradlew generateHtml
+
+# Generate only PDF
+./gradlew generatePdf</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">GitHub Actions Integration</h2>
+      
+      <p class="p">Example workflow file <span class="ph filepath">.github/workflows/docs.yml</span>:</p>
+      <pre class="pre codeblock"><code>name: Build Documentation
+on:
+  push:
+    paths: ['docs/**']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Documentation
+        run: ./gradlew buildAll
+
+      - name: Deploy to Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/output/html</code></pre>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Multi-Format Output</h2>
+      
+      <p class="p">The project generates multiple output formats:</p>
+      <ul class="ul">
+        <li class="li"><strong class="ph b">HTML5:</strong> Interactive web documentation for GitHub Pages</li>
+        <li class="li"><strong class="ph b">PDF:</strong> Downloadable documentation for offline use</li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Best Practices</h2>
+      
+      <ul class="ul">
+        <li class="li">Use caching for DITA-OT downloads in CI</li>
+        <li class="li">Enable Configuration Cache for faster builds</li>
+        <li class="li">Trigger builds only on documentation changes</li>
+        <li class="li">Archive build artifacts for debugging</li>
+      </ul>
+    </section>
+  </div>
+</article></main></body></html>

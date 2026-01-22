@@ -1,0 +1,142 @@
+<!DOCTYPE html
+  SYSTEM "about:legacy-compat">
+<html lang="en"><head><meta charset="UTF-8"><meta name="copyright" content="(C) Copyright 2026"><meta name="generator" content="DITA-OT"><meta name="description" content="Planned features and improvements."><title>Roadmap</title><link rel="stylesheet" type="text/css" href="../../commonltr.css"></head><body id="roadmap"><main role="main"><article role="article" aria-labelledby="ariaid-title1">
+  <h1 class="title topictitle1" id="ariaid-title1">Roadmap</h1>
+  
+  <div class="body"><p class="shortdesc">Planned features and improvements.</p>
+    <p class="p">This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
+
+    <section class="section"><h2 class="title sectiontitle">Completed in Version 2.8.0</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Progress Reporting:</strong> Visual progress indicators during builds
+          <ul class="ul">
+            <li class="li">Visual progress bar with percentage</li>
+            <li class="li">Stage detection from DITA-OT output (20 stages)</li>
+            <li class="li">File count tracking</li>
+            <li class="li">Configurable display styles (DETAILED, SIMPLE, MINIMAL, QUIET)</li>
+            <li class="li">Error and warning collection with summary</li>
+            <li class="li">Duration reporting</li>
+            <li class="li">Terminal-aware output (in-place updates when supported)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Completed in Version 2.7.0</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">DitaLinkCheckTask:</strong> Check for broken links in DITA content
+          <ul class="ul">
+            <li class="li">Internal link checking (xref, conref, topicref, image)</li>
+            <li class="li">Optional external URL verification</li>
+            <li class="li">Recursive scanning of referenced files</li>
+            <li class="li">Configurable timeouts for external checks</li>
+            <li class="li">URL pattern exclusion</li>
+            <li class="li">Detailed results with file locations</li>
+            <li class="li">scope="external" attribute detection</li>
+            <li class="li">Keyref/conkeyref skipping (requires DITA-OT resolution)</li>
+            <li class="li">Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Completed in Version 2.6.0</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Gradle Wrapper in Examples:</strong> All standalone example projects now include Gradle wrapper
+          <ul class="ul">
+            <li class="li">Self-contained example projects for easy testing</li>
+            <li class="li">All examples use built-in DitaOtDownloadTask</li>
+            <li class="li">Local plugin development with includeBuild</li>
+            <li class="li">No external plugins required</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Completed in Version 2.5.0</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">DitaOtValidateTask:</strong> Validate DITA content without full transformation
+          <ul class="ul">
+            <li class="li">Fast validation during development</li>
+            <li class="li">Strict mode (fail on warnings)</li>
+            <li class="li">Configurable processing mode (strict, lax, skip)</li>
+            <li class="li">Configurable timeout</li>
+            <li class="li">Clear error messages with file locations</li>
+            <li class="li">Summary report with error/warning counts</li>
+            <li class="li">Automatic temp directory cleanup</li>
+            <li class="li">Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Completed in Version 2.4.0</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">DitaOtDownloadTask:</strong> Built-in DITA-OT download from GitHub releases
+          <ul class="ul">
+            <li class="li">Automatic version management and caching</li>
+            <li class="li">Configurable retries with exponential backoff</li>
+            <li class="li">Checksum verification (MD5, SHA1, SHA256, SHA512)</li>
+            <li class="li">Temp-and-move pattern for safe downloads</li>
+            <li class="li">Configurable timeouts (connect/read)</li>
+            <li class="li">Quiet mode for CI environments</li>
+          </ul>
+        </li>
+        <li class="li"><strong class="ph b">DitaOtInstallPluginTask:</strong> Built-in plugin installation
+          <ul class="ul">
+            <li class="li">Install from registry, URL, or local files</li>
+            <li class="li">Configurable retries with exponential backoff</li>
+            <li class="li">Force reinstall option</li>
+            <li class="li">Quiet mode for CI environments</li>
+            <li class="li">Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+        <li class="li"><strong class="ph b">Improved Error Messages:</strong> Clear, actionable error messages with contextual suggestions and troubleshooting steps</li>
+        <li class="li"><strong class="ph b">No External Dependencies:</strong> Examples no longer require the de.undercouch.download plugin</li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">High Priority (P1)</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Multi-Format Task:</strong> Generate multiple outputs from single task</li>
+        <li class="li"><strong class="ph b">Incremental Build Support:</strong> Smart change detection for faster builds</li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Medium Priority (P2)</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Kotlin DSL Extensions:</strong> Cleaner Kotlin DSL syntax</li>
+        <li class="li"><strong class="ph b">Watch Mode:</strong> Automatic rebuild on file changes</li>
+        <li class="li"><strong class="ph b">DITA-OT Version Management:</strong> Switch between versions easily</li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Lower Priority (P3-P4)</h2>
+      
+      <ul class="ul">
+        <li class="li"><strong class="ph b">Preview Server:</strong> Live preview with auto-refresh</li>
+        <li class="li"><strong class="ph b">Build Metrics:</strong> Performance tracking and reporting</li>
+        <li class="li"><strong class="ph b">Docker Support:</strong> Containerized DITA-OT execution</li>
+        <li class="li"><strong class="ph b">IDE Plugins:</strong> IntelliJ and VS Code integration</li>
+        <li class="li"><strong class="ph b">Build Cache:</strong> Distributed caching for CI/CD</li>
+      </ul>
+    </section>
+
+    <section class="section"><h2 class="title sectiontitle">Contributing</h2>
+      
+      <p class="p">We welcome contributions! See the <a class="xref" href="https://github.com/jyjeanne/dita-ot-gradle" target="_blank" rel="external noopener">GitHub repository</a> for:</p>
+      <ul class="ul">
+        <li class="li">Feature requests and bug reports</li>
+        <li class="li">Pull requests</li>
+        <li class="li">Documentation improvements</li>
+      </ul>
+    </section>
+  </div>
+</article></main></body></html>

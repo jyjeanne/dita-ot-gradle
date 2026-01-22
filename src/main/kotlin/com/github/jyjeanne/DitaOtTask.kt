@@ -371,16 +371,50 @@ abstract class DitaOtTask @Inject constructor(
 
     /**
      * Detect DITA-OT version from the installation.
+     *
+     * Checks multiple locations in order of preference:
+     * 1. plugins/org.dita.base/plugin.xml (DITA-OT 3.x+)
+     * 2. lib/dost.jar manifest Implementation-Version
+     * 3. Directory name pattern (dita-ot-X.Y.Z)
+     * 4. Returns "unknown" if version cannot be determined
      */
     fun detectDitaOtVersion(): String {
         return try {
             val ditaHome = resolveDitaHome()
-            val versionFile = File(ditaHome, "VERSION")
-            if (versionFile.exists()) {
-                versionFile.readText().trim()
-            } else {
-                "unknown"
+
+            // Method 1: Read from org.dita.base plugin.xml (DITA-OT 3.x+)
+            val pluginXml = File(ditaHome, "plugins/org.dita.base/plugin.xml")
+            if (pluginXml.exists()) {
+                val content = pluginXml.readText()
+                // Use multiline regex to handle tags that span multiple lines
+                // Match version attribute with either double or single quotes
+                val versionRegex = """<plugin\s[^>]*version\s*=\s*["']([^"']+)["']""".toRegex(RegexOption.DOT_MATCHES_ALL)
+                val match = versionRegex.find(content)
+                if (match != null) {
+                    return match.groupValues[1]
+                }
             }
+
+            // Method 2: Read from lib/dost.jar manifest
+            val dostJar = File(ditaHome, "lib/dost.jar")
+            if (dostJar.exists()) {
+                java.util.jar.JarFile(dostJar).use { jar ->
+                    val version = jar.manifest?.mainAttributes?.getValue("Implementation-Version")
+                    if (!version.isNullOrBlank()) {
+                        return version
+                    }
+                }
+            }
+
+            // Method 3: Fallback - extract from directory name if it matches pattern
+            val dirName = ditaHome.name
+            val dirVersionRegex = """dita-ot-(\d+\.\d+(?:\.\d+)?)""".toRegex()
+            val dirMatch = dirVersionRegex.find(dirName)
+            if (dirMatch != null) {
+                return dirMatch.groupValues[1]
+            }
+
+            "unknown"
         } catch (e: Exception) {
             logger.debug("Could not detect DITA-OT version: ${e.message}")
             "unknown"
