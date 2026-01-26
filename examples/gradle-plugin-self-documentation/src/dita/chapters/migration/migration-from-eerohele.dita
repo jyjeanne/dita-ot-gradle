@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="migration-from-eerohele">
+  <title>Migration from eerohele/dita-ot-gradle</title>
+  <shortdesc>Upgrade guide for users of the original plugin.</shortdesc>
+  <body>
+    <p>This plugin is a fork of <codeph>eerohele/dita-ot-gradle</codeph> with additional features and improvements.</p>
+
+    <section>
+      <title>Why Migrate?</title>
+      <ul>
+        <li><b>Full Configuration Cache Support:</b> 77% faster incremental builds</li>
+        <li><b>Gradle 9 Compatibility:</b> Works with latest Gradle versions</li>
+        <li><b>Active Maintenance:</b> Regular updates and bug fixes</li>
+        <li><b>Improved Documentation:</b> Comprehensive examples and guides</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Migration Steps</title>
+      <ol>
+        <li>
+          <p><b>Update Plugin ID:</b></p>
+          <codeblock>// Before
+plugins {
+    id 'com.github.eerohele.dita-ot-gradle' version 'X.X.X'
+}
+
+// After
+plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
+}</codeblock>
+        </li>
+        <li>
+          <p><b>Review Task Configuration:</b> Most configurations are compatible. Update any deprecated options.</p>
+        </li>
+        <li>
+          <p><b>Enable Configuration Cache:</b> Add to <filepath>gradle.properties</filepath>:</p>
+          <codeblock>org.gradle.configuration-cache=true</codeblock>
+        </li>
+        <li>
+          <p><b>Test Your Build:</b> Run your existing build to verify compatibility.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <title>Breaking Changes</title>
+      <p>There are no breaking changes from the original plugin. All existing configurations should work without modification.</p>
+    </section>
+
+    <section>
+      <title>New Features Available</title>
+      <p>After migration, you can take advantage of:</p>
+      <ul>
+        <li><codeph>ditaProperties.put()</codeph> for Configuration Cache compatibility</li>
+        <li>Provider API support for lazy evaluation</li>
+        <li>Improved error messages and diagnostics</li>
+        <li>Better Kotlin DSL support</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Getting Help</title>
+      <p>If you encounter issues during migration:</p>
+      <ul>
+        <li>Check the <xref href="../reference/troubleshooting.dita">Troubleshooting</xref> guide</li>
+        <li>Open an issue on <xref href="https://github.com/jyjeanne/dita-ot-gradle/issues" format="html" scope="external">GitHub</xref></li>
+      </ul>
+    </section>
+  </body>
+</topic>

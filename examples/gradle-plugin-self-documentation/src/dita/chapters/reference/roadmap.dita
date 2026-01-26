@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="roadmap">
+  <title>Roadmap</title>
+  <shortdesc>Planned features and improvements.</shortdesc>
+  <body>
+    <p>This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
+
+    <section>
+      <title>Completed in Version 2.8.2</title>
+      <ul>
+        <li><b>validateDita Message Classification Fix:</b> DITA-OT informational messages (like DOTJ031I) no longer treated as errors
+          <ul>
+            <li>Updated ERROR_PATTERN to only match E (Error) and F (Fatal) suffixes</li>
+            <li>Added INFO_PATTERN to skip informational messages</li>
+            <li>Fixed fallback error extraction to exclude INFO messages</li>
+          </ul>
+        </li>
+        <li><b>checkLinks Peer Link Support:</b> Links with scope="peer" properly handled
+          <ul>
+            <li>Added isPeerScope detection for scope="peer" attribute</li>
+            <li>Peer links skipped during validation (not in build)</li>
+            <li>Peer links counted separately in results output</li>
+          </ul>
+        </li>
+        <li><b>showWarnings Option:</b> Configurable FOP warning display
+          <ul>
+            <li>Warnings suppressed by default (showWarnings=false)</li>
+            <li>Enable with showWarnings(true) for debugging</li>
+            <li>Summary shows warning count with hint to enable display</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.8.1</title>
+      <ul>
+        <li><b>Cross-Platform Path with Spaces Fix:</b> Fixed command building for paths containing spaces on Windows</li>
+        <li><b>DITA-OT Version Detection Fix:</b> Fixed version detection returning "unknown"
+          <ul>
+            <li>Reads from plugins/org.dita.base/plugin.xml (primary)</li>
+            <li>Falls back to lib/dost.jar manifest</li>
+            <li>Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0</li>
+          </ul>
+        </li>
+        <li><b>DITA-OT 4.x Compatibility:</b> Changed validation transtype from deprecated 'preprocess' to 'dita'</li>
+        <li><b>Unit Tests:</b> Added 20 new tests for bug fix coverage (total: 199 tests)</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.8.0</title>
+      <ul>
+        <li><b>Progress Reporting:</b> Visual progress indicators during builds
+          <ul>
+            <li>Visual progress bar with percentage</li>
+            <li>Stage detection from DITA-OT output (20 stages)</li>
+            <li>File count tracking</li>
+            <li>Configurable display styles (DETAILED, SIMPLE, MINIMAL, QUIET)</li>
+            <li>Error and warning collection with summary</li>
+            <li>Duration reporting</li>
+            <li>Terminal-aware output (in-place updates when supported)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.7.0</title>
+      <ul>
+        <li><b>DitaLinkCheckTask:</b> Check for broken links in DITA content
+          <ul>
+            <li>Internal link checking (xref, conref, topicref, image)</li>
+            <li>Optional external URL verification</li>
+            <li>Recursive scanning of referenced files</li>
+            <li>Configurable timeouts for external checks</li>
+            <li>URL pattern exclusion</li>
+            <li>Detailed results with file locations</li>
+            <li>scope="external" attribute detection</li>
+            <li>Keyref/conkeyref skipping (requires DITA-OT resolution)</li>
+            <li>Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.6.0</title>
+      <ul>
+        <li><b>Gradle Wrapper in Examples:</b> All standalone example projects now include Gradle wrapper
+          <ul>
+            <li>Self-contained example projects for easy testing</li>
+            <li>All examples use built-in DitaOtDownloadTask</li>
+            <li>Local plugin development with includeBuild</li>
+            <li>No external plugins required</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.5.0</title>
+      <ul>
+        <li><b>DitaOtValidateTask:</b> Validate DITA content without full transformation
+          <ul>
+            <li>Fast validation during development</li>
+            <li>Strict mode (fail on warnings)</li>
+            <li>Configurable processing mode (strict, lax, skip)</li>
+            <li>Configurable timeout</li>
+            <li>Clear error messages with file locations</li>
+            <li>Summary report with error/warning counts</li>
+            <li>Automatic temp directory cleanup</li>
+            <li>Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Completed in Version 2.4.0</title>
+      <ul>
+        <li><b>DitaOtDownloadTask:</b> Built-in DITA-OT download from GitHub releases
+          <ul>
+            <li>Automatic version management and caching</li>
+            <li>Configurable retries with exponential backoff</li>
+            <li>Checksum verification (MD5, SHA1, SHA256, SHA512)</li>
+            <li>Temp-and-move pattern for safe downloads</li>
+            <li>Configurable timeouts (connect/read)</li>
+            <li>Quiet mode for CI environments</li>
+          </ul>
+        </li>
+        <li><b>DitaOtInstallPluginTask:</b> Built-in plugin installation
+          <ul>
+            <li>Install from registry, URL, or local files</li>
+            <li>Configurable retries with exponential backoff</li>
+            <li>Force reinstall option</li>
+            <li>Quiet mode for CI environments</li>
+            <li>Cross-platform support (Windows, macOS, Linux)</li>
+          </ul>
+        </li>
+        <li><b>Improved Error Messages:</b> Clear, actionable error messages with contextual suggestions and troubleshooting steps</li>
+        <li><b>No External Dependencies:</b> Examples no longer require the de.undercouch.download plugin</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>High Priority (P1)</title>
+      <ul>
+        <li><b>Multi-Format Task:</b> Generate multiple outputs from single task</li>
+        <li><b>Incremental Build Support:</b> Smart change detection for faster builds</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Medium Priority (P2)</title>
+      <ul>
+        <li><b>Kotlin DSL Extensions:</b> Cleaner Kotlin DSL syntax</li>
+        <li><b>Watch Mode:</b> Automatic rebuild on file changes</li>
+        <li><b>DITA-OT Version Management:</b> Switch between versions easily</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Lower Priority (P3-P4)</title>
+      <ul>
+        <li><b>Preview Server:</b> Live preview with auto-refresh</li>
+        <li><b>Build Metrics:</b> Performance tracking and reporting</li>
+        <li><b>Docker Support:</b> Containerized DITA-OT execution</li>
+        <li><b>IDE Plugins:</b> IntelliJ and VS Code integration</li>
+        <li><b>Build Cache:</b> Distributed caching for CI/CD</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Contributing</title>
+      <p>We welcome contributions! See the <xref href="https://github.com/jyjeanne/dita-ot-gradle" format="html" scope="external">GitHub repository</xref> for:</p>
+      <ul>
+        <li>Feature requests and bug reports</li>
+        <li>Pull requests</li>
+        <li>Documentation improvements</li>
+      </ul>
+    </section>
+  </body>
+</topic>

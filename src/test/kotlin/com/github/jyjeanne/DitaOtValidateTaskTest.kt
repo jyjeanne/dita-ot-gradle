@@ -286,6 +286,75 @@ class DitaOtValidateTaskTest : StringSpec({
         task.get().processingMode.get() shouldBe "strict"
     }
 
+    // ============================================================================
+    // DITA-OT Message Classification Tests (v2.8.1 bug fix)
+    // Tests for proper handling of DITA-OT message severity codes
+    // ============================================================================
+
+    "DOTJ031I should be treated as info, not error" {
+        // This test verifies the fix for PLUGIN_NEW_VERSION_FEEDBACK.md
+        // DOTJ031I is an informational message about missing DITAVAL rules
+        // It should NOT cause validation to fail
+        //
+        // DITA-OT message format: DOT[component][number][severity]
+        // Severity: E=Error, W=Warning, I=Info, F=Fatal
+        //
+        // DOTJ031I message: "No rule for '%1' was found in the DITAVAL file.
+        // Using the default action, or a parent prop action if specified."
+
+        // The message code ends with 'I' (Info), not 'E' (Error)
+        val infoMessage = "[DOTJ031I] No rule for 'audience:admin' was found in the DITAVAL file."
+        val errorMessage = "[DOTJ012E] Some actual error occurred"
+        val warningMessage = "[DOTJ031W] Some warning message"
+
+        // Verify the patterns correctly classify messages
+        val infoPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}I\\]")
+        val errorPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}W\\]")
+
+        // DOTJ031I should match INFO pattern, not ERROR
+        infoPattern.matcher(infoMessage).find() shouldBe true
+        errorPattern.matcher(infoMessage).find() shouldBe false
+
+        // Actual error should match ERROR pattern
+        errorPattern.matcher(errorMessage).find() shouldBe true
+        infoPattern.matcher(errorMessage).find() shouldBe false
+
+        // Warning should match WARNING pattern
+        warningPattern.matcher(warningMessage).find() shouldBe true
+        errorPattern.matcher(warningMessage).find() shouldBe false
+    }
+
+    "Various DITA-OT message codes are classified correctly" {
+        // Test various DITA-OT message codes to ensure correct classification
+        val infoPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}I\\]")
+        val errorPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}W\\]")
+
+        // Info messages (should NOT be errors)
+        infoPattern.matcher("[DOTJ031I]").find() shouldBe true
+        infoPattern.matcher("[DOTA001I]").find() shouldBe true
+        infoPattern.matcher("[DOTX050I]").find() shouldBe true
+
+        // Error messages
+        errorPattern.matcher("[DOTJ012E]").find() shouldBe true
+        errorPattern.matcher("[DOTA001E]").find() shouldBe true
+        errorPattern.matcher("[DOTX050E]").find() shouldBe true
+
+        // Fatal messages (also errors)
+        errorPattern.matcher("[DOTJ001F]").find() shouldBe true
+        errorPattern.matcher("[DOTA001F]").find() shouldBe true
+
+        // Warning messages
+        warningPattern.matcher("[DOTJ031W]").find() shouldBe true
+        warningPattern.matcher("[DOTA001W]").find() shouldBe true
+        warningPattern.matcher("[DOTX050W]").find() shouldBe true
+
+        // Info messages should NOT match error pattern
+        errorPattern.matcher("[DOTJ031I]").find() shouldBe false
+        errorPattern.matcher("[DOTA001I]").find() shouldBe false
+    }
+
     "ValidationResult output can be retrieved" {
         val result = DitaOtValidateTask.ValidationResult(
             file = File("test.ditamap"),

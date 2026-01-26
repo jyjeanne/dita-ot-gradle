@@ -90,4 +90,38 @@ class DitaOtPluginTest : StringSpec({
         ditaTask.progressStyle("QUIET")
         ditaTask.progressStyle.get() shouldBe "QUIET"
     }
+
+    // ============================================================================
+    // showWarnings Tests (v2.8.1)
+    // Tests for FOP warning verbosity control
+    // ============================================================================
+
+    "DitaOtTask showWarnings default is false" {
+        // By default, warnings should be suppressed to reduce noise
+        // (especially FOP warnings during PDF generation)
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.showWarnings.get() shouldBe false
+    }
+
+    "DitaOtTask showWarnings can be enabled" {
+        // Users can enable warnings for debugging
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.showWarnings(true)
+        ditaTask.showWarnings.get() shouldBe true
+    }
+
+    "DitaOtTask showWarnings can be disabled after enabling" {
+        project.plugins.apply(DitaOtPlugin::class.java)
+
+        val ditaTask = project.tasks.findByName(DITA) as DitaOtTask
+        ditaTask.showWarnings(true)
+        ditaTask.showWarnings.get() shouldBe true
+
+        ditaTask.showWarnings(false)
+        ditaTask.showWarnings.get() shouldBe false
+    }
 })

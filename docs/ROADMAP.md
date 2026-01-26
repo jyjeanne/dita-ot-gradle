@@ -175,6 +175,81 @@ tasks.register<DitaLinkCheckTask>("checkLinks") {
 
 ---
 
+## ✅ v2.8.2 Bug Fixes and Improvements (COMPLETED)
+
+### Bug Fixes from PR Feedback
+
+#### validateDita Task - DITA-OT Message Classification Fix
+**Status**: ✅ COMPLETED (v2.8.2)
+
+Fixed false error reporting where informational messages (like DOTJ031I) were incorrectly treated as errors.
+
+**Problem:** DITA-OT messages ending with `I` (Info) were matched by the error pattern, causing validation to fail on non-error messages.
+
+**Solution:** Updated `ERROR_PATTERN` to only match `E` (Error) and `F` (Fatal) suffixes. Added `INFO_PATTERN` to explicitly skip informational messages.
+
+**DITA-OT Message Format:** `DOT[component][number][severity]`
+- `E` = Error (e.g., DOTJ012E)
+- `F` = Fatal (e.g., DOTJ001F)
+- `W` = Warning (e.g., DOTJ031W)
+- `I` = Info (e.g., DOTJ031I) - **NOT an error**
+
+**Files Fixed:**
+- `DitaOtValidateTask.kt` - Error pattern and message parsing
+- `ProgressReporter.kt` - Error detection during progress reporting
+
+#### checkLinks Task - Peer Link Support
+**Status**: ✅ COMPLETED (v2.8.2)
+
+Fixed link checker incorrectly flagging `scope="peer"` links as broken.
+
+**Problem:** The link checker only recognized `scope="external"` for skipping, but not `scope="peer"`. Peer links point to resources not available at build time (e.g., separately-generated API documentation).
+
+**Solution:** Added `isPeerScope` detection and skip logic. Peer links are now counted separately in the results.
+
+**DITA Scope Values:**
+- `local` (default): Resource is part of this documentation set
+- `peer`: Resource is NOT in this build but part of same information set
+- `external`: Resource is external (websites, etc.)
+
+**Files Fixed:**
+- `DitaLinkCheckTask.kt` - Added isPeerScope property and handling
+
+### New Features
+
+#### Configurable Warning Display (showWarnings)
+**Status**: ✅ COMPLETED (v2.8.2)
+
+Added `showWarnings` property to control FOP warning verbosity during PDF transformation.
+
+**Problem:** PDF transformations logged numerous FOP warnings by default, cluttering output.
+
+**Solution:** Warnings are now suppressed by default but still counted. Users can enable display with `showWarnings(true)`.
+
+**API:**
+```kotlin
+tasks.named<DitaOtTask>("dita") {
+    showWarnings(false)  // Default - warnings counted but not displayed
+    showWarnings(true)   // Show all warnings during transformation
+}
+```
+
+**Files Changed:**
+- `DitaOtTask.kt` - Added showWarnings property and DSL method
+- `ProgressReporter.kt` - Updated warning display logic
+
+### New Unit Tests
+
+Added 6 new tests for v2.8.2 (total: 203 tests):
+
+| Test Class | New Tests | Description |
+|------------|-----------|-------------|
+| `DitaOtValidateTaskTest.kt` | 2 | DITA-OT message classification (DOTJ031I) |
+| `DitaLinkCheckTaskTest.kt` | 4 | Peer link handling (scope="peer") |
+| `DitaOtPluginTest.kt` | 3 | showWarnings property |
+
+---
+
 ## ✅ v2.8.1 Bug Fixes and Improvements (COMPLETED)
 
 ### Bug Fixes
@@ -255,7 +330,7 @@ Added Gradle wrapper to all standalone example projects for self-contained execu
 - ✅ `multi-language/`
 - ✅ `version-docs/`
 - ✅ `plugin-test/`
-- ✅ `dita-ot-gradle-plugin-documentation/`
+- ✅ `gradle-plugin-self-documentation/`
 
 **Also updated:**
 - All examples now use built-in `DitaOtDownloadTask` (no external `de.undercouch.download` plugin)
@@ -553,6 +628,9 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
+| **Configurable Warning Display (showWarnings)** | 2.8.2 | Jan 2026 |
+| **checkLinks Peer Link Support** | 2.8.2 | Jan 2026 |
+| **validateDita Message Classification Fix** | 2.8.2 | Jan 2026 |
 | **Unit Tests for Bug Fixes** | 2.8.1 | Jan 2026 |
 | **Cross-Platform Path with Spaces Fix** | 2.8.1 | Jan 2026 |
 | **DITA-OT Version Detection Fix** | 2.8.1 | Jan 2026 |

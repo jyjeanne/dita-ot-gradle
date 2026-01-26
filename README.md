@@ -7,13 +7,13 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.1)
+## Highlights (v2.8.2)
 
 | Feature | Description |
 |---------|-------------|
-| **Progress Reporting** | Visual progress indicators during builds |
-| **DitaLinkCheckTask** | Check for broken internal and external links |
-| **DitaOtValidateTask** | Validate DITA content without full transformation |
+| **Progress Reporting** | Visual progress indicators with configurable warning display |
+| **DitaLinkCheckTask** | Check for broken links with `scope="peer"` support |
+| **DitaOtValidateTask** | Validate DITA content with proper DITA-OT message classification |
 | **DitaOtDownloadTask** | Built-in DITA-OT download with retries, checksums, and caching |
 | **DitaOtInstallPluginTask** | Install plugins from registry, URL, or local files |
 | **Configuration Cache** | Up to **77% faster** incremental builds |
@@ -35,14 +35,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.2"
 }
 ```
 
@@ -128,7 +128,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
@@ -187,7 +187,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
 }
 
 def ditaOtVersion = '4.2.3'
@@ -305,7 +305,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.2"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -553,7 +553,7 @@ cd examples/version-docs
 | [`multi-project`](examples/multi-project) | Multi-project Gradle build | Large projects |
 | [`classpath`](examples/classpath) | Custom classpath configuration | Advanced customization |
 | [`configuration-cache`](examples/configuration-cache) | Configuration cache demo | Performance optimization |
-| [`dita-ot-gradle-plugin-documentation`](examples/dita-ot-gradle-plugin-documentation) | Generate plugin docs from DITA | Self-documentation |
+| [`gradle-plugin-self-documentation`](examples/gradle-plugin-self-documentation) | Generate plugin docs (HTML5, PDF, Bootstrap) | Self-documentation |
 
 ---
 
@@ -680,7 +680,11 @@ tasks.register<com.github.jyjeanne.DitaLinkCheckTask>("checkLinks") {
 **Limitations:**
 - `keyref` and `conkeyref` links are skipped (require DITA-OT key resolution)
 - Fragment identifiers (`#element-id`) are not validated against target file content
-- Peer scope links (`scope="peer"`) are checked as regular internal links
+
+**Scope Handling:**
+- `scope="local"` (default): Links checked as internal file references
+- `scope="peer"`: Links skipped (not available at build time, e.g., API docs)
+- `scope="external"`: Links handled as external URLs
 
 **Sample Output:**
 ```
@@ -693,8 +697,11 @@ Internal links:     120
   ✓ Valid:          118
   ✗ Broken:         2
 ───────────────────────────────────────────────────────
-External links:     25
-  ✓ Valid:          23
+Peer links:         3
+  ○ Skipped:        3 (not in build)
+───────────────────────────────────────────────────────
+External links:     22
+  ✓ Valid:          20
   ✗ Broken:         2
 ───────────────────────────────────────────────────────
 Status:             FAILED
@@ -714,6 +721,7 @@ Status:             FAILED
 | `useAssociatedFilter` | `Boolean` | `false` | Use DITAVAL with same basename |
 | `showProgress` | `Boolean` | `true` | Show visual progress during builds |
 | `progressStyle` | `String` | `DETAILED` | Progress display style (DETAILED, SIMPLE, MINIMAL, QUIET) |
+| `showWarnings` | `Boolean` | `false` | Display warnings during transformation (suppresses FOP warnings by default) |
 
 ### Passing Properties to DITA-OT
 
@@ -913,7 +921,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.1'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
 }
 ```
 
@@ -921,7 +929,7 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.1 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.2 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8+ | No | Yes |
 | Gradle 9+ | No | Yes |

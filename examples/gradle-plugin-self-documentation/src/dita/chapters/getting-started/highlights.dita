@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="highlights">
+  <title>Highlights (v2.8.2)</title>
+  <shortdesc>Key features and improvements in the current version.</shortdesc>
+  <body>
+    <section>
+      <title>What's New in 2.8.2</title>
+      <p>This release includes bug fixes from community feedback and new features:</p>
+      <ul>
+        <li><b>validateDita Fix:</b> DITA-OT informational messages (like DOTJ031I) are no longer incorrectly treated as errors</li>
+        <li><b>checkLinks Peer Support:</b> Links with <codeph>scope="peer"</codeph> are now properly skipped (not flagged as broken)</li>
+        <li><b>showWarnings Option:</b> FOP warnings are now suppressed by default during PDF transformation, configurable via <codeph>showWarnings(true)</codeph></li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Feature Overview</title>
+      <table>
+        <tgroup cols="2">
+          <colspec colname="feature" colwidth="1*"/>
+          <colspec colname="description" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Feature</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><b>Progress Reporting</b></entry>
+              <entry>Visual progress indicators with configurable warning display</entry>
+            </row>
+            <row>
+              <entry><b>DitaLinkCheckTask</b></entry>
+              <entry>Check for broken links with scope="peer" support</entry>
+            </row>
+            <row>
+              <entry><b>DitaOtValidateTask</b></entry>
+              <entry>Validate DITA content with proper message classification</entry>
+            </row>
+            <row>
+              <entry><b>DitaOtDownloadTask</b></entry>
+              <entry>Download DITA-OT automatically with version management and caching</entry>
+            </row>
+            <row>
+              <entry><b>DitaOtInstallPluginTask</b></entry>
+              <entry>Install DITA-OT plugins from registry, URL, or local files</entry>
+            </row>
+            <row>
+              <entry><b>Configuration Cache</b></entry>
+              <entry>Up to 77% faster incremental builds</entry>
+            </row>
+            <row>
+              <entry><b>Improved Error Messages</b></entry>
+              <entry>Contextual error messages with suggestions and troubleshooting</entry>
+            </row>
+            <row>
+              <entry><b>Cross-Platform</b></entry>
+              <entry>Windows, macOS, Linux support (paths with spaces supported)</entry>
+            </row>
+            <row>
+              <entry><b>DITA-OT 3.x/4.x</b></entry>
+              <entry>Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0</entry>
+            </row>
+            <row>
+              <entry><b>Modern Architecture</b></entry>
+              <entry>Provider API, Gradle 9.0 compatible</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Task Types</title>
+
+      <p><b>DitaOtValidateTask</b> - Validate DITA content without full transformation:</p>
+      <codeblock>tasks.register&lt;DitaOtValidateTask&gt;("validateDita") {
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    input("docs/guide.ditamap")
+    strictMode.set(true)  // Fail on warnings too
+}</codeblock>
+
+      <p><b>DitaLinkCheckTask</b> - Check for broken links:</p>
+      <codeblock>tasks.register&lt;DitaLinkCheckTask&gt;("checkLinks") {
+    input("docs/guide.ditamap")
+    checkExternal.set(true)   // Also check external URLs
+    failOnBroken.set(true)    // Fail build on broken links
+}</codeblock>
+
+      <p><b>DitaOtDownloadTask</b> - Automatically download DITA-OT:</p>
+      <codeblock>val downloadDitaOt by tasks.registering(DitaOtDownloadTask::class) {
+    version.set("4.2.3")  // DITA-OT version
+    destinationDir.set(layout.buildDirectory.dir("dita-ot"))
+}</codeblock>
+
+      <p><b>DitaOtInstallPluginTask</b> - Install DITA-OT plugins:</p>
+      <codeblock>val installPlugins by tasks.registering(DitaOtInstallPluginTask::class) {
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    plugins.set(listOf(
+        "org.dita.pdf2",                    // From registry
+        "https://example.com/plugin.zip",   // From URL
+        "/path/to/local/plugin.zip"         // Local file
+    ))
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Progress Reporting</title>
+      <p>Visual progress indicators during DITA-OT transformations:</p>
+      <codeblock>dita {
+    showProgress(true)         // Enable progress (default)
+    progressStyle("DETAILED")  // DETAILED, SIMPLE, MINIMAL, QUIET
+    showWarnings(false)        // Suppress FOP warnings (default)
+}</codeblock>
+      <p>Example output:</p>
+      <codeblock>  [=====>                        ] 18% - Preprocessing (12 files)
+  [===============>              ] 52% - Resolving content references (24 files)
+  [=========================>    ] 85% - Generating content (34 files)
+  [==============================] 100% - Complete (45 files, 3.2s)
+
+  Warnings: 4
+    (use showWarnings(true) to display warning details)</codeblock>
+    </section>
+
+    <section>
+      <title>Performance Improvements</title>
+      <p>With Configuration Cache enabled, you can achieve significant build time improvements:</p>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="scenario" colwidth="2*"/>
+          <colspec colname="time" colwidth="1*"/>
+          <colspec colname="improvement" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Scenario</entry>
+              <entry>Time</entry>
+              <entry>Improvement</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Without Configuration Cache</entry>
+              <entry>20.8s</entry>
+              <entry>baseline</entry>
+            </row>
+            <row>
+              <entry>With Cache (first run)</entry>
+              <entry>22.8s</entry>
+              <entry>-10%</entry>
+            </row>
+            <row>
+              <entry><b>With Cache (up-to-date)</b></entry>
+              <entry><b>4.8s</b></entry>
+              <entry><b>77% faster</b></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Version History</title>
+      <p><b>2.8.2</b> - validateDita message fix, checkLinks peer support, showWarnings option</p>
+      <p><b>2.8.1</b> - Cross-platform path fix, DITA-OT version detection fix, DITA-OT 4.x compatibility</p>
+      <p><b>2.8.0</b> - Progress reporting, thread safety improvements</p>
+      <p><b>2.7.0</b> - DitaLinkCheckTask for broken link detection</p>
+      <p><b>2.6.0</b> - Gradle wrapper in all examples</p>
+      <p><b>2.5.0</b> - DitaOtValidateTask for content validation</p>
+      <p><b>2.4.0</b> - DitaOtDownloadTask, DitaOtInstallPluginTask, improved error messages</p>
+      <p><b>2.3.x</b> - Configuration cache support, Gradle 9.0 compatibility</p>
+    </section>
+  </body>
+</topic>

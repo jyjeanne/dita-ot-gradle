@@ -1,0 +1,98 @@
+@startuml publish-workflow-simple
+
+title DITA Publication Workflow\n./gradlew publishWorkflow
+
+skinparam backgroundColor #fefefe
+skinparam activity {
+  BackgroundColor #e8f4e8
+  BorderColor #2d5a2d
+  DiamondBackgroundColor #fff3cd
+  DiamondBorderColor #856404
+}
+skinparam arrow {
+  Color #333333
+}
+
+start
+
+partition "Step 1: Setup" #e3f2fd {
+  :Download DITA-OT 4.2.3
+  from GitHub releases;
+}
+
+partition "Step 2: Install Plugins" #e8f5e9 {
+  :Install DITA-OT plugins
+  from registry:
+  **net.infotexture.dita-bootstrap**;
+}
+
+partition "Step 3: Validation" #f1f8e9 {
+  :Validate DITA content
+  (strict processing mode);
+
+  if (Valid?) then (yes)
+  else (no)
+    #ffcdd2:Validation Error|
+    stop
+  endif
+}
+
+partition "Step 4: Link Check" #fff8e1 {
+  :Check internal and
+  external links;
+
+  if (All links OK?) then (yes)
+  else (no)
+    #ffcdd2:Broken Links|
+    stop
+  endif
+}
+
+partition "Step 5: Publish" #f3e5f5 {
+  fork
+    :Generate **HTML5**
+    build/docs/html5/;
+  fork again
+    :Generate **PDF**
+    build/docs/pdf/;
+  fork again
+    :Generate **Bootstrap**
+    build/docs/bootstrap/;
+  end fork
+
+  if (Published?) then (yes)
+  else (no)
+    #ffcdd2:Build Error|
+    stop
+  endif
+}
+
+partition "Step 6: Verify" #e0f7fa {
+  fork
+    :Verify **HTML5**
+    - index.html exists
+    - files not empty;
+  fork again
+    :Verify **PDF**
+    - user-guide.pdf exists
+    - file not empty;
+  fork again
+    :Verify **Bootstrap**
+    - toc.html exists
+    - files not empty;
+  end fork
+
+  if (Verified?) then (yes)
+  else (no)
+    #ffcdd2:Missing Output|
+    stop
+  endif
+}
+
+#c8e6c9:BUILD SUCCESS|
+
+stop
+
+footer DITA-OT Gradle Plugin v2.8.1 | Generated with PlantUML
+
+@enduml

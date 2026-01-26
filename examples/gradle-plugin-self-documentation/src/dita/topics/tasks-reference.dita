@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="tasks-reference">
+  <title>Task Reference</title>
+  <shortdesc>Reference documentation for all available Gradle tasks.</shortdesc>
+  <refbody>
+    <section>
+      <title>Available Task Types</title>
+      <p>The plugin provides the following task types. See <xref href="configuration.dita"/>
+        for detailed configuration options.</p>
+      <table>
+        <tgroup cols="2">
+          <colspec colname="task" colwidth="1*"/>
+          <colspec colname="purpose" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Task</entry>
+              <entry>Purpose</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><codeph>DitaOtDownloadTask</codeph></entry>
+              <entry>Download DITA-OT from GitHub releases with automatic caching and checksum verification</entry>
+            </row>
+            <row>
+              <entry><codeph>DitaOtInstallPluginTask</codeph></entry>
+              <entry>Install plugins from registry, URL, or local paths</entry>
+            </row>
+            <row>
+              <entry><codeph>DitaOtTask</codeph></entry>
+              <entry>Execute DITA transformations to produce output</entry>
+            </row>
+            <row>
+              <entry><codeph>DitaOtValidateTask</codeph></entry>
+              <entry>Validate DITA content without full transformation</entry>
+            </row>
+            <row>
+              <entry><codeph>DitaLinkCheckTask</codeph></entry>
+              <entry>Check for broken internal and external links</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Download Task</title>
+      <p>Download DITA-OT automatically from
+        <xref href="https://github.com/dita-ot/dita-ot/releases" format="html" scope="external"
+          >GitHub releases</xref>:</p>
+      <codeblock outputclass="language-kotlin">tasks.register&lt;com.github.jyjeanne.DitaOtDownloadTask&gt;("downloadDitaOt") {
+    version("4.2.3")
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Transformation Task</title>
+      <p>Execute a DITA transformation:</p>
+      <codeblock outputclass="language-kotlin">tasks.register&lt;com.github.jyjeanne.DitaOtTask&gt;("ditaHtml") {
+    dependsOn("downloadDitaOt")
+    ditaOt("build/dita-ot/dita-ot-4.2.3")
+    input("src/dita/maps/user-guide.ditamap")
+    output("build/docs/html5")
+    transtype("html5")
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Running Tasks</title>
+      <p>Execute builds from the command line:</p>
+      <codeblock># Build HTML5 documentation
+./gradlew ditaHtml
+
+# Build all formats
+./gradlew ditaAll
+
+# Continuous mode - watches for changes and rebuilds
+./gradlew ditaHtml --continuous</codeblock>
+    </section>
+  </refbody>
+</reference>

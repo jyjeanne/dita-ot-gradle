@@ -72,15 +72,33 @@ abstract class DitaOtValidateTask @Inject constructor(
         /** Maximum output size (200KB) */
         private const val MAX_OUTPUT_SIZE = 200 * 1024
 
-        /** Pattern for DITA-OT error messages */
+        /**
+         * Pattern for DITA-OT error messages.
+         * DITA-OT message format: DOT[component][number][severity]
+         * Severity codes: E=Error, F=Fatal, W=Warning, I=Info
+         * Only matches messages ending with E (Error) or F (Fatal).
+         */
         private val ERROR_PATTERN = Pattern.compile(
-            "\\[DOTA?[A-Z]*\\d+[A-Z]?\\]|ERROR|FATAL|Error:|error:",
+            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|(?<![A-Z])Error:|(?<![a-z])error:",
             Pattern.CASE_INSENSITIVE
         )
 
-        /** Pattern for DITA-OT warning messages */
+        /**
+         * Pattern for DITA-OT warning messages.
+         * Only matches messages ending with W (Warning).
+         */
         private val WARNING_PATTERN = Pattern.compile(
-            "\\[DOTX?\\d+W\\]|WARN|Warning:|warning:",
+            "\\[DOT[A-Z]\\d{3,4}W\\]|(?<!\\w)WARN(?!ING\\w)|Warning:|warning:",
+            Pattern.CASE_INSENSITIVE
+        )
+
+        /**
+         * Pattern for DITA-OT informational messages.
+         * Messages ending with I are informational and should not be treated as errors.
+         * Example: DOTJ031I - missing DITAVAL rule (informational, not an error)
+         */
+        private val INFO_PATTERN = Pattern.compile(
+            "\\[DOT[A-Z]\\d{3,4}I\\]",
             Pattern.CASE_INSENSITIVE
         )
 
@@ -401,8 +419,13 @@ abstract class DitaOtValidateTask @Inject constructor(
             // add a general error
             if (exitCode != 0 && errors.isEmpty()) {
                 // Extract meaningful error from output
+                // IMPORTANT: Exclude INFO messages (like DOTJ031I) which may contain
+                // "ERROR" keyword in their description but are not actual errors
                 val errorLines = output.lines()
-                    .filter { ERROR_PATTERN.matcher(it).find() }
+                    .filter { line ->
+                        ERROR_PATTERN.matcher(line).find() &&
+                        !INFO_PATTERN.matcher(line).find()  // Skip info messages
+                    }
                     .take(5)
 
                 if (errorLines.isNotEmpty()) {
@@ -507,6 +530,15 @@ abstract class DitaOtValidateTask @Inject constructor(
 
     /**
      * Parse an output line for errors and warnings.
+     *
+     * DITA-OT message severity is determined by the suffix:
+     * - E = Error (e.g., DOTJ012E)
+     * - F = Fatal (e.g., DOTJ001F)
+     * - W = Warning (e.g., DOTJ031W)
+     * - I = Info (e.g., DOTJ031I) - NOT an error, just informational
+     *
+     * Info messages like DOTJ031I ("No rule for X was found in DITAVAL file")
+     * are informational only and should not cause validation to fail.
      */
     private fun parseOutputLine(
         line: String,
@@ -516,6 +548,12 @@ abstract class DitaOtValidateTask @Inject constructor(
     ) {
         val trimmedLine = line.trim()
         if (trimmedLine.isEmpty()) return
+
+        // Skip informational messages (ending with I) - they are not errors
+        if (INFO_PATTERN.matcher(trimmedLine).find()) {
+            logger.debug("  [INFO] $trimmedLine")
+            return
+        }
 
         when {
             ERROR_PATTERN.matcher(trimmedLine).find() -> {

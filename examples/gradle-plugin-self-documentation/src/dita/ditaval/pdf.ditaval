@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<val>
+  <!-- PDF-specific filtering -->
+  <prop action="include" att="audience" val="print"/>
+  <prop action="exclude" att="audience" val="web"/>
+
+  <!-- Include all content by default -->
+  <prop action="include"/>
+
+  <!-- Product filtering example -->
+  <prop action="include" att="product" val="enterprise"/>
+  <prop action="include" att="product" val="standard"/>
+</val>

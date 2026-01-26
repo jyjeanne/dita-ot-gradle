@@ -1,0 +1,43 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# DITA-OT (downloaded to project root)
+/dita-ot/
+*.log
+
+# Oxygen XML Editor
+.oxygen/
+*.xpr.backup
+*.xpr~
+*.xpr.bak
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Java
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Local environment
+.env
+.env.local
+
+# Claude Code
+.claude/

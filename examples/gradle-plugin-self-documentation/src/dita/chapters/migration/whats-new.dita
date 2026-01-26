@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="whats-new">
+  <title>What's New</title>
+  <shortdesc>Release highlights and new features.</shortdesc>
+  <body>
+    <section>
+      <title>Version 2.8.2</title>
+      <p><b>Bug Fixes from Community Feedback</b></p>
+      <ul>
+        <li><b>validateDita Fix:</b> DITA-OT informational messages (like DOTJ031I) no longer treated as errors</li>
+        <li><b>checkLinks Peer Support:</b> Links with <codeph>scope="peer"</codeph> properly skipped</li>
+        <li><b>showWarnings Option:</b> FOP warnings suppressed by default, configurable via <codeph>showWarnings(true)</codeph></li>
+        <li>Code review fixes for fallback error extraction</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.8.1</title>
+      <p><b>Cross-Platform and Compatibility Fixes</b></p>
+      <ul>
+        <li><b>Path with Spaces Fix:</b> Fixed command building for paths containing spaces on Windows</li>
+        <li><b>Version Detection Fix:</b> Fixed DITA-OT version detection returning "unknown"</li>
+        <li><b>DITA-OT 4.x Compatibility:</b> Changed validation transtype from deprecated 'preprocess' to 'dita'</li>
+        <li>20 new unit tests for bug fix coverage</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.8.0</title>
+      <p><b>Progress Reporting</b></p>
+      <ul>
+        <li><b>Visual Progress Bar:</b> Real-time progress indicators during builds</li>
+        <li><b>Stage Detection:</b> 20 processing stages tracked (init, preprocess, transform, etc.)</li>
+        <li><b>File Count:</b> Shows number of files processed</li>
+        <li><b>Configurable Styles:</b> DETAILED, SIMPLE, MINIMAL, QUIET</li>
+        <li><b>Thread Safety:</b> Improved error and warning collection</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.7.0</title>
+      <p><b>Link Checking</b></p>
+      <ul>
+        <li><b>DitaLinkCheckTask:</b> Check for broken links in DITA content</li>
+        <li>Internal link checking (xref, conref, topicref, image)</li>
+        <li>Optional external URL verification</li>
+        <li>Recursive scanning of referenced files</li>
+        <li>Configurable timeouts and URL exclusion patterns</li>
+        <li><codeph>scope="external"</codeph> and <codeph>scope="peer"</codeph> detection</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.6.0</title>
+      <ul>
+        <li>Added Gradle wrapper to all example projects</li>
+        <li>Updated examples to use built-in DitaOtDownloadTask</li>
+        <li>Fixed output() method calls in examples</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.5.0</title>
+      <p><b>Content Validation</b></p>
+      <ul>
+        <li><b>DitaOtValidateTask:</b> Validate DITA content without full transformation</li>
+        <li>Fast validation for development workflow</li>
+        <li>Strict mode (fail on warnings)</li>
+        <li>Configurable processing mode and timeout</li>
+        <li>Clear error messages with file locations</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.4.0</title>
+      <p><b>Major Release: Built-in DITA-OT Management</b></p>
+      <ul>
+        <li><b>DitaOtDownloadTask:</b> Automatic DITA-OT download with caching</li>
+        <li><b>DitaOtInstallPluginTask:</b> Install plugins from registry, URL, or local files</li>
+        <li><b>Improved Error Messages:</b> Contextual suggestions and troubleshooting steps</li>
+        <li>No external plugins required for DITA-OT download</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.3.x</title>
+      <p><b>Configuration Cache Support</b></p>
+      <ul>
+        <li><b>Configuration Cache:</b> Up to 77% faster incremental builds</li>
+        <li><b>Provider API:</b> New <codeph>ditaProperties.put()</codeph> method</li>
+        <li><b>Gradle 9 Support:</b> Full compatibility with Gradle 9.x</li>
+        <li><b>Fixed Implicit Task Dependencies:</b> Proper handling of Provider inputs</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Performance Improvements</title>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="scenario" colwidth="2*"/>
+          <colspec colname="before" colwidth="1*"/>
+          <colspec colname="after" colwidth="1*"/>
+          <thead>
+            <row>
+              <entry>Scenario</entry>
+              <entry>Before</entry>
+              <entry>After (2.8.x)</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry>Incremental build (up-to-date)</entry>
+              <entry>20.8s</entry>
+              <entry>4.8s</entry>
+            </row>
+            <row>
+              <entry>Configuration phase</entry>
+              <entry>~3s</entry>
+              <entry>&lt;0.5s (cached)</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Upgrade Recommendations</title>
+      <p>To get the most from version 2.8.x:</p>
+      <ol>
+        <li>Enable Configuration Cache in <filepath>gradle.properties</filepath></li>
+        <li>Use <codeph>ditaProperties.put()</codeph> instead of closures</li>
+        <li>Upgrade to Gradle 9.0 or later</li>
+        <li>Enable parallel execution with <codeph>org.gradle.parallel=true</codeph></li>
+        <li>Use <codeph>showWarnings(false)</codeph> for cleaner PDF builds</li>
+      </ol>
+    </section>
+  </body>
+</topic>

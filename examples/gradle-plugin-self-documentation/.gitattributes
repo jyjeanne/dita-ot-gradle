@@ -1,0 +1,30 @@
+# DITA files - treat as XML for better diffs
+*.dita text diff=xml
+*.ditamap text diff=xml
+*.bookmap text diff=xml
+*.ditaval text diff=xml
+*.xml text diff=xml
+
+# Gradle files
+*.gradle text diff=java
+*.gradle.kts text diff=kotlin
+*.properties text
+
+# Shell scripts
+*.sh text eol=lf
+*.bat text eol=crlf
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+
+# Markdown
+*.md text diff=markdown
+
+# Binary files
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="install">
+  <title>Installation</title>
+  <shortdesc>Install the DITA-OT Gradle Plugin in your project.</shortdesc>
+  <taskbody>
+    <prereq>
+      <p>Before installing, ensure you have:</p>
+      <ul>
+        <li><xref href="https://adoptium.net/" format="html" scope="external">Java JDK 11 or 17</xref> installed</li>
+        <li><xref href="https://gradle.org/install/" format="html" scope="external">Gradle 8.0 or higher</xref> (or use Gradle Wrapper)</li>
+      </ul>
+    </prereq>
+
+    <context>
+      <p>Add the plugin to your Gradle build file using the Plugin DSL.</p>
+    </context>
+
+    <steps>
+      <step>
+        <cmd>Add the plugin to your <filepath>build.gradle.kts</filepath> file:</cmd>
+        <info>
+          <codeblock outputclass="language-kotlin">plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
+}</codeblock>
+        </info>
+      </step>
+
+      <step>
+        <cmd>For Groovy DSL, add to <filepath>build.gradle</filepath>:</cmd>
+        <info>
+          <codeblock outputclass="language-groovy">plugins {
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.0'
+}</codeblock>
+        </info>
+      </step>
+
+      <step>
+        <cmd>Verify the installation by running:</cmd>
+        <info>
+          <codeblock>./gradlew tasks --group=documentation</codeblock>
+        </info>
+        <stepresult>You should see the DITA tasks listed in the output.</stepresult>
+      </step>
+    </steps>
+
+    <result>
+      <p>The plugin is now installed and ready to configure for your documentation project.</p>
+      <p>Next step: <xref href="quick-start.dita"/> to build your first documentation output.</p>
+      <p>For advanced options, see <xref href="configuration.dita"/>.</p>
+    </result>
+  </taskbody>
+</task>

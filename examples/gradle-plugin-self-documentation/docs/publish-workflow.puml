@@ -1,0 +1,192 @@
+@startuml publish-workflow
+
+title DITA Documentation Publication Workflow\n./gradlew publishWorkflow
+
+skinparam activityBackgroundColor #f0f0f0
+skinparam activityBorderColor #333333
+skinparam activityDiamondBackgroundColor #ffffcc
+skinparam activityDiamondBorderColor #333333
+skinparam arrowColor #333333
+skinparam noteBorderColor #999999
+skinparam noteBackgroundColor #ffffcc
+
+|#lightblue|Gradle Build|
+
+start
+
+:publishWorkflow;
+note right
+  Complete publication workflow
+  for DITA documentation
+  Plugin v2.8.1
+end note
+
+|#lightyellow|Step 1: Setup|
+
+:downloadDitaOt;
+note right
+  Download DITA-OT 4.2.3
+  from GitHub releases
+  to dita-ot/ folder
+end note
+
+if (DITA-OT downloaded?) then (yes)
+  :DITA-OT ready;
+else (no)
+  :Download from GitHub;
+  :Extract to destination;
+  :DITA-OT ready;
+endif
+
+|#e8f5e9|Step 2: Install Plugins|
+
+:installPlugins;
+note right
+  Install DITA-OT plugins
+  from registry:
+  - net.infotexture.dita-bootstrap
+end note
+
+if (Plugins installed?) then (yes)
+  :Plugins ready;
+else (no)
+  :Download from registry;
+  :Install to DITA-OT;
+  :Plugins ready;
+endif
+
+|#lightgreen|Step 3: Validation|
+
+:validateDita;
+note right
+  Validate DITA content
+  using 'dita' transtype
+  with strict processing mode
+end note
+
+if (Validation passed?) then (yes)
+else (no)
+  #pink:Validation failed;
+  note right
+    DITA errors found
+    Check error messages
+  end note
+  stop
+endif
+
+|#fff8e1|Step 4: Link Check|
+
+:checkLinks;
+note right
+  Check all internal xref
+  and external URLs
+  in DITA files
+end note
+
+fork
+  :Scan internal links;
+  :Verify file references;
+fork again
+  :Scan external URLs;
+  :HTTP request validation;
+end fork
+
+if (All links valid?) then (yes)
+else (no)
+  #pink:Broken links found;
+  note right
+    Fix broken references
+    before publishing
+  end note
+  stop
+endif
+
+|#f3e5f5|Step 5: Publish|
+
+:publishDocs;
+
+fork
+  :ditaHtml;
+  note right
+    Generate HTML5 output
+    to build/docs/html5/
+  end note
+  :HTML5 complete;
+fork again
+  :ditaPdf;
+  note right
+    Generate PDF output
+    to build/docs/pdf/
+  end note
+  :PDF complete;
+fork again
+  :ditaBootstrap;
+  note right
+    Generate Bootstrap 5 HTML
+    to build/docs/bootstrap/
+  end note
+  :Bootstrap complete;
+end fork
+
+if (Publication successful?) then (yes)
+else (no)
+  #pink:Publication failed;
+  note right
+    DITA-OT transformation
+    error occurred
+  end note
+  stop
+endif
+
+|#e0f7fa|Step 6: Verify|
+
+:verifyOutput;
+
+fork
+  :Check HTML5 directory;
+  :Verify index.html exists;
+  :Verify files not empty;
+  :Count HTML files;
+fork again
+  :Check PDF directory;
+  :Find user-guide.pdf;
+  :Verify PDF not empty;
+  :Get file size;
+fork again
+  :Check Bootstrap directory;
+  :Verify toc.html exists;
+  :Verify files not empty;
+  :Count HTML files;
+end fork
+
+if (All outputs verified?) then (yes)
+  #lightgreen:Output Verification PASSED;
+  note right
+    HTML5: index.html + pages
+    PDF: user-guide.pdf
+    Bootstrap: toc.html + pages
+  end note
+else (no)
+  #pink:Output Verification FAILED;
+  note right
+    Missing or empty files
+    Check build logs
+  end note
+  stop
+endif
+
+|#lightblue|Gradle Build|
+
+#lightgreen:BUILD SUCCESSFUL;
+note right
+  Documentation published:
+  - build/docs/html5/
+  - build/docs/pdf/
+  - build/docs/bootstrap/
+end note
+
+stop
+
+footer DITA-OT Gradle Plugin v2.8.1 | Generated with PlantUML
+
+@enduml

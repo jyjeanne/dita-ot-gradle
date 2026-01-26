@@ -149,6 +149,17 @@ abstract class DitaOtTask @Inject constructor(
     abstract val progressStyle: Property<String>
 
     /**
+     * Show warnings during transformation output.
+     * When false (default), warnings are counted but not displayed.
+     * This is useful to suppress verbose FOP warnings during PDF generation.
+     * Default: false
+     *
+     * @since 2.8.1
+     */
+    @get:Input
+    abstract val showWarnings: Property<Boolean>
+
+    /**
      * Custom classpath for DITA-OT (optional).
      */
     @get:InputFiles
@@ -178,6 +189,7 @@ abstract class DitaOtTask @Inject constructor(
         tempDir.convention(projectLayout.buildDirectory.dir("dita-temp"))
         showProgress.convention(true)
         progressStyle.convention(ProgressReporter.ProgressStyle.DETAILED.name)
+        showWarnings.convention(false)
     }
 
     // ==================== Configuration Methods (DSL) ====================
@@ -339,6 +351,18 @@ abstract class DitaOtTask @Inject constructor(
                 e
             )
         }
+    }
+
+    /**
+     * Enable or disable warning display during transformation.
+     * When false (default), warnings are counted but not displayed.
+     * This is useful to suppress verbose FOP warnings during PDF generation.
+     *
+     * @param show Whether to display warnings during transformation
+     * @since 2.8.1
+     */
+    fun showWarnings(show: Boolean) {
+        showWarnings.set(show)
     }
 
     // ==================== Computed Properties ====================
@@ -608,7 +632,7 @@ abstract class DitaOtTask @Inject constructor(
             } catch (e: IllegalArgumentException) {
                 ProgressReporter.ProgressStyle.DETAILED
             }
-            ProgressReporter(logger, style)
+            ProgressReporter(logger, style, showWarnings.get())
         } else {
             null
         }

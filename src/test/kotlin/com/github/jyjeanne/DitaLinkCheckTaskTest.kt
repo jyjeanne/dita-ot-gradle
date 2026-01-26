@@ -289,4 +289,89 @@ class DitaLinkCheckTaskTest : StringSpec({
         linkInfo.target shouldBe "external-doc.pdf"
         linkInfo.isExternalScope shouldBe true
     }
+
+    // ============================================================================
+    // Peer Link Tests (v2.8.1 bug fix)
+    // Tests for proper handling of scope="peer" links
+    // ============================================================================
+
+    "LinkInfo isPeerScope defaults to false" {
+        // By default, links should not be marked as peer
+        val linkInfo = DitaLinkCheckTask.LinkInfo(
+            sourceFile = File("test.dita"),
+            target = "other.dita",
+            type = DitaLinkCheckTask.LinkType.HREF,
+            elementName = "xref",
+            lineNumber = null
+        )
+
+        linkInfo.isPeerScope shouldBe false
+    }
+
+    "LinkInfo isPeerScope can be set to true" {
+        // Peer links should be skipped during checking
+        // Example: <topicref href="api/index.html" format="html" scope="peer">
+        val linkInfo = DitaLinkCheckTask.LinkInfo(
+            sourceFile = File("userguide.ditamap"),
+            target = "api/index.html",
+            type = DitaLinkCheckTask.LinkType.HREF,
+            elementName = "topicref",
+            lineNumber = 21,
+            isPeerScope = true
+        )
+
+        linkInfo.isPeerScope shouldBe true
+        linkInfo.target shouldBe "api/index.html"
+    }
+
+    "Peer links should be identified separately from external links" {
+        // scope="peer" is different from scope="external"
+        // - peer: Part of same information set but not in this build
+        // - external: Outside the documentation (websites, etc.)
+        val peerLink = DitaLinkCheckTask.LinkInfo(
+            sourceFile = File("guide.ditamap"),
+            target = "api/index.html",
+            type = DitaLinkCheckTask.LinkType.HREF,
+            elementName = "topicref",
+            lineNumber = null,
+            isExternalScope = false,
+            isPeerScope = true
+        )
+
+        val externalLink = DitaLinkCheckTask.LinkInfo(
+            sourceFile = File("guide.ditamap"),
+            target = "https://example.com/docs",
+            type = DitaLinkCheckTask.LinkType.HREF,
+            elementName = "xref",
+            lineNumber = null,
+            isExternalScope = true,
+            isPeerScope = false
+        )
+
+        peerLink.isPeerScope shouldBe true
+        peerLink.isExternalScope shouldBe false
+
+        externalLink.isPeerScope shouldBe false
+        externalLink.isExternalScope shouldBe true
+    }
+
+    "LinkInfo with API docs peer reference" {
+        // Real-world example from dita-ot/docs feedback:
+        // <topicref href="api/index.html" format="html" scope="peer">
+        // This link points to API docs generated separately, not in this build
+        val linkInfo = DitaLinkCheckTask.LinkInfo(
+            sourceFile = File("userguide.ditamap"),
+            target = "api/index.html",
+            type = DitaLinkCheckTask.LinkType.HREF,
+            elementName = "topicref",
+            lineNumber = 21,
+            isExternalScope = false,
+            isPeerScope = true
+        )
+
+        linkInfo.target shouldBe "api/index.html"
+        linkInfo.isPeerScope shouldBe true
+        linkInfo.isExternalScope shouldBe false
+        linkInfo.elementName shouldBe "topicref"
+    }
 })

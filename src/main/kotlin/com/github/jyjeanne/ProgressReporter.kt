@@ -14,11 +14,19 @@ import java.util.regex.Pattern
  * Parses DITA-OT output to detect processing stages and displays
  * visual progress indicators during transformation.
  *
+ * @param logger The Gradle logger for output
+ * @param style The progress display style (DETAILED, SIMPLE, MINIMAL, QUIET)
+ * @param showWarnings Whether to display warnings during transformation (default: false)
+ *        When false, warnings are still collected for the summary count but not displayed.
+ *        When true, warnings are displayed in all modes except QUIET.
+ *        This is useful to suppress verbose FOP warnings during PDF generation.
+ *
  * @since 2.8.0
  */
 class ProgressReporter(
     private val logger: Logger,
-    private val style: ProgressStyle = ProgressStyle.DETAILED
+    private val style: ProgressStyle = ProgressStyle.DETAILED,
+    private val showWarnings: Boolean = false
 ) {
     /**
      * Progress display style.
@@ -115,8 +123,25 @@ class ProgressReporter(
         // Pattern to match DITA-OT log messages
         private val LOG_PATTERN = Pattern.compile("^\\[([^\\]]+)\\]\\s+(\\w+):\\s+(.*)$")
         private val FILE_PATTERN = Pattern.compile("(Processing|Reading|Writing|Transforming)\\s+(.+\\.(dita|ditamap|xml|html|pdf))")
-        private val ERROR_PATTERN = Pattern.compile("(ERROR|FATAL|Exception)", Pattern.CASE_INSENSITIVE)
-        private val WARNING_PATTERN = Pattern.compile("WARN", Pattern.CASE_INSENSITIVE)
+
+        /**
+         * Pattern for DITA-OT error messages.
+         * DITA-OT message format: DOT[component][number][severity]
+         * Severity: E=Error, F=Fatal, W=Warning, I=Info
+         * Only matches actual errors (E/F suffix) or generic ERROR/FATAL keywords.
+         * Excludes informational messages like DOTJ031I.
+         */
+        private val ERROR_PATTERN = Pattern.compile(
+            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|Exception",
+            Pattern.CASE_INSENSITIVE
+        )
+        private val WARNING_PATTERN = Pattern.compile("\\[DOT[A-Z]\\d{3,4}W\\]|(?<!\\w)WARN(?!ING\\w)", Pattern.CASE_INSENSITIVE)
+
+        /**
+         * Pattern for DITA-OT informational messages (not errors).
+         * Example: DOTJ031I - "No rule for X was found in DITAVAL file"
+         */
+        private val INFO_PATTERN = Pattern.compile("\\[DOT[A-Z]\\d{3,4}I\\]", Pattern.CASE_INSENSITIVE)
     }
 
     @Volatile
@@ -142,7 +167,8 @@ class ProgressReporter(
                 var line: String? = reader.readLine()
                 while (!Thread.currentThread().isInterrupted && line != null) {
                     processLine(line)
-                    if (ERROR_PATTERN.matcher(line).find()) {
+                    // Only count as error if it's a real error (not info messages like DOTJ031I)
+                    if (ERROR_PATTERN.matcher(line).find() && !INFO_PATTERN.matcher(line).find()) {
                         hasErrors = true
                     }
                     line = reader.readLine()
@@ -171,6 +197,15 @@ class ProgressReporter(
 
     /**
      * Process a single line of DITA-OT output.
+     *
+     * DITA-OT message severity is determined by the suffix:
+     * - E = Error (e.g., DOTJ012E)
+     * - F = Fatal (e.g., DOTJ001F)
+     * - W = Warning (e.g., DOTJ031W)
+     * - I = Info (e.g., DOTJ031I) - NOT an error, just informational
+     *
+     * Info messages like DOTJ031I ("No rule for X was found in DITAVAL file")
+     * are informational only and should not be treated as errors.
      */
     private fun processLine(line: String) {
         // Detect stage changes
@@ -186,6 +221,13 @@ class ProgressReporter(
             filesProcessed.incrementAndGet()
         }
 
+        // Skip informational messages (DITA-OT messages ending with I)
+        // These are not errors, just diagnostic information
+        if (INFO_PATTERN.matcher(line).find()) {
+            logger.debug(line)
+            return
+        }
+
         // Collect errors and warnings
         if (ERROR_PATTERN.matcher(line).find()) {
             errors.add(line)
@@ -194,8 +236,10 @@ class ProgressReporter(
                 logger.error(line)
             }
         } else if (WARNING_PATTERN.matcher(line).find()) {
+            // Always collect warnings for summary count
             warnings.add(line)
-            if (style == ProgressStyle.DETAILED) {
+            // Display warnings if showWarnings is enabled (except in QUIET mode)
+            if (showWarnings && style != ProgressStyle.QUIET) {
                 clearProgressLine()
                 logger.warn(line)
             }
@@ -317,9 +361,15 @@ class ProgressReporter(
             }
         }
 
-        if (warningSnapshot.isNotEmpty() && style == ProgressStyle.DETAILED) {
+        // Show warning count in summary (even if warnings weren't displayed during processing)
+        // This lets users know warnings exist and can enable showWarnings for details
+        if (warningSnapshot.isNotEmpty() && style != ProgressStyle.QUIET) {
             logger.lifecycle("")
             logger.lifecycle("  Warnings: ${warningSnapshot.size}")
+            // Show hint only in DETAILED mode (SIMPLE/MINIMAL users want minimal output)
+            if (!showWarnings && style == ProgressStyle.DETAILED) {
+                logger.lifecycle("    (use showWarnings(true) to display warning details)")
+            }
         }
 
         if (errorSnapshot.isNotEmpty()) {

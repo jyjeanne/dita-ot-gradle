@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE task PUBLIC "-//OASIS//DTD DITA Task//EN" "task.dtd">
+<task id="quick-start">
+  <title>Quick Start</title>
+  <shortdesc>Get started quickly with a minimal configuration to build HTML5 documentation.</shortdesc>
+  <taskbody>
+    <context>
+      <p>This quick start guide shows you how to build your first DITA documentation output in just a few steps.</p>
+    </context>
+
+    <steps>
+      <step>
+        <cmd>Create your <filepath>build.gradle.kts</filepath> with minimal configuration:</cmd>
+        <info>
+          <codeblock outputclass="language-kotlin">plugins {
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.0"
+}
+
+tasks.register&lt;com.github.jyjeanne.DitaOtDownloadTask&gt;("downloadDitaOt") {
+    version("4.2.3")
+}
+
+tasks.register&lt;com.github.jyjeanne.DitaOtTask&gt;("ditaHtml") {
+    dependsOn("downloadDitaOt")
+    ditaOt("build/dita-ot/dita-ot-4.2.3")
+    input("src/dita/maps/user-guide.ditamap")
+    output("build/docs/html5")
+    transtype("html5")
+}</codeblock>
+        </info>
+      </step>
+
+      <step>
+        <cmd>Create your DITA map at <filepath>src/dita/maps/user-guide.ditamap</filepath></cmd>
+      </step>
+
+      <step>
+        <cmd>Download DITA-OT and build your documentation:</cmd>
+        <info>
+          <codeblock>./gradlew ditaHtml</codeblock>
+        </info>
+      </step>
+
+      <step>
+        <cmd>Open the generated output in your browser:</cmd>
+        <info>
+          <p>Navigate to <filepath>build/docs/html5/</filepath> and open the HTML file.</p>
+        </info>
+      </step>
+    </steps>
+
+    <result>
+      <p>Your HTML5 documentation is generated in the <filepath>build/docs/html5</filepath> directory.</p>
+      <p>For more output formats and advanced configuration, see <xref href="configuration.dita"/>
+        and <xref href="tasks-reference.dita"/>.</p>
+      <p>Learn more about DITA at the <xref href="https://www.oasis-open.org/committees/dita/"
+        format="html" scope="external">OASIS DITA Technical Committee</xref>.</p>
+    </result>
+  </taskbody>
+</task>

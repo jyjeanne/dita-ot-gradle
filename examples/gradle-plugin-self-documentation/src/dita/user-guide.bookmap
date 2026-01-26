@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE bookmap PUBLIC "-//OASIS//DTD DITA BookMap//EN" "bookmap.dtd">
+<bookmap id="user-guide">
+  <booktitle>
+    <mainbooktitle>DITA-OT Gradle Plugin</mainbooktitle>
+    <booktitlealt>User Guide</booktitlealt>
+  </booktitle>
+
+  <bookmeta>
+    <authorinformation>
+      <personinfo>
+        <namedetails>
+          <personname>
+            <firstname>Jeremy</firstname>
+            <lastname>Jeanne</lastname>
+          </personname>
+        </namedetails>
+      </personinfo>
+    </authorinformation>
+    <critdates>
+      <created date="2026-01-22"/>
+    </critdates>
+    <bookid>
+      <edition>2.8.0</edition>
+    </bookid>
+    <bookrights>
+      <copyrfirst><year>2026</year></copyrfirst>
+      <bookowner>
+        <organization>Jeremy Jeanne</organization>
+      </bookowner>
+    </bookrights>
+  </bookmeta>
+
+  <frontmatter>
+    <booklists>
+      <toc/>
+    </booklists>
+  </frontmatter>
+
+  <chapter href="topics/intro.dita" navtitle="Introduction"/>
+
+  <chapter navtitle="Getting Started">
+    <topicref href="topics/install.dita" navtitle="Installation"/>
+    <topicref href="topics/quick-start.dita" navtitle="Quick Start"/>
+  </chapter>
+
+  <chapter navtitle="Reference">
+    <topicref href="topics/configuration.dita" navtitle="Configuration"/>
+    <topicref href="topics/tasks-reference.dita" navtitle="Tasks Reference"/>
+  </chapter>
+
+</bookmap>

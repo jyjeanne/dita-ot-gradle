@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
+<topic id="intro">
+  <title>Introduction</title>
+  <shortdesc>The DITA-OT Gradle Plugin provides native Gradle integration for publishing DITA documentation using DITA Open Toolkit.</shortdesc>
+  <body>
+    <section>
+      <title>Overview</title>
+      <p>This modern Gradle plugin is a Kotlin-based continuation of the original
+        <codeph>com.github.eerohele.dita-ot-gradle</codeph> plugin, offering enhanced
+        features for CI/CD integration and automated documentation workflows.</p>
+      <p>For more information, visit the <xref href="https://github.com/jyjeanne/dita-ot-gradle"
+        format="html" scope="external">plugin GitHub repository</xref> or the official
+        <xref href="https://www.dita-ot.org/" format="html" scope="external">DITA Open Toolkit website</xref>.</p>
+      <p>To get started, see <xref href="install.dita"/> for installation instructions.</p>
+    </section>
+
+    <section>
+      <title>Key Features</title>
+      <ul>
+        <li><b>Progress Reporting</b> - Visual indicators during builds</li>
+        <li><b>Link Checking</b> - Built-in task to validate internal and external links</li>
+        <li><b>Content Validation</b> - DitaOtValidateTask for DITA validation without full transformation</li>
+        <li><b>Automated Downloads</b> - DitaOtDownloadTask with retries, checksums, and caching</li>
+        <li><b>Plugin Installation</b> - DitaOtInstallPluginTask supporting registry, URL, or local sources</li>
+        <li><b>Configuration Cache</b> - Enables 77% faster incremental builds</li>
+        <li><b>Cross-Platform</b> - Windows, macOS, Linux support</li>
+        <li><b>Modern Architecture</b> - Provider API and Gradle 9.0 compatibility</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Use Cases</title>
+      <p>The plugin supports five primary workflows:</p>
+      <ol>
+        <li><b>Plugin Testing</b> - Test existing registry plugins with different DITA-OT versions</li>
+        <li><b>Custom Plugin Development</b> - Fast iteration cycles with automatic rebuilding</li>
+        <li><b>CI/CD Publishing</b> - Reproducible documentation builds with GitHub Actions</li>
+        <li><b>Multi-Language Output</b> - Parallel builds for localized documentation</li>
+        <li><b>Version-Specific Docs</b> - Conditional processing for multiple product versions</li>
+      </ol>
+    </section>
+  </body>
+</topic>

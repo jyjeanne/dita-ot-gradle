@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="configuration">
+  <title>Configuration</title>
+  <shortdesc>Configure the DITA-OT Gradle Plugin for your documentation needs.</shortdesc>
+  <refbody>
+    <section>
+      <title>Task Configuration</title>
+      <p>Each DITA task can be configured with the following properties. For a complete list of
+        available tasks, see <xref href="tasks-reference.dita"/>.</p>
+      <table>
+        <tgroup cols="3">
+          <colspec colname="property" colwidth="1*"/>
+          <colspec colname="type" colwidth="1*"/>
+          <colspec colname="description" colwidth="2*"/>
+          <thead>
+            <row>
+              <entry>Property</entry>
+              <entry>Type</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody>
+            <row>
+              <entry><codeph>ditaOt</codeph></entry>
+              <entry>String</entry>
+              <entry>Path to DITA-OT installation directory</entry>
+            </row>
+            <row>
+              <entry><codeph>input</codeph></entry>
+              <entry>String</entry>
+              <entry>Path to the input DITA map or topic</entry>
+            </row>
+            <row>
+              <entry><codeph>output</codeph></entry>
+              <entry>String</entry>
+              <entry>Path to the output directory</entry>
+            </row>
+            <row>
+              <entry><codeph>transtype</codeph></entry>
+              <entry>String</entry>
+              <entry>Transformation type (html5, pdf, epub, etc.)</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Properties Block</title>
+      <p>Use the <codeph>properties</codeph> block to pass additional
+        <xref href="https://www.dita-ot.org/dev/parameters/parameters-base.html" format="html"
+          scope="external">DITA-OT parameters</xref>:</p>
+      <codeblock outputclass="language-kotlin">tasks.register&lt;com.github.jyjeanne.DitaOtTask&gt;("ditaPdf") {
+    // ... other configuration ...
+    properties {
+        property("args.filter", "src/dita/ditaval/pdf.ditaval")
+        property("args.gen.task.lbl", "YES")
+        property("clean.temp", "YES")
+    }
+}</codeblock>
+    </section>
+
+    <section>
+      <title>Configuration Cache</title>
+      <p>Enable Gradle's configuration cache for faster incremental builds by adding to
+        <filepath>gradle.properties</filepath>:</p>
+      <codeblock>org.gradle.configuration-cache=true</codeblock>
+      <p>This can result in up to 77% faster incremental builds.</p>
+    </section>
+  </refbody>
+</reference>

@@ -182,6 +182,10 @@ abstract class DitaLinkCheckTask @Inject constructor(
     @get:Internal
     protected var skippedExternalLinks = 0
 
+    /** Skipped peer links count */
+    @get:Internal
+    protected var skippedPeerLinks = 0
+
     // ==================== Initialization ====================
 
     init {
@@ -225,6 +229,7 @@ abstract class DitaLinkCheckTask @Inject constructor(
         validInternalLinks = 0
         validExternalLinks = 0
         skippedExternalLinks = 0
+        skippedPeerLinks = 0
 
         val inputs = inputFiles.files
         val isQuiet = quiet.get()
@@ -326,6 +331,15 @@ abstract class DitaLinkCheckTask @Inject constructor(
 
     /**
      * Scan for elements with href attribute.
+     *
+     * DITA scope attribute values:
+     * - "local" (default): Resource is part of this documentation set
+     * - "peer": Resource is NOT part of this build but is part of the same information set
+     *           (e.g., API docs generated separately, sister publications)
+     * - "external": Resource is external to the documentation (e.g., websites)
+     *
+     * Peer links should be skipped during link checking because they point to
+     * resources that are not available at build time.
      */
     private fun scanHrefElements(sourceFile: File, root: Element) {
         HREF_ELEMENTS.forEach { elementName ->
@@ -334,9 +348,10 @@ abstract class DitaLinkCheckTask @Inject constructor(
                 val element = elements.item(i) as Element
                 val href = element.getAttribute("href")
                 if (href.isNotBlank()) {
-                    // Check if scope="external" marks this as an external link
+                    // Check scope attribute for external or peer links
                     val scope = element.getAttribute("scope")
                     val isExternalScope = scope.equals("external", ignoreCase = true)
+                    val isPeerScope = scope.equals("peer", ignoreCase = true)
 
                     allLinks.add(LinkInfo(
                         sourceFile = sourceFile,
@@ -344,7 +359,8 @@ abstract class DitaLinkCheckTask @Inject constructor(
                         type = LinkType.HREF,
                         elementName = elementName,
                         lineNumber = null, // XML parser doesn't provide line numbers by default
-                        isExternalScope = isExternalScope
+                        isExternalScope = isExternalScope,
+                        isPeerScope = isPeerScope
                     ))
                 }
             }
@@ -437,9 +453,23 @@ abstract class DitaLinkCheckTask @Inject constructor(
 
     /**
      * Check all collected links.
+     *
+     * Links with scope="peer" are always skipped because they point to resources
+     * that are not part of the current build (e.g., API documentation generated
+     * separately, sister publications, etc.).
+     *
+     * See: https://www.dita-ot.org/dev/topics/dita-linking-attribute-values
      */
     private fun checkAllLinks(checkExternal: Boolean) {
         allLinks.forEach { link ->
+            // Skip peer links - they point to resources not available at build time
+            // Example: <topicref href="api/index.html" format="html" scope="peer">
+            if (link.isPeerScope) {
+                skippedPeerLinks++
+                logger.debug("  Skipping peer link (not in build): ${link.target}")
+                return@forEach
+            }
+
             // Determine if this is an external link (URL pattern or scope="external")
             val isExternal = isExternalUrl(link.target) || link.isExternalScope
 
@@ -617,6 +647,11 @@ abstract class DitaLinkCheckTask @Inject constructor(
             logger.lifecycle("  ✗ Broken:         $brokenInternal")
         }
         logger.lifecycle("───────────────────────────────────────────────────────")
+        if (skippedPeerLinks > 0) {
+            logger.lifecycle("Peer links:         $skippedPeerLinks")
+            logger.lifecycle("  ○ Skipped:        $skippedPeerLinks (not in build)")
+            logger.lifecycle("───────────────────────────────────────────────────────")
+        }
         logger.lifecycle("External links:     ${totalExternal + skippedExternalLinks}")
         if (checkExternal.get()) {
             logger.lifecycle("  ✓ Valid:          $validExternalLinks")
@@ -687,6 +722,14 @@ abstract class DitaLinkCheckTask @Inject constructor(
 
     /**
      * Information about a link found in DITA content.
+     *
+     * @property sourceFile The file containing this link
+     * @property target The link target (href, conref, etc.)
+     * @property type The type of link (HREF, CONREF, etc.)
+     * @property elementName The DITA element name containing this link
+     * @property lineNumber The line number (if available)
+     * @property isExternalScope True if scope="external" (links to external resources)
+     * @property isPeerScope True if scope="peer" (links to resources not in this build)
      */
     data class LinkInfo(
         val sourceFile: File,
@@ -694,7 +737,8 @@ abstract class DitaLinkCheckTask @Inject constructor(
         val type: LinkType,
         val elementName: String,
         val lineNumber: Int?,
-        val isExternalScope: Boolean = false
+        val isExternalScope: Boolean = false,
+        val isPeerScope: Boolean = false
     )
 
     /**
