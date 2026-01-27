@@ -7,7 +7,7 @@
     <p>This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
 
     <section>
-      <title>Completed in Version 2.8.2</title>
+      <title>Completed in Version 2.8.3</title>
       <ul>
         <li><b>validateDita Message Classification Fix:</b> DITA-OT informational messages (like DOTJ031I) no longer treated as errors
           <ul>

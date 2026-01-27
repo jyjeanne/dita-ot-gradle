@@ -5,7 +5,7 @@
   <shortdesc>Release highlights and new features.</shortdesc>
   <body>
     <section>
-      <title>Version 2.8.2</title>
+      <title>Version 2.8.3</title>
       <p><b>Bug Fixes from Community Feedback</b></p>
       <ul>
         <li><b>validateDita Fix:</b> DITA-OT informational messages (like DOTJ031I) no longer treated as errors</li>

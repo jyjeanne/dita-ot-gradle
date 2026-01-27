@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
 <topic id="highlights">
-  <title>Highlights (v2.8.2)</title>
+  <title>Highlights (v2.8.3)</title>
   <shortdesc>Key features and improvements in the current version.</shortdesc>
   <body>
     <section>
-      <title>What's New in 2.8.2</title>
+      <title>What's New in 2.8.3</title>
       <p>This release includes bug fixes from community feedback and new features:</p>
       <ul>
         <li><b>validateDita Fix:</b> DITA-OT informational messages (like DOTJ031I) are no longer incorrectly treated as errors</li>
@@ -162,7 +162,7 @@
 
     <section>
       <title>Version History</title>
-      <p><b>2.8.2</b> - validateDita message fix, checkLinks peer support, showWarnings option</p>
+      <p><b>2.8.3</b> - validateDita message fix, checkLinks peer support, showWarnings option</p>
       <p><b>2.8.1</b> - Cross-platform path fix, DITA-OT version detection fix, DITA-OT 4.x compatibility</p>
       <p><b>2.8.0</b> - Progress reporting, thread safety improvements</p>
       <p><b>2.7.0</b> - DitaLinkCheckTask for broken link detection</p>

@@ -380,4 +380,111 @@ class DitaOtValidateTaskTest : StringSpec({
         result.file shouldBe testFile
         result.file.name shouldBe "my-guide.ditamap"
     }
+
+    // ============================================================================
+    // DITA-OT Progress Message Tests (v2.8.3 bug fix)
+    // Tests for filtering out progress messages that are not errors
+    // ============================================================================
+
+    "Processing file message should not be classified as error" {
+        // This test verifies the fix for VALIDATION_BUG.md
+        // Progress messages like "Processing file:" should NOT be treated as errors
+        val progressPattern = java.util.regex.Pattern.compile(
+            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
+            "Processing\\s+.+\\s+to\\s+file:|" +
+            "Copying\\s+.+\\s+to\\s+",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+        val errorPattern = java.util.regex.Pattern.compile(
+            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|(?<![A-Z])Error:|(?<![a-z])error:",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+
+        // Progress messages should be filtered out
+        val progressMessage1 = "Processing file:/path/to/input.xml to file:/path/to/output.xml"
+        val progressMessage2 = "Writing file:/path/to/output.xml"
+        val progressMessage3 = "  Processing file:/temp/topics/file.xml"
+
+        progressPattern.matcher(progressMessage1).find() shouldBe true
+        progressPattern.matcher(progressMessage2).find() shouldBe true
+        progressPattern.matcher(progressMessage3).find() shouldBe true
+
+        // Real error should still be detected
+        val realError = "Error: File file:/path/to/missing-file.md was not found."
+        progressPattern.matcher(realError).find() shouldBe false
+        errorPattern.matcher(realError).find() shouldBe true
+    }
+
+    "Writing file message should not be classified as error" {
+        val progressPattern = java.util.regex.Pattern.compile(
+            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
+            "Processing\\s+.+\\s+to\\s+file:|" +
+            "Copying\\s+.+\\s+to\\s+",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+
+        // Various writing file messages
+        progressPattern.matcher("Writing file:/temp/output.xml").find() shouldBe true
+        progressPattern.matcher("  Writing file:/path/to/topics/file.xml").find() shouldBe true
+        progressPattern.matcher("Writing file:C:/temp/output.dita").find() shouldBe true
+    }
+
+    "Processing to file message should not be classified as error" {
+        val progressPattern = java.util.regex.Pattern.compile(
+            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
+            "Processing\\s+.+\\s+to\\s+file:|" +
+            "Copying\\s+.+\\s+to\\s+",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+
+        // Processing X to file:Y messages
+        progressPattern.matcher("Processing file:/input.xml to file:/output.xml").find() shouldBe true
+        progressPattern.matcher("Processing /path/input.dita to file:/temp/output.dita").find() shouldBe true
+    }
+
+    "Loading and Copying messages should not be classified as error" {
+        val progressPattern = java.util.regex.Pattern.compile(
+            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
+            "Processing\\s+.+\\s+to\\s+file:|" +
+            "Copying\\s+.+\\s+to\\s+",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+
+        // Loading file messages
+        progressPattern.matcher("Loading file:/path/to/input.dita").find() shouldBe true
+        progressPattern.matcher("  Loading file:/temp/map.ditamap").find() shouldBe true
+
+        // Transforming file messages
+        progressPattern.matcher("Transforming file:/path/to/topic.dita").find() shouldBe true
+
+        // Copying messages
+        progressPattern.matcher("Copying file:/source/image.png to /dest/").find() shouldBe true
+        progressPattern.matcher("Copying /path/file.css to /output/css/").find() shouldBe true
+    }
+
+    "Real errors should still be detected after progress filtering" {
+        val progressPattern = java.util.regex.Pattern.compile(
+            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
+            "Processing\\s+.+\\s+to\\s+file:|" +
+            "Copying\\s+.+\\s+to\\s+",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+        val errorPattern = java.util.regex.Pattern.compile(
+            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|(?<![A-Z])Error:|(?<![a-z])error:",
+            java.util.regex.Pattern.CASE_INSENSITIVE
+        )
+
+        // These are real errors and should NOT match progress pattern
+        val realErrors = listOf(
+            "Error: File file:/path/missing.md was not found.",
+            "[DOTX012E]: Referenced file not found",
+            "[FATAL] Build failed",
+            "error: invalid XML syntax"
+        )
+
+        for (error in realErrors) {
+            progressPattern.matcher(error).find() shouldBe false
+            errorPattern.matcher(error).find() shouldBe true
+        }
+    }
 })

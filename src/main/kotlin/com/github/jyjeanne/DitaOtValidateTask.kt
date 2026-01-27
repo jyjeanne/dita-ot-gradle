@@ -102,6 +102,23 @@ abstract class DitaOtValidateTask @Inject constructor(
             Pattern.CASE_INSENSITIVE
         )
 
+        /**
+         * Pattern for DITA-OT progress messages.
+         * These are informational messages about file processing, not errors.
+         * Examples:
+         * - "Processing file:/path/input.xml to file:/path/output.xml"
+         * - "Writing file:/path/output.xml"
+         * - "Loading file:/path/input.xml"
+         * - "Transforming file:/path/input.xml"
+         * - "Copying file:/path/file.ext to /path/dest/"
+         */
+        private val PROGRESS_PATTERN = Pattern.compile(
+            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
+            "Processing\\s+.+\\s+to\\s+file:|" +
+            "Copying\\s+.+\\s+to\\s+",
+            Pattern.CASE_INSENSITIVE
+        )
+
         /** Pattern to extract file location from error messages */
         private val FILE_LOCATION_PATTERN = Pattern.compile(
             "(?:file:/*)?([^:]+\\.(?:dita|ditamap|xml))(?::(\\d+))?",
@@ -419,12 +436,13 @@ abstract class DitaOtValidateTask @Inject constructor(
             // add a general error
             if (exitCode != 0 && errors.isEmpty()) {
                 // Extract meaningful error from output
-                // IMPORTANT: Exclude INFO messages (like DOTJ031I) which may contain
-                // "ERROR" keyword in their description but are not actual errors
+                // IMPORTANT: Exclude INFO messages (like DOTJ031I) and progress messages
+                // (like "Processing file:" or "Writing file:") which are not actual errors
                 val errorLines = output.lines()
                     .filter { line ->
                         ERROR_PATTERN.matcher(line).find() &&
-                        !INFO_PATTERN.matcher(line).find()  // Skip info messages
+                        !INFO_PATTERN.matcher(line).find() &&      // Skip info messages
+                        !PROGRESS_PATTERN.matcher(line).find()     // Skip progress messages
                     }
                     .take(5)
 
@@ -552,6 +570,12 @@ abstract class DitaOtValidateTask @Inject constructor(
         // Skip informational messages (ending with I) - they are not errors
         if (INFO_PATTERN.matcher(trimmedLine).find()) {
             logger.debug("  [INFO] $trimmedLine")
+            return
+        }
+
+        // Skip progress messages (Processing file:, Writing file:) - they are not errors
+        if (PROGRESS_PATTERN.matcher(trimmedLine).find()) {
+            logger.debug("  [PROGRESS] $trimmedLine")
             return
         }
 

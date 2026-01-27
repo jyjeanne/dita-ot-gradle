@@ -1,5 +1,5 @@
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
 }
 
 repositories {

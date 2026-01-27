@@ -7,7 +7,7 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.2)
+## Highlights (v2.8.3)
 
 | Feature | Description |
 |---------|-------------|
@@ -35,14 +35,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
 }
 ```
 
@@ -128,7 +128,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
@@ -187,7 +187,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
 }
 
 def ditaOtVersion = '4.2.3'
@@ -305,7 +305,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.2"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -921,7 +921,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.2'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
 }
 ```
 
@@ -929,7 +929,7 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.2 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.3 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8+ | No | Yes |
 | Gradle 9+ | No | Yes |

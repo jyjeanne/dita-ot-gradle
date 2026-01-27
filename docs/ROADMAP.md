@@ -175,6 +175,43 @@ tasks.register<DitaLinkCheckTask>("checkLinks") {
 
 ---
 
+## ✅ v2.8.3 Bug Fixes (COMPLETED)
+
+### validateDita Task - Progress Message False Positives Fix
+**Status**: ✅ COMPLETED (v2.8.3)
+
+Fixed false error reporting where DITA-OT progress messages ("Processing file:", "Writing file:", etc.) were incorrectly treated as errors.
+
+**Problem:** Progress messages containing `file:` were matched by the error pattern, causing validation to fail with false positives like:
+```
+ERROR [/path/file.xml]: Processing file:/path/input.xml to file:/path/output.xml
+ERROR [/path/file.xml]: Writing file:/path/output.xml
+```
+
+**Solution:** Added `PROGRESS_PATTERN` to filter out informational progress messages before error classification.
+
+**Patterns Filtered:**
+- `Processing file:` - file processing progress
+- `Writing file:` - file output progress
+- `Loading file:` - file loading progress
+- `Transforming file:` - transformation progress
+- `Copying ... to ...` - file copy operations
+
+**Files Fixed:**
+- `DitaOtValidateTask.kt` - Added PROGRESS_PATTERN and filtering logic
+
+**Reference:** [VALIDATION_BUG.md](VALIDATION_BUG.md)
+
+### New Unit Tests
+
+Added 5 new tests for v2.8.3 (total: 208 tests):
+
+| Test Class | New Tests | Description |
+|------------|-----------|-------------|
+| `DitaOtValidateTaskTest.kt` | 5 | Progress message filtering |
+
+---
+
 ## ✅ v2.8.2 Bug Fixes and Improvements (COMPLETED)
 
 ### Bug Fixes from PR Feedback
@@ -628,6 +665,7 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
+| **validateDita Progress Message False Positives Fix** | 2.8.3 | Jan 2026 |
 | **Configurable Warning Display (showWarnings)** | 2.8.2 | Jan 2026 |
 | **checkLinks Peer Link Support** | 2.8.2 | Jan 2026 |
 | **validateDita Message Classification Fix** | 2.8.2 | Jan 2026 |
