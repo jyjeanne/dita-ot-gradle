@@ -6,7 +6,6 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
-import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
@@ -75,11 +74,12 @@ abstract class DitaOtValidateTask @Inject constructor(
         /**
          * Pattern for DITA-OT error messages.
          * DITA-OT message format: DOT[component][number][severity]
-         * Severity codes: E=Error, F=Fatal, W=Warning, I=Info
+         * samples : DOTA001F
+         * Severity codes: E=Error, F=Fatal
          * Only matches messages ending with E (Error) or F (Fatal).
          */
         private val ERROR_PATTERN = Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|(?<![A-Z])Error:|(?<![a-z])error:",
+            "\\[DOT[A-Z]\\d{3,4}[EF]\\]",
             Pattern.CASE_INSENSITIVE
         )
 
@@ -432,7 +432,7 @@ abstract class DitaOtValidateTask @Inject constructor(
 
             val exitCode = process.exitValue()
 
-            // If exit code is non-zero and we haven't captured specific errors,
+            // If exit code is non-zero, and we haven't captured specific errors,
             // add a general error
             if (exitCode != 0 && errors.isEmpty()) {
                 // Extract meaningful error from output
