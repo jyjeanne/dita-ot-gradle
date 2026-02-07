@@ -7,13 +7,13 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.3)
+## Highlights (v2.8.4)
 
 | Feature | Description |
 |---------|-------------|
 | **Progress Reporting** | Visual progress indicators with configurable warning display |
 | **DitaLinkCheckTask** | Check for broken links with `scope="peer"` support |
-| **DitaOtValidateTask** | Validate DITA content with proper DITA-OT message classification |
+| **DitaOtValidateTask** | Validate DITA content with zero false positives (DITA-OT message codes only) |
 | **DitaOtDownloadTask** | Built-in DITA-OT download with retries, checksums, and caching |
 | **DitaOtInstallPluginTask** | Install plugins from registry, URL, or local files |
 | **Configuration Cache** | Up to **77% faster** incremental builds |
@@ -35,14 +35,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.4"
 }
 ```
 
@@ -128,7 +128,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
@@ -187,7 +187,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
 }
 
 def ditaOtVersion = '4.2.3'
@@ -305,7 +305,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.4"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -613,7 +613,7 @@ tasks.register<com.github.jyjeanne.DitaOtInstallPluginTask>("installPlugins") {
 
 #### DitaOtValidateTask
 
-Validates DITA content without running full transformation. Fast feedback during development.
+Validates DITA content without running full transformation. Uses DITA-OT structured message codes only (zero false positives).
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -643,6 +643,8 @@ tasks.register<com.github.jyjeanne.DitaOtValidateTask>("validateDita") {
 - Reference integrity (conrefs, topicrefs, xrefs)
 - Key definitions and references
 - Image and resource references
+
+**Error Detection:** Only DITA-OT structured message codes (`[DOTJ012E]`, `[DOTX050E]`, etc.) are classified as errors/warnings. Generic output like `[ERROR]`, `Exception`, or progress messages are ignored — zero false positives.
 
 #### DitaLinkCheckTask
 
@@ -921,7 +923,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
 }
 ```
 
@@ -929,14 +931,14 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.3 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.4 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8+ | No | Yes |
 | Gradle 9+ | No | Yes |
 | Configuration Cache | No | Yes (77% faster) |
 | **Built-in DITA-OT Download** | No | **Yes** (DitaOtDownloadTask) |
 | **Built-in Plugin Install** | No | **Yes** (DitaOtInstallPluginTask) |
-| **DITA-OT Validation** | No | **Yes** (DitaOtValidateTask) |
+| **DITA-OT Validation** | No | **Yes** (DitaOtValidateTask, zero false positives) |
 | **Link Checking** | No | **Yes** (DitaLinkCheckTask) |
 | **Progress Reporting** | No | **Yes** (visual progress bar) |
 | Kotlin DSL | Limited | Full support |

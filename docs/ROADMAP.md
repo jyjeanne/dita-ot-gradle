@@ -175,40 +175,63 @@ tasks.register<DitaLinkCheckTask>("checkLinks") {
 
 ---
 
-## ✅ v2.8.3 Bug Fixes (COMPLETED)
+## ✅ v2.8.4 Code Quality Improvements (COMPLETED)
 
-### validateDita Task - Progress Message False Positives Fix
-**Status**: ✅ COMPLETED (v2.8.3)
+### Code Review Fixes
+**Status**: ✅ COMPLETED (v2.8.4)
 
-Fixed false error reporting where DITA-OT progress messages ("Processing file:", "Writing file:", etc.) were incorrectly treated as errors.
+Applied fixes from two rounds of code review on the DITA-OT message code detection system.
 
-**Problem:** Progress messages containing `file:` were matched by the error pattern, causing validation to fail with false positives like:
-```
-ERROR [/path/file.xml]: Processing file:/path/input.xml to file:/path/output.xml
-ERROR [/path/file.xml]: Writing file:/path/output.xml
-```
-
-**Solution:** Added `PROGRESS_PATTERN` to filter out informational progress messages before error classification.
-
-**Patterns Filtered:**
-- `Processing file:` - file processing progress
-- `Writing file:` - file output progress
-- `Loading file:` - file loading progress
-- `Transforming file:` - transformation progress
-- `Copying ... to ...` - file copy operations
+**Fixes Applied:**
+- Fixed `extractLineNumber` regex bug — "line X" format never captured the number
+- Removed dead fallback error extraction code in `validateFile()` — `parseOutputLine()` already captures all errors, so re-scanning was unreachable
+- Removed unused `INFO_PATTERN` from `ProgressReporter` — declared but never referenced
+- Moved `LINE_NUMBER_PATTERN` to companion object to avoid recompilation on every call
+- Removed redundant `!INFO_PATTERN` guard in `ProgressReporter.processOutput`
 
 **Files Fixed:**
-- `DitaOtValidateTask.kt` - Added PROGRESS_PATTERN and filtering logic
+- `DitaOtValidateTask.kt` — extractLineNumber, fallback cleanup, pattern optimization
+- `ProgressReporter.kt` — dead code removal
+
+---
+
+## ✅ v2.8.3 Bug Fixes (COMPLETED)
+
+### validateDita Task - Zero False Positives (DITA-OT Message Codes Only)
+**Status**: ✅ COMPLETED (v2.8.3)
+
+Replaced all generic error detection patterns with DITA-OT structured message code only detection, eliminating false positives entirely.
+
+**Problem:** Generic patterns like `[ERROR]`, `Error:`, `Exception`, and filename-based matching (`file:`) caused false positives when DITA-OT output contained progress messages, informational text, or filenames resembling error patterns.
+
+**Solution:** Rewrote error/warning detection to exclusively use DITA-OT's structured message code format: `[PREFIX][NUMBER][SEVERITY]`
+
+**DITA-OT Message Code Format:**
+- **Prefixes:** `DOTA` (Ant/core), `DOTJ` (Java), `DOTX` (XSLT), `INDX` (Index), `PDFJ` (PDF/Java), `PDFX` (PDF/XSL-FO), `XEPJ` (XEP)
+- **Severity codes:** `E` = Error, `F` = Fatal, `W` = Warning, `I` = Info
+
+**Patterns (regex):**
+```kotlin
+ERROR_PATTERN = "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]"
+WARNING_PATTERN = "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]"
+INFO_PATTERN = "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}I\\]"
+```
+
+**What changed:**
+- Removed all generic patterns (`[ERROR]`, `Error:`, `Exception`, `file:` matching)
+- Only lines containing valid DITA-OT message codes are now classified
+- All other output lines are silently ignored — zero false positives
+- Both `DitaOtValidateTask.kt` and `ProgressReporter.kt` updated
 
 **Reference:** [VALIDATION_BUG.md](VALIDATION_BUG.md)
 
 ### New Unit Tests
 
-Added 5 new tests for v2.8.3 (total: 208 tests):
+Added 25+ tests for DITA-OT message code detection (total: 203 tests):
 
 | Test Class | New Tests | Description |
 |------------|-----------|-------------|
-| `DitaOtValidateTaskTest.kt` | 5 | Progress message filtering |
+| `DitaOtValidateTaskTest.kt` | 25+ | All prefixes, severities, false positive rejection, integration |
 
 ---
 
@@ -223,7 +246,7 @@ Fixed false error reporting where informational messages (like DOTJ031I) were in
 
 **Problem:** DITA-OT messages ending with `I` (Info) were matched by the error pattern, causing validation to fail on non-error messages.
 
-**Solution:** Updated `ERROR_PATTERN` to only match `E` (Error) and `F` (Fatal) suffixes. Added `INFO_PATTERN` to explicitly skip informational messages.
+**Solution:** Updated `ERROR_PATTERN` to only match `E` (Error) and `F` (Fatal) suffixes. Added `INFO_PATTERN` to explicitly skip informational messages. (Further refined in v2.8.3 with DITA-OT message code only detection.)
 
 **DITA-OT Message Format:** `DOT[component][number][severity]`
 - `E` = Error (e.g., DOTJ012E)
@@ -665,7 +688,8 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
-| **validateDita Progress Message False Positives Fix** | 2.8.3 | Jan 2026 |
+| **Code Review Fixes (extractLineNumber, dead code removal)** | 2.8.4 | Feb 2026 |
+| **validateDita Zero False Positives (DITA-OT message codes only)** | 2.8.3 | Jan 2026 |
 | **Configurable Warning Display (showWarnings)** | 2.8.2 | Jan 2026 |
 | **checkLinks Peer Link Support** | 2.8.2 | Jan 2026 |
 | **validateDita Message Classification Fix** | 2.8.2 | Jan 2026 |

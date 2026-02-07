@@ -125,23 +125,23 @@ class ProgressReporter(
         private val FILE_PATTERN = Pattern.compile("(Processing|Reading|Writing|Transforming)\\s+(.+\\.(dita|ditamap|xml|html|pdf))")
 
         /**
-         * Pattern for DITA-OT error messages.
-         * DITA-OT message format: DOT[component][number][severity]
-         * Severity: E=Error, F=Fatal, W=Warning, I=Info
-         * Only matches actual errors (E/F suffix) or generic ERROR/FATAL keywords.
-         * Excludes informational messages like DOTJ031I.
+         * Pattern for DITA-OT error messages using structured message codes ONLY.
+         *
+         * DITA-OT message code format: [PREFIX][NUMBER][SEVERITY]
+         * Prefixes: DOTA (Ant/core), DOTJ (Java), DOTX (XSLT),
+         *           INDX (Index), PDFJ (PDF/Java), PDFX (PDF/XSL-FO), XEPJ (XEP)
+         * Severity: E=Error, F=Fatal
+         *
+         * Generic markers ([ERROR], Error:, Exception) from third-party libraries
+         * (Apache FOP, Batik) are excluded — they cause false positives and
+         * double-counting of stack traces.
          */
         private val ERROR_PATTERN = Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|Exception",
-            Pattern.CASE_INSENSITIVE
+            "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]"
         )
-        private val WARNING_PATTERN = Pattern.compile("\\[DOT[A-Z]\\d{3,4}W\\]|(?<!\\w)WARN(?!ING\\w)", Pattern.CASE_INSENSITIVE)
-
-        /**
-         * Pattern for DITA-OT informational messages (not errors).
-         * Example: DOTJ031I - "No rule for X was found in DITAVAL file"
-         */
-        private val INFO_PATTERN = Pattern.compile("\\[DOT[A-Z]\\d{3,4}I\\]", Pattern.CASE_INSENSITIVE)
+        private val WARNING_PATTERN = Pattern.compile(
+            "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]"
+        )
     }
 
     @Volatile
@@ -167,8 +167,8 @@ class ProgressReporter(
                 var line: String? = reader.readLine()
                 while (!Thread.currentThread().isInterrupted && line != null) {
                     processLine(line)
-                    // Only count as error if it's a real error (not info messages like DOTJ031I)
-                    if (ERROR_PATTERN.matcher(line).find() && !INFO_PATTERN.matcher(line).find()) {
+                    // Count as error if line contains a DITA-OT error/fatal code
+                    if (ERROR_PATTERN.matcher(line).find()) {
                         hasErrors = true
                     }
                     line = reader.readLine()
@@ -221,14 +221,7 @@ class ProgressReporter(
             filesProcessed.incrementAndGet()
         }
 
-        // Skip informational messages (DITA-OT messages ending with I)
-        // These are not errors, just diagnostic information
-        if (INFO_PATTERN.matcher(line).find()) {
-            logger.debug(line)
-            return
-        }
-
-        // Collect errors and warnings
+        // Collect errors and warnings (DITA-OT message codes only)
         if (ERROR_PATTERN.matcher(line).find()) {
             errors.add(line)
             if (style != ProgressStyle.QUIET) {

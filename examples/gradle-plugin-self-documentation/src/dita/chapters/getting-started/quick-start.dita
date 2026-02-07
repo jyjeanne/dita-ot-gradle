@@ -8,11 +8,11 @@
       <title>Step 1: Add the Plugin</title>
       <p>Add the plugin to your <filepath>build.gradle.kts</filepath> (Kotlin DSL):</p>
       <codeblock>plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.4"
 }</codeblock>
       <p>Or in <filepath>build.gradle</filepath> (Groovy DSL):</p>
       <codeblock>plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
 }</codeblock>
     </section>
 
@@ -60,7 +60,7 @@ dita {
       <title>Complete Example (Kotlin DSL)</title>
       <p>Here's a complete <filepath>build.gradle.kts</filepath> example:</p>
       <codeblock>plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.3"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.4"
 }
 
 // Download DITA-OT automatically

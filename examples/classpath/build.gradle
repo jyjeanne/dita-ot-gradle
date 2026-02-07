@@ -2,7 +2,7 @@
 
 plugins {
     id 'de.undercouch.download' version '4.1.1'
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.3'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
 }
 
 task downloadSaxonPE(type: Download) {

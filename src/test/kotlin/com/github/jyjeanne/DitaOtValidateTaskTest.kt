@@ -287,73 +287,11 @@ class DitaOtValidateTaskTest : StringSpec({
     }
 
     // ============================================================================
-    // DITA-OT Message Classification Tests (v2.8.1 bug fix)
-    // Tests for proper handling of DITA-OT message severity codes
+    // DITA-OT Message Code Only Detection Tests (v2.8.4)
+    // Uses DITA-OT structured message codes ONLY — no generic patterns
+    // Prefixes: DOTA, DOTJ, DOTX, INDX, PDFJ, PDFX, XEPJ
+    // Severity: I=Info, W=Warning, E=Error, F=Fatal
     // ============================================================================
-
-    "DOTJ031I should be treated as info, not error" {
-        // This test verifies the fix for PLUGIN_NEW_VERSION_FEEDBACK.md
-        // DOTJ031I is an informational message about missing DITAVAL rules
-        // It should NOT cause validation to fail
-        //
-        // DITA-OT message format: DOT[component][number][severity]
-        // Severity: E=Error, W=Warning, I=Info, F=Fatal
-        //
-        // DOTJ031I message: "No rule for '%1' was found in the DITAVAL file.
-        // Using the default action, or a parent prop action if specified."
-
-        // The message code ends with 'I' (Info), not 'E' (Error)
-        val infoMessage = "[DOTJ031I] No rule for 'audience:admin' was found in the DITAVAL file."
-        val errorMessage = "[DOTJ012E] Some actual error occurred"
-        val warningMessage = "[DOTJ031W] Some warning message"
-
-        // Verify the patterns correctly classify messages
-        val infoPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}I\\]")
-        val errorPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}[EF]\\]")
-        val warningPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}W\\]")
-
-        // DOTJ031I should match INFO pattern, not ERROR
-        infoPattern.matcher(infoMessage).find() shouldBe true
-        errorPattern.matcher(infoMessage).find() shouldBe false
-
-        // Actual error should match ERROR pattern
-        errorPattern.matcher(errorMessage).find() shouldBe true
-        infoPattern.matcher(errorMessage).find() shouldBe false
-
-        // Warning should match WARNING pattern
-        warningPattern.matcher(warningMessage).find() shouldBe true
-        errorPattern.matcher(warningMessage).find() shouldBe false
-    }
-
-    "Various DITA-OT message codes are classified correctly" {
-        // Test various DITA-OT message codes to ensure correct classification
-        val infoPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}I\\]")
-        val errorPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}[EF]\\]")
-        val warningPattern = java.util.regex.Pattern.compile("\\[DOT[A-Z]\\d{3,4}W\\]")
-
-        // Info messages (should NOT be errors)
-        infoPattern.matcher("[DOTJ031I]").find() shouldBe true
-        infoPattern.matcher("[DOTA001I]").find() shouldBe true
-        infoPattern.matcher("[DOTX050I]").find() shouldBe true
-
-        // Error messages
-        errorPattern.matcher("[DOTJ012E]").find() shouldBe true
-        errorPattern.matcher("[DOTA001E]").find() shouldBe true
-        errorPattern.matcher("[DOTX050E]").find() shouldBe true
-
-        // Fatal messages (also errors)
-        errorPattern.matcher("[DOTJ001F]").find() shouldBe true
-        errorPattern.matcher("[DOTA001F]").find() shouldBe true
-
-        // Warning messages
-        warningPattern.matcher("[DOTJ031W]").find() shouldBe true
-        warningPattern.matcher("[DOTA001W]").find() shouldBe true
-        warningPattern.matcher("[DOTX050W]").find() shouldBe true
-
-        // Info messages should NOT match error pattern
-        errorPattern.matcher("[DOTJ031I]").find() shouldBe false
-        errorPattern.matcher("[DOTA001I]").find() shouldBe false
-    }
 
     "ValidationResult output can be retrieved" {
         val result = DitaOtValidateTask.ValidationResult(
@@ -381,110 +319,205 @@ class DitaOtValidateTaskTest : StringSpec({
         result.file.name shouldBe "my-guide.ditamap"
     }
 
-    // ============================================================================
-    // DITA-OT Progress Message Tests (v2.8.3 bug fix)
-    // Tests for filtering out progress messages that are not errors
-    // ============================================================================
+    // --- DITA-OT Error Codes (should be detected as errors) ---
 
-    "Processing file message should not be classified as error" {
-        // This test verifies the fix for VALIDATION_BUG.md
-        // Progress messages like "Processing file:" should NOT be treated as errors
-        val progressPattern = java.util.regex.Pattern.compile(
-            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
-            "Processing\\s+.+\\s+to\\s+file:|" +
-            "Copying\\s+.+\\s+to\\s+",
-            java.util.regex.Pattern.CASE_INSENSITIVE
-        )
-        val errorPattern = java.util.regex.Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|(?<![A-Z])Error:|(?<![a-z])error:",
-            java.util.regex.Pattern.CASE_INSENSITIVE
-        )
-
-        // Progress messages should be filtered out
-        val progressMessage1 = "Processing file:/path/to/input.xml to file:/path/to/output.xml"
-        val progressMessage2 = "Writing file:/path/to/output.xml"
-        val progressMessage3 = "  Processing file:/temp/topics/file.xml"
-
-        progressPattern.matcher(progressMessage1).find() shouldBe true
-        progressPattern.matcher(progressMessage2).find() shouldBe true
-        progressPattern.matcher(progressMessage3).find() shouldBe true
-
-        // Real error should still be detected
-        val realError = "Error: File file:/path/to/missing-file.md was not found."
-        progressPattern.matcher(realError).find() shouldBe false
-        errorPattern.matcher(realError).find() shouldBe true
+    "should detect DOTJ013E - failed to parse referenced resource" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[DOTJ013E] Failed to parse the referenced resource 'topics/missing.dita'."
+        errorPattern.matcher(line).find() shouldBe true
     }
 
-    "Writing file message should not be classified as error" {
-        val progressPattern = java.util.regex.Pattern.compile(
-            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
-            "Processing\\s+.+\\s+to\\s+file:|" +
-            "Copying\\s+.+\\s+to\\s+",
-            java.util.regex.Pattern.CASE_INSENSITIVE
-        )
-
-        // Various writing file messages
-        progressPattern.matcher("Writing file:/temp/output.xml").find() shouldBe true
-        progressPattern.matcher("  Writing file:/path/to/topics/file.xml").find() shouldBe true
-        progressPattern.matcher("Writing file:C:/temp/output.dita").find() shouldBe true
+    "should detect DOTA001F - not a recognized transformation type" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[DOTA001F] 'unknown' is not a recognized transformation type."
+        errorPattern.matcher(line).find() shouldBe true
     }
 
-    "Processing to file message should not be classified as error" {
-        val progressPattern = java.util.regex.Pattern.compile(
-            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
-            "Processing\\s+.+\\s+to\\s+file:|" +
-            "Copying\\s+.+\\s+to\\s+",
-            java.util.regex.Pattern.CASE_INSENSITIVE
-        )
-
-        // Processing X to file:Y messages
-        progressPattern.matcher("Processing file:/input.xml to file:/output.xml").find() shouldBe true
-        progressPattern.matcher("Processing /path/input.dita to file:/temp/output.dita").find() shouldBe true
+    "should detect PDFJ001E - PDF indexing sort error" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[PDFJ001E] PDF indexing cannot find sort location for 'term'."
+        errorPattern.matcher(line).find() shouldBe true
     }
 
-    "Loading and Copying messages should not be classified as error" {
-        val progressPattern = java.util.regex.Pattern.compile(
-            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
-            "Processing\\s+.+\\s+to\\s+file:|" +
-            "Copying\\s+.+\\s+to\\s+",
-            java.util.regex.Pattern.CASE_INSENSITIVE
-        )
-
-        // Loading file messages
-        progressPattern.matcher("Loading file:/path/to/input.dita").find() shouldBe true
-        progressPattern.matcher("  Loading file:/temp/map.ditamap").find() shouldBe true
-
-        // Transforming file messages
-        progressPattern.matcher("Transforming file:/path/to/topic.dita").find() shouldBe true
-
-        // Copying messages
-        progressPattern.matcher("Copying file:/source/image.png to /dest/").find() shouldBe true
-        progressPattern.matcher("Copying /path/file.css to /output/css/").find() shouldBe true
+    "should detect XEPJ002E - XEP error" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[XEPJ002E] XEP processing failed."
+        errorPattern.matcher(line).find() shouldBe true
     }
 
-    "Real errors should still be detected after progress filtering" {
-        val progressPattern = java.util.regex.Pattern.compile(
-            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
-            "Processing\\s+.+\\s+to\\s+file:|" +
-            "Copying\\s+.+\\s+to\\s+",
-            java.util.regex.Pattern.CASE_INSENSITIVE
-        )
-        val errorPattern = java.util.regex.Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}[EF]\\]|(?<!\\w)ERROR(?!\\w)|(?<!\\w)FATAL(?!\\w)|(?<![A-Z])Error:|(?<![a-z])error:",
-            java.util.regex.Pattern.CASE_INSENSITIVE
+    "should detect INDX002E - index sort error" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[INDX002E] PDF indexing cannot find sort location for 'term'."
+        errorPattern.matcher(line).find() shouldBe true
+    }
+
+    "should detect PDFX013F - PDF file cannot be generated" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[PDFX013F] PDF file cannot be generated."
+        errorPattern.matcher(line).find() shouldBe true
+    }
+
+    "should detect DOTX010E - unable to find conref target" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[DOTX010E] Unable to find @conref target 'topics/shared.dita#topic/id'."
+        errorPattern.matcher(line).find() shouldBe true
+    }
+
+    // --- DITA-OT Warning Codes (should be warnings, not errors) ---
+
+    "should detect DOTX023W as warning, not error" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]")
+        val line = "[DOTX023W] Unable to retrieve navtitle from target 'topics/overview.dita'."
+        errorPattern.matcher(line).find() shouldBe false
+        warningPattern.matcher(line).find() shouldBe true
+    }
+
+    "should detect DOTJ014W as warning" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]")
+        val line = "[DOTJ014W] Found an <indexterm> element with no content."
+        errorPattern.matcher(line).find() shouldBe false
+        warningPattern.matcher(line).find() shouldBe true
+    }
+
+    "should detect PDFX001W as warning" {
+        val warningPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]")
+        val line = "[PDFX001W] index term range specified with @start but no matching @end."
+        warningPattern.matcher(line).find() shouldBe true
+    }
+
+    // --- DITA-OT Info Codes (should be ignored) ---
+
+    "should NOT detect DOTJ031I as error - no rule found in DITAVAL" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]")
+        val infoPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}I\\]")
+        val line = "[DOTJ031I] No rule for 'audience' found in DITAVAL file."
+        errorPattern.matcher(line).find() shouldBe false
+        warningPattern.matcher(line).find() shouldBe false
+        infoPattern.matcher(line).find() shouldBe true
+    }
+
+    "should NOT detect DOTJ045I as error - key defined more than once" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[DOTJ045I] key 'product-name' is defined more than once in the same map."
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should NOT detect PDFJ003I as error" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val infoPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}I\\]")
+        val line = "[PDFJ003I] Index entry will be sorted under Special characters heading."
+        errorPattern.matcher(line).find() shouldBe false
+        infoPattern.matcher(line).find() shouldBe true
+    }
+
+    // --- Same Code Number With Different Severities ---
+
+    "DOTJ007E should be error, DOTJ007W warning, DOTJ007I info" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]")
+        val infoPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}I\\]")
+
+        val errorLine = "[DOTJ007E] Duplicate condition in filter file for rule 'audience:expert'."
+        val warningLine = "[DOTJ007W] Duplicate condition in filter file for rule 'audience:expert'."
+        val infoLine = "[DOTJ007I] Duplicate condition in filter file for rule 'audience:expert'."
+
+        errorPattern.matcher(errorLine).find() shouldBe true
+        warningPattern.matcher(errorLine).find() shouldBe false
+
+        errorPattern.matcher(warningLine).find() shouldBe false
+        warningPattern.matcher(warningLine).find() shouldBe true
+
+        errorPattern.matcher(infoLine).find() shouldBe false
+        warningPattern.matcher(infoLine).find() shouldBe false
+        infoPattern.matcher(infoLine).find() shouldBe true
+    }
+
+    // --- Lines Without DITA-OT Code (should ALL be ignored) ---
+
+    "should ignore Processing file with error in filename" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "Processing file:/path/topics/error-messages.xml to file:/path/temp/hash.xml"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore Processing file with error-messages-details in filename" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "Processing file:/path/topics/error-messages-details.xml to file:/path/temp/hash.xml"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore Processing with Windows path" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "Processing C:\\path\\build\\dita-temp\\topics\\error-messages.xml"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore Writing file message" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "Writing file:/path/temp/validate/topics/file.xml"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore generic ERROR tag from third-party (Apache FOP)" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "[ERROR] SVG graphic could not be built."
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore generic Error prefix from third-party" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "Error: File file:/path/missing.md was not found."
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore stack trace from Apache Batik" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "org.apache.batik.bridge.BridgeException: file:/path/temp/:-1"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore Caused by in stack trace" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "Caused by: java.lang.RuntimeException: some message"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    "should ignore at line in stack trace" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val line = "    at org.apache.fop.render.pdf.PDFRenderer.render(PDFRenderer.java:123)"
+        errorPattern.matcher(line).find() shouldBe false
+    }
+
+    // --- Integration Test (real build output) ---
+
+    "should correctly count errors and warnings in real build output" {
+        val errorPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]")
+        val warningPattern = java.util.regex.Pattern.compile("\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]")
+
+        val buildOutput = listOf(
+            // Lines WITHOUT DITA-OT code -> all ignored
+            "Processing file:/path/topics/error-messages.xml to file:/path/temp/hash.xml",
+            "Processing file:/path/topics/error-messages-details.xml to file:/path/temp/hash.xml",
+            "[ERROR] SVG graphic could not be built. Reason: org.apache.batik.bridge.BridgeException",
+            "org.apache.batik.bridge.BridgeException: file:/path/temp/:-1",
+            "    at org.apache.batik.bridge.SVGImageElementBridge.createGraphicsNode(...)",
+            "Writing file:/path/temp/validate/topics/error-messages.xml",
+            // Lines WITH DITA-OT code -> classified by suffix
+            "[DOTJ031I] No rule for 'audience' found in DITAVAL file.",                   // I -> ignored
+            "[DOTJ045I] key 'product-name' is defined more than once in the same map.",   // I -> ignored
+            "[DOTX023W] Unable to retrieve navtitle from target 'topics/overview.dita'.", // W -> warning
+            "[DOTJ014W] Found an <indexterm> element with no content.",                   // W -> warning
+            "[DOTJ013E] Failed to parse the referenced resource 'topics/broken.dita'.",   // E -> error
+            "[DOTX010E] Unable to find @conref target 'shared.dita#topic/id'.",           // E -> error
+            "[DOTA001F] 'unknown' is not a recognized transformation type."               // F -> error
         )
 
-        // These are real errors and should NOT match progress pattern
-        val realErrors = listOf(
-            "Error: File file:/path/missing.md was not found.",
-            "[DOTX012E]: Referenced file not found",
-            "[FATAL] Build failed",
-            "error: invalid XML syntax"
-        )
-
-        for (error in realErrors) {
-            progressPattern.matcher(error).find() shouldBe false
-            errorPattern.matcher(error).find() shouldBe true
-        }
+        val errorCount = buildOutput.count { errorPattern.matcher(it).find() }
+        val warningCount = buildOutput.count { warningPattern.matcher(it).find() }
+        errorCount shouldBe 3    // DOTJ013E + DOTX010E + DOTA001F
+        warningCount shouldBe 2  // DOTX023W + DOTJ014W
     }
 })

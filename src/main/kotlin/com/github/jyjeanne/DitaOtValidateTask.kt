@@ -72,51 +72,40 @@ abstract class DitaOtValidateTask @Inject constructor(
         private const val MAX_OUTPUT_SIZE = 200 * 1024
 
         /**
-         * Pattern for DITA-OT error messages.
-         * DITA-OT message format: DOT[component][number][severity]
-         * samples : DOTA001F
-         * Severity codes: E=Error, F=Fatal
-         * Only matches messages ending with E (Error) or F (Fatal).
+         * Pattern for DITA-OT error messages using structured message codes ONLY.
+         *
+         * DITA-OT message code format: [PREFIX][NUMBER][SEVERITY]
+         * Prefixes: DOTA (Ant/core), DOTJ (Java), DOTX (XSLT),
+         *           INDX (Index), PDFJ (PDF/Java), PDFX (PDF/XSL-FO), XEPJ (XEP)
+         * Severity: E=Error, F=Fatal
+         *
+         * Strategy: Only lines with a valid DITA-OT message code are classified.
+         * Lines without a code (generic [ERROR], Error:, stack traces, filenames
+         * containing "error") are ignored — zero false positives.
+         *
+         * Note: Only built-in DITA-OT prefixes are recognized. Custom plugin
+         * message codes (e.g., LWDT from LwDITA) are not detected. If the
+         * process exits with non-zero code and no recognized errors are found,
+         * a generic "Validation failed with exit code" error is reported.
          */
         private val ERROR_PATTERN = Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}[EF]\\]",
-            Pattern.CASE_INSENSITIVE
+            "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}[EF]\\]"
         )
 
         /**
-         * Pattern for DITA-OT warning messages.
-         * Only matches messages ending with W (Warning).
+         * Pattern for DITA-OT warning messages (W suffix).
+         * Same prefix coverage as ERROR_PATTERN.
          */
         private val WARNING_PATTERN = Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}W\\]|(?<!\\w)WARN(?!ING\\w)|Warning:|warning:",
-            Pattern.CASE_INSENSITIVE
+            "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}W\\]"
         )
 
         /**
-         * Pattern for DITA-OT informational messages.
-         * Messages ending with I are informational and should not be treated as errors.
-         * Example: DOTJ031I - missing DITAVAL rule (informational, not an error)
+         * Pattern for DITA-OT informational messages (I suffix).
+         * These are not errors and should be ignored.
          */
         private val INFO_PATTERN = Pattern.compile(
-            "\\[DOT[A-Z]\\d{3,4}I\\]",
-            Pattern.CASE_INSENSITIVE
-        )
-
-        /**
-         * Pattern for DITA-OT progress messages.
-         * These are informational messages about file processing, not errors.
-         * Examples:
-         * - "Processing file:/path/input.xml to file:/path/output.xml"
-         * - "Writing file:/path/output.xml"
-         * - "Loading file:/path/input.xml"
-         * - "Transforming file:/path/input.xml"
-         * - "Copying file:/path/file.ext to /path/dest/"
-         */
-        private val PROGRESS_PATTERN = Pattern.compile(
-            "^\\s*(?:Processing|Writing|Loading|Transforming|Copying)\\s+file:|" +
-            "Processing\\s+.+\\s+to\\s+file:|" +
-            "Copying\\s+.+\\s+to\\s+",
-            Pattern.CASE_INSENSITIVE
+            "\\[(DOT[AJX]|INDX|PDF[JX]|XEPJ)\\d{3}I\\]"
         )
 
         /** Pattern to extract file location from error messages */
@@ -124,6 +113,9 @@ abstract class DitaOtValidateTask @Inject constructor(
             "(?:file:/*)?([^:]+\\.(?:dita|ditamap|xml))(?::(\\d+))?",
             Pattern.CASE_INSENSITIVE
         )
+
+        /** Pattern to extract line number from "line X" or ":X:" format */
+        private val LINE_NUMBER_PATTERN = Pattern.compile("(?:line\\s+(\\d+)|:(\\d+):)")
     }
 
     // ==================== Properties ====================
@@ -433,34 +425,16 @@ abstract class DitaOtValidateTask @Inject constructor(
             val exitCode = process.exitValue()
 
             // If exit code is non-zero, and we haven't captured specific errors,
-            // add a general error
+            // add a general error.
+            // Note: parseOutputLine() already classified all ERROR_PATTERN matches,
+            // so if errors is empty here, no DITA-OT error codes were found.
+            // This handles cases like custom plugin errors or non-DITA-OT failures.
             if (exitCode != 0 && errors.isEmpty()) {
-                // Extract meaningful error from output
-                // IMPORTANT: Exclude INFO messages (like DOTJ031I) and progress messages
-                // (like "Processing file:" or "Writing file:") which are not actual errors
-                val errorLines = output.lines()
-                    .filter { line ->
-                        ERROR_PATTERN.matcher(line).find() &&
-                        !INFO_PATTERN.matcher(line).find() &&      // Skip info messages
-                        !PROGRESS_PATTERN.matcher(line).find()     // Skip progress messages
-                    }
-                    .take(5)
-
-                if (errorLines.isNotEmpty()) {
-                    errorLines.forEach { line ->
-                        errors.add(ValidationMessage(
-                            extractFileFromMessage(line) ?: inputFile.absolutePath,
-                            extractLineNumber(line),
-                            line.trim()
-                        ))
-                    }
-                } else {
-                    errors.add(ValidationMessage(
-                        inputFile.absolutePath,
-                        null,
-                        "Validation failed with exit code: $exitCode"
-                    ))
-                }
+                errors.add(ValidationMessage(
+                    inputFile.absolutePath,
+                    null,
+                    "Validation failed with exit code: $exitCode"
+                ))
             }
 
             ValidationResult(
@@ -549,14 +523,16 @@ abstract class DitaOtValidateTask @Inject constructor(
     /**
      * Parse an output line for errors and warnings.
      *
-     * DITA-OT message severity is determined by the suffix:
-     * - E = Error (e.g., DOTJ012E)
-     * - F = Fatal (e.g., DOTJ001F)
-     * - W = Warning (e.g., DOTJ031W)
-     * - I = Info (e.g., DOTJ031I) - NOT an error, just informational
+     * Classification uses DITA-OT structured message codes ONLY.
+     * Lines without a DITA-OT message code are ignored (not classified).
+     * This eliminates all false positives from filenames, generic markers,
+     * third-party messages, and stack traces.
      *
-     * Info messages like DOTJ031I ("No rule for X was found in DITAVAL file")
-     * are informational only and should not cause validation to fail.
+     * DITA-OT message severity is determined by the code suffix:
+     * - E = Error (e.g., DOTJ013E)
+     * - F = Fatal (e.g., DOTA001F)
+     * - W = Warning (e.g., DOTX023W)
+     * - I = Info (e.g., DOTJ031I) - NOT an error, just informational
      */
     private fun parseOutputLine(
         line: String,
@@ -566,18 +542,6 @@ abstract class DitaOtValidateTask @Inject constructor(
     ) {
         val trimmedLine = line.trim()
         if (trimmedLine.isEmpty()) return
-
-        // Skip informational messages (ending with I) - they are not errors
-        if (INFO_PATTERN.matcher(trimmedLine).find()) {
-            logger.debug("  [INFO] $trimmedLine")
-            return
-        }
-
-        // Skip progress messages (Processing file:, Writing file:) - they are not errors
-        if (PROGRESS_PATTERN.matcher(trimmedLine).find()) {
-            logger.debug("  [PROGRESS] $trimmedLine")
-            return
-        }
 
         when {
             ERROR_PATTERN.matcher(trimmedLine).find() -> {
@@ -593,6 +557,12 @@ abstract class DitaOtValidateTask @Inject constructor(
                     extractLineNumber(trimmedLine),
                     trimmedLine
                 ))
+            }
+            INFO_PATTERN.matcher(trimmedLine).find() -> {
+                logger.debug("  [INFO] $trimmedLine")
+            }
+            else -> {
+                logger.debug("  $trimmedLine")
             }
         }
     }
@@ -618,10 +588,9 @@ abstract class DitaOtValidateTask @Inject constructor(
             matcher.group(2)?.toIntOrNull()
         } else {
             // Try to find line number in format "line X" or ":X:"
-            val linePattern = Pattern.compile("(?:line\\s+|:(\\d+):)")
-            val lineMatcher = linePattern.matcher(message)
+            val lineMatcher = LINE_NUMBER_PATTERN.matcher(message)
             if (lineMatcher.find()) {
-                lineMatcher.group(1)?.toIntOrNull()
+                (lineMatcher.group(1) ?: lineMatcher.group(2))?.toIntOrNull()
             } else {
                 null
             }
