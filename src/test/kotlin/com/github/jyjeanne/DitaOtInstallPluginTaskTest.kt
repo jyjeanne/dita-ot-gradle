@@ -1,6 +1,8 @@
 package com.github.jyjeanne
 
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -115,5 +117,46 @@ class DitaOtInstallPluginTaskTest : StringSpec({
         }
 
         task.get().failOnError.get() shouldBe false
+    }
+
+    "Command places --force after plugin argument" {
+        val task = project.tasks.register("installPlugins", DitaOtInstallPluginTask::class.java) {
+            it.ditaOtDir.set(File("/path/to/dita-ot"))
+            it.force.set(true)
+        }
+
+        val command = task.get().buildInstallCommand("org.dita.pdf2")
+
+        val installIndex = command.indexOf("install")
+        val pluginIndex = command.indexOf("org.dita.pdf2")
+        val forceIndex = command.indexOf("--force")
+
+        installIndex shouldBeLessThan pluginIndex
+        pluginIndex shouldBeLessThan forceIndex
+    }
+
+    "Command omits --force when not set" {
+        val task = project.tasks.register("installPlugins", DitaOtInstallPluginTask::class.java) {
+            it.ditaOtDir.set(File("/path/to/dita-ot"))
+            it.force.set(false)
+        }
+
+        val command = task.get().buildInstallCommand("org.dita.pdf2")
+
+        command shouldNotContain "--force"
+    }
+
+    "Command handles Windows file path with --force" {
+        val task = project.tasks.register("installPlugins", DitaOtInstallPluginTask::class.java) {
+            it.ditaOtDir.set(File("/path/to/dita-ot"))
+            it.force.set(true)
+        }
+
+        val command = task.get().buildInstallCommand("C:\\build\\plugin\\my-plugin.zip")
+
+        val pluginIndex = command.indexOf("C:\\build\\plugin\\my-plugin.zip")
+        val forceIndex = command.indexOf("--force")
+
+        pluginIndex shouldBeLessThan forceIndex
     }
 })

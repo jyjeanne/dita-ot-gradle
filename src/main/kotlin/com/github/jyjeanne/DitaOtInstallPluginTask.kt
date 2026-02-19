@@ -242,7 +242,7 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
                             2. Verify network connectivity
                             3. For URLs, ensure the file is accessible
                             4. For local files, verify the path exists
-                            5. Try running: ${ditaExecutable.absolutePath} --install $plugin
+                            5. Try running: ${ditaExecutable.absolutePath} install $plugin
                             """.trimIndent()
                         )
                     }
@@ -349,6 +349,30 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
     }
 
     /**
+     * Build the install command for a plugin.
+     * The positional argument (plugin) is placed before --force to comply
+     * with DITA-OT 4.4+ picocli argument parsing.
+     */
+    internal fun buildInstallCommand(plugin: String): List<String> {
+        val command = mutableListOf<String>()
+
+        if (Platform.isWindows) {
+            command.add("cmd")
+            command.add("/c")
+        }
+
+        command.add(ditaExecutable.absolutePath)
+        command.add("install")
+        command.add(plugin)
+
+        if (force.get()) {
+            command.add("--force")
+        }
+
+        return command
+    }
+
+    /**
      * Install a single plugin.
      */
     private fun installPlugin(ditaHome: File, plugin: String): InstallResult {
@@ -358,23 +382,7 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
                 return InstallResult.AlreadyInstalled(extractPluginId(plugin))
             }
 
-            // Build install command
-            val command = mutableListOf<String>()
-
-            val isWindows = Platform.isWindows
-            if (isWindows) {
-                command.add("cmd")
-                command.add("/c")
-            }
-
-            command.add(ditaExecutable.absolutePath)
-            command.add("install")
-
-            if (force.get()) {
-                command.add("--force")
-            }
-
-            command.add(plugin)
+            val command = buildInstallCommand(plugin)
 
             logger.debug("Executing: ${command.joinToString(" ")}")
 
