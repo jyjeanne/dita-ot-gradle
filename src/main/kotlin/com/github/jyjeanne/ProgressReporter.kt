@@ -175,10 +175,6 @@ class ProgressReporter(
                 }
             }
 
-            // Mark as complete (only if not interrupted)
-            if (!Thread.currentThread().isInterrupted) {
-                updateProgress(Stage.COMPLETE)
-            }
             onComplete(!hasErrors)
         } catch (e: InterruptedException) {
             // Thread was interrupted, exit gracefully
@@ -348,9 +344,9 @@ class ProgressReporter(
         if (style != ProgressStyle.QUIET) {
             logger.lifecycle("")
             if (success) {
-                logger.lifecycle("  [${buildProgressBar(100)}] 100% - Complete ($filesSnapshot files, ${String.format("%.1f", durationSec)}s)")
+                logger.lifecycle("  ${buildProgressBar(100)} 100% - Complete ($filesSnapshot files, ${String.format("%.1f", durationSec)}s)")
             } else {
-                logger.lifecycle("  [${buildProgressBar(stageSnapshot.progressPercent)}] ${stageSnapshot.progressPercent}% - Failed at ${stageSnapshot.displayName}")
+                logger.lifecycle("  ${buildProgressBar(stageSnapshot.progressPercent)} ${stageSnapshot.progressPercent}% - Failed at ${stageSnapshot.displayName}")
             }
         }
 
