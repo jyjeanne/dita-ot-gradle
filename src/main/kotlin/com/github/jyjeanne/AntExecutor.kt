@@ -216,7 +216,11 @@ object AntExecutor {
                 -1
             }
 
-            // Print summary (thread-safe even if output thread is still running)
+            // Wait for reader thread to finish processing all output before
+            // printing summary, so that filesProcessed/currentStage are final.
+            // The process has exited so its output stream will close promptly.
+            outputThread?.join(5000)
+
             val duration = System.currentTimeMillis() - startTime
             progressReporter.printSummary(exitCode == 0, duration)
 

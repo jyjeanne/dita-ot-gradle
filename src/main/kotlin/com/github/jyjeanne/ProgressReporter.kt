@@ -256,14 +256,22 @@ class ProgressReporter(
 
         when (style) {
             ProgressStyle.DETAILED -> {
+                // Skip COMPLETE — printSummary() handles the completion line with
+                // duration info. Displaying a progress bar here would cause a
+                // duplicate 100% line in non-terminal mode (e.g., CI/Gradle logs).
+                if (stage == Stage.COMPLETE) return
                 val progressLine = "  $progressBar $percent% - ${stage.displayName}$fileCount"
                 printProgressLine(progressLine)
             }
             ProgressStyle.SIMPLE -> {
+                // Same as DETAILED: skip COMPLETE to avoid duplicate with printSummary().
+                if (stage == Stage.COMPLETE) return
                 val progressLine = "  $progressBar $percent%"
                 printProgressLine(progressLine)
             }
             ProgressStyle.MINIMAL -> {
+                // MINIMAL shows stage names (not progress bars), so the "Complete..."
+                // message doesn't duplicate printSummary()'s progress bar format.
                 if (stage == Stage.INIT || stage == Stage.PREPROCESS ||
                     stage == Stage.TRANSFORM || stage == Stage.COMPLETE) {
                     clearProgressLine()
