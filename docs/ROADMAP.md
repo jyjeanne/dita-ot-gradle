@@ -16,6 +16,65 @@ This document outlines planned improvements and features for the DITA-OT Gradle 
 
 ---
 
+## ✅ v2.8.5 Bug Fixes (COMPLETED)
+
+### DitaOtInstallPluginTask - DITA-OT 4.4 Compatibility
+**Status**: ✅ COMPLETED (v2.8.5)
+
+Fixed `--force` flag placement breaking plugin installation on DITA-OT 4.4+ (picocli argument parsing).
+
+**Problem:** The `--force` flag was placed before the positional plugin argument (`dita install --force <plugin>`), which worked with DITA-OT ≤4.3 but fails with DITA-OT 4.4's picocli parser that requires positional arguments first.
+
+**Solution:** Reordered command arguments to `dita install <plugin> --force`. Extracted `buildInstallCommand()` as `internal fun` for testability.
+
+**Also fixed:** Troubleshooting message used deprecated `--install` syntax; updated to `install` (subcommand format).
+
+**Files Fixed:**
+- `DitaOtInstallPluginTask.kt` — Command argument ordering, buildInstallCommand extraction, troubleshooting message
+
+### ProgressReporter - Duplicate Progress Lines Fix
+**Status**: ✅ COMPLETED (v2.8.5)
+
+Fixed duplicate 100% completion lines appearing in task logs.
+
+**Problem:** Three separate code paths could print completion lines:
+1. `processLine()` detecting "build successful" → `updateProgress(Stage.COMPLETE)`
+2. `processOutput()` explicitly calling `updateProgress(Stage.COMPLETE)`
+3. `printSummary()` printing the final progress bar with duration
+
+This produced 2-3 duplicate lines in non-terminal mode (CI/Gradle logs). Also, `printSummary()` wrapped `buildProgressBar()` output (which already includes `[...]`) with extra brackets, producing `[[...]]`.
+
+**Solution:**
+- Removed explicit `updateProgress(Stage.COMPLETE)` call from `processOutput()`
+- Added COMPLETE guard in `updateProgress()` for DETAILED and SIMPLE styles (these duplicate `printSummary()`'s progress bar format)
+- MINIMAL style still shows "Complete..." (different format, no duplication)
+- Fixed double bracket formatting in `printSummary()`
+
+**Files Fixed:**
+- `ProgressReporter.kt` — Duplicate progress lines, double brackets
+
+### AntExecutor - Thread Synchronization Fix
+**Status**: ✅ COMPLETED (v2.8.5)
+
+Fixed race condition where `printSummary()` could read stale progress data.
+
+**Problem:** The main thread called `printSummary()` before the output reader thread finished processing all DITA-OT output, potentially showing incorrect file counts or stage information.
+
+**Solution:** Added `outputThread?.join(5000)` before `printSummary()` to ensure the reader thread completes processing.
+
+**Files Fixed:**
+- `AntExecutor.kt` — Thread join before summary
+
+### New Unit Tests
+
+Added 3 new tests for v2.8.5 (total: 206 tests):
+
+| Test Class | New Tests | Description |
+|------------|-----------|-------------|
+| `DitaOtInstallPluginTaskTest.kt` | 3 | Command argument ordering (--force after plugin, omit --force, Windows paths) |
+
+---
+
 ## ✅ P0 - Critical Priority (COMPLETED in v2.4.0)
 
 ### 1. ✅ Built-in DITA-OT Download Task
@@ -688,6 +747,9 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
+| **DitaOtInstallPluginTask DITA-OT 4.4 Compatibility** | 2.8.5 | Feb 2026 |
+| **ProgressReporter Duplicate Progress Lines Fix** | 2.8.5 | Feb 2026 |
+| **AntExecutor Thread Synchronization Fix** | 2.8.5 | Feb 2026 |
 | **Code Review Fixes (extractLineNumber, dead code removal)** | 2.8.4 | Feb 2026 |
 | **validateDita Zero False Positives (DITA-OT message codes only)** | 2.8.3 | Jan 2026 |
 | **Configurable Warning Display (showWarnings)** | 2.8.2 | Jan 2026 |

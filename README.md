@@ -7,7 +7,7 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.4)
+## Highlights (v2.8.5)
 
 | Feature | Description |
 |---------|-------------|
@@ -19,7 +19,7 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 | **Configuration Cache** | Up to **77% faster** incremental builds |
 | **Improved Error Messages** | Clear, actionable errors with troubleshooting steps |
 | **Cross-Platform** | Windows, macOS, Linux support (paths with spaces supported) |
-| **DITA-OT 3.x/4.x** | Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0 |
+| **DITA-OT 3.x/4.x** | Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0, **4.4** |
 | **Modern Architecture** | Provider API, Gradle 9.0 compatible |
 
 **Note**: This is a continuation of the original [com.github.eerohele.dita-ot-gradle](https://github.com/eerohele/dita-ot-gradle) plugin, migrated to Kotlin with modern Gradle support.
@@ -35,14 +35,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.4"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.5"
 }
 ```
 
@@ -128,7 +128,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
@@ -187,7 +187,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
 }
 
 def ditaOtVersion = '4.2.3'
@@ -305,7 +305,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.4"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.5"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -864,7 +864,7 @@ dita {
 
 | Component | Tested | Supported | Notes |
 |-----------|--------|-----------|-------|
-| **DITA-OT** | 3.5.4, 3.6, 4.2.3, 4.3.0 | 3.0+ | Auto-detects version from plugin.xml |
+| **DITA-OT** | 3.5.4, 3.6, 4.2.3, 4.3.0, 4.4 | 3.0+ | Auto-detects version from plugin.xml |
 | **Gradle** | 8.5, 8.10, 9.0 | 6.5+ | Configuration cache requires 6.5+ |
 | **Java** | 17 (build) | 8+ | Compiled to Java 8 bytecode |
 
@@ -923,7 +923,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.4'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
 }
 ```
 
@@ -931,7 +931,7 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.4 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.5 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8+ | No | Yes |
 | Gradle 9+ | No | Yes |

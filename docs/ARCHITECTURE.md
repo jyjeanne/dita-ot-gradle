@@ -42,24 +42,37 @@ dita-ot-gradle/
 │   ├── main/
 │   │   └── kotlin/
 │   │       └── com/github/jyjeanne/
-│   │           ├── DitaOtPlugin.kt      # Plugin entry point
-│   │           ├── DitaOtTask.kt        # Main task (600+ lines)
-│   │           ├── Options.kt           # Configuration options
-│   │           ├── AntExecutor.kt       # DITA-OT execution
-│   │           ├── Classpath.kt         # Classpath management
-│   │           ├── PropertyBuilder.kt   # Property DSL
-│   │           ├── GroovyPropertyCapture.kt  # Groovy closure capture
-│   │           ├── FileExtensions.kt    # Extension constants
-│   │           ├── GlobPatterns.kt      # File patterns
-│   │           ├── Messages.kt          # Error messages
-│   │           └── Properties.kt        # Property constants
+│   │           ├── DitaOtPlugin.kt            # Plugin entry point
+│   │           ├── DitaOtTask.kt              # Main transformation task
+│   │           ├── DitaOtDownloadTask.kt      # DITA-OT download & install
+│   │           ├── DitaOtInstallPluginTask.kt # Plugin installation task
+│   │           ├── DitaOtValidateTask.kt      # DITA content validation
+│   │           ├── DitaLinkCheckTask.kt       # Link checking task
+│   │           ├── ProgressReporter.kt        # Visual progress reporting
+│   │           ├── Platform.kt                # Cross-platform utilities
+│   │           ├── Options.kt                 # Configuration options
+│   │           ├── AntExecutor.kt             # DITA-OT process execution
+│   │           ├── Classpath.kt               # Classpath management
+│   │           ├── PropertyBuilder.kt         # Property DSL
+│   │           ├── GroovyPropertyCapture.kt   # Groovy closure capture
+│   │           ├── FileExtensions.kt          # Extension constants
+│   │           ├── GlobPatterns.kt            # File patterns
+│   │           ├── Messages.kt                # Error messages
+│   │           └── Properties.kt              # Property constants
 │   └── test/
 │       └── kotlin/
 │           └── com/github/jyjeanne/
-│               ├── DitaOtTaskSpec.kt    # Unit tests
-│               └── GroovyPropertyCaptureSpec.kt
-├── examples/                            # Usage examples
-├── build.gradle.kts                     # Build configuration
+│               ├── DitaOtTaskSpec.kt              # DitaOtTask unit tests
+│               ├── DitaOtPluginTest.kt            # Plugin registration tests
+│               ├── DitaOtInstallPluginTaskTest.kt # Install task tests
+│               ├── DitaOtValidateTaskTest.kt      # Validation task tests
+│               ├── DitaLinkCheckTaskTest.kt       # Link check tests
+│               ├── AntExecutorTest.kt             # AntExecutor tests
+│               ├── ProgressReporterTest.kt        # Progress reporter tests
+│               └── GroovyPropertyCaptureSpec.kt   # Groovy capture tests
+├── examples/                                # Usage examples
+├── docs/                                    # Documentation
+├── build.gradle.kts                         # Build configuration
 └── README.md
 ```
 
@@ -77,7 +90,7 @@ A **Gradle plugin** is an extension that adds functionality to Gradle. It can:
 ```kotlin
 // How a plugin is used in build.gradle.kts
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.3.1"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.5"
 }
 ```
 
@@ -1072,5 +1085,5 @@ class DitaOtTaskSpec : StringSpec({
 
 ---
 
-*Document created December 16, 2025*
-*Plugin version: 2.3.1*
+*Document created December 16, 2025 - Updated February 2026*
+*Plugin version: 2.8.5*
