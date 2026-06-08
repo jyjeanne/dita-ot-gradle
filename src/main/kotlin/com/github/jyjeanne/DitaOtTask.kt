@@ -160,6 +160,16 @@ abstract class DitaOtTask @Inject constructor(
     abstract val showWarnings: Property<Boolean>
 
     /**
+     * Timeout in minutes for the DITA-OT process when using the DITA_SCRIPT strategy.
+     * Set to 0 to disable the timeout entirely (wait indefinitely).
+     * Default: 30
+     *
+     * @since 2.8.6
+     */
+    @get:Input
+    abstract val ditaProcessTimeoutMinutes: Property<Long>
+
+    /**
      * Custom classpath for DITA-OT (optional).
      */
     @get:InputFiles
@@ -190,6 +200,7 @@ abstract class DitaOtTask @Inject constructor(
         showProgress.convention(true)
         progressStyle.convention(ProgressReporter.ProgressStyle.DETAILED.name)
         showWarnings.convention(false)
+        ditaProcessTimeoutMinutes.convention(30L)
     }
 
     // ==================== Configuration Methods (DSL) ====================
@@ -363,6 +374,20 @@ abstract class DitaOtTask @Inject constructor(
      */
     fun showWarnings(show: Boolean) {
         showWarnings.set(show)
+    }
+
+    /**
+     * Set the timeout in minutes for the DITA-OT process.
+     * Use 0 to disable the timeout (wait indefinitely).
+     *
+     * @param minutes Timeout in minutes (0 = no timeout)
+     * @since 2.8.6
+     */
+    fun ditaProcessTimeoutMinutes(minutes: Long) {
+        if (minutes < 0) {
+            throw GradleException("ditaProcessTimeoutMinutes must be >= 0 (use 0 to disable timeout)")
+        }
+        ditaProcessTimeoutMinutes.set(minutes)
     }
 
     // ==================== Computed Properties ====================
@@ -578,7 +603,7 @@ abstract class DitaOtTask @Inject constructor(
         val strategy = Options.Companion.AntExecutionStrategy.valueOf(antExecutionStrategy.get())
         if (strategy == Options.Companion.AntExecutionStrategy.DITA_SCRIPT) {
             logger.info("Using DITA_SCRIPT strategy (configuration cache compatible)")
-            val success = renderViaDitaScript(ditaHome, inputs, types, startTime)
+            val success = renderViaDitaScript(ditaHome, inputs, types, startTime, ditaProcessTimeoutMinutes.get())
 
             if (!success) {
                 throw GradleException("DITA-OT transformation failed with DITA_SCRIPT strategy")
@@ -621,7 +646,8 @@ abstract class DitaOtTask @Inject constructor(
         ditaHome: File,
         inputs: Set<File>,
         types: Array<String>,
-        startTime: Long
+        startTime: Long,
+        timeoutMinutes: Long = 30L
     ): Boolean {
         var hasErrors = false
 
@@ -681,7 +707,8 @@ abstract class DitaOtTask @Inject constructor(
                         filterFile = filter,
                         properties = properties,
                         logger = logger,
-                        progressReporter = progressReporter
+                        progressReporter = progressReporter,
+                        timeoutMinutes = timeoutMinutes
                     )
 
                     if (exitCode == 0) {

@@ -7,10 +7,11 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.5)
+## Highlights (v2.8.6)
 
 | Feature | Description |
 |---------|-------------|
+| **Configurable Timeout** | Set `ditaProcessTimeoutMinutes` per task (default 30 min, 0 = no timeout) — fixes long builds killed after 30 min |
 | **Progress Reporting** | Visual progress indicators with configurable warning display |
 | **DitaLinkCheckTask** | Check for broken links with `scope="peer"` support |
 | **DitaOtValidateTask** | Validate DITA content with zero false positives (DITA-OT message codes only) |
@@ -35,14 +36,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.5"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
 }
 ```
 
@@ -128,7 +129,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
@@ -187,7 +188,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
 }
 
 def ditaOtVersion = '4.2.3'
@@ -305,7 +306,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.5"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -724,6 +725,7 @@ Status:             FAILED
 | `showProgress` | `Boolean` | `true` | Show visual progress during builds |
 | `progressStyle` | `String` | `DETAILED` | Progress display style (DETAILED, SIMPLE, MINIMAL, QUIET) |
 | `showWarnings` | `Boolean` | `false` | Display warnings during transformation (suppresses FOP warnings by default) |
+| `ditaProcessTimeoutMinutes` | `Long` | `30` | Timeout in minutes for the DITA-OT process (0 = no timeout) |
 
 ### Passing Properties to DITA-OT
 
@@ -923,7 +925,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.5'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
 }
 ```
 
@@ -931,7 +933,7 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.5 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.6 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8+ | No | Yes |
 | Gradle 9+ | No | Yes |
@@ -941,6 +943,7 @@ plugins {
 | **DITA-OT Validation** | No | **Yes** (DitaOtValidateTask, zero false positives) |
 | **Link Checking** | No | **Yes** (DitaLinkCheckTask) |
 | **Progress Reporting** | No | **Yes** (visual progress bar) |
+| **Configurable Timeout** | No | **Yes** (`ditaProcessTimeoutMinutes`, 0 = no timeout) |
 | Kotlin DSL | Limited | Full support |
 | Cross-platform | Partial | Full (Win/Mac/Linux, paths with spaces) |
 | DITA-OT versions | 2.x only | 3.x, 4.x (auto-detected) |

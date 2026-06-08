@@ -1,7 +1,7 @@
 // See the 'simple' example for comments on the basic properties.
 
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.5"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
 }
 
 defaultTasks("dita")

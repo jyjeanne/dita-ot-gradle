@@ -16,10 +16,10 @@ This document outlines planned improvements and features for the DITA-OT Gradle 
 
 ---
 
-## ✅ v2.8.5 Bug Fixes (COMPLETED)
+## ✅ v2.8.6 Bug Fixes (COMPLETED)
 
 ### DitaOtInstallPluginTask - DITA-OT 4.4 Compatibility
-**Status**: ✅ COMPLETED (v2.8.5)
+**Status**: ✅ COMPLETED (v2.8.6)
 
 Fixed `--force` flag placement breaking plugin installation on DITA-OT 4.4+ (picocli argument parsing).
 
@@ -33,7 +33,7 @@ Fixed `--force` flag placement breaking plugin installation on DITA-OT 4.4+ (pic
 - `DitaOtInstallPluginTask.kt` — Command argument ordering, buildInstallCommand extraction, troubleshooting message
 
 ### ProgressReporter - Duplicate Progress Lines Fix
-**Status**: ✅ COMPLETED (v2.8.5)
+**Status**: ✅ COMPLETED (v2.8.6)
 
 Fixed duplicate 100% completion lines appearing in task logs.
 
@@ -54,7 +54,7 @@ This produced 2-3 duplicate lines in non-terminal mode (CI/Gradle logs). Also, `
 - `ProgressReporter.kt` — Duplicate progress lines, double brackets
 
 ### AntExecutor - Thread Synchronization Fix
-**Status**: ✅ COMPLETED (v2.8.5)
+**Status**: ✅ COMPLETED (v2.8.6)
 
 Fixed race condition where `printSummary()` could read stale progress data.
 
@@ -67,7 +67,7 @@ Fixed race condition where `printSummary()` could read stale progress data.
 
 ### New Unit Tests
 
-Added 3 new tests for v2.8.5 (total: 206 tests):
+Added 3 new tests for v2.8.6 (total: 206 tests):
 
 | Test Class | New Tests | Description |
 |------------|-----------|-------------|
@@ -747,9 +747,9 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
-| **DitaOtInstallPluginTask DITA-OT 4.4 Compatibility** | 2.8.5 | Feb 2026 |
-| **ProgressReporter Duplicate Progress Lines Fix** | 2.8.5 | Feb 2026 |
-| **AntExecutor Thread Synchronization Fix** | 2.8.5 | Feb 2026 |
+| **DitaOtInstallPluginTask DITA-OT 4.4 Compatibility** | 2.8.6 | Feb 2026 |
+| **ProgressReporter Duplicate Progress Lines Fix** | 2.8.6 | Feb 2026 |
+| **AntExecutor Thread Synchronization Fix** | 2.8.6 | Feb 2026 |
 | **Code Review Fixes (extractLineNumber, dead code removal)** | 2.8.4 | Feb 2026 |
 | **validateDita Zero False Positives (DITA-OT message codes only)** | 2.8.3 | Jan 2026 |
 | **Configurable Warning Display (showWarnings)** | 2.8.2 | Jan 2026 |

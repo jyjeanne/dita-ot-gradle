@@ -53,7 +53,8 @@ object AntExecutor {
         filterFile: File? = null,
         properties: Map<String, String> = emptyMap(),
         logger: Logger,
-        progressReporter: ProgressReporter? = null
+        progressReporter: ProgressReporter? = null,
+        timeoutMinutes: Long = 30L
     ): Int {
         logger.debug("Workaround: Using DITA-OT script for ANT execution (DITA_SCRIPT strategy)")
 
@@ -137,7 +138,7 @@ object AntExecutor {
             val exitCode = if (progressReporter != null) {
                 // Capture output for progress reporting
                 val process = processBuilder.start()
-                processOutputWithProgress(process, progressReporter, logger)
+                processOutputWithProgress(process, progressReporter, logger, timeoutMinutes)
             } else {
                 // Legacy: inherit IO and wait (output goes directly to console)
                 processBuilder.inheritIO()
@@ -186,7 +187,8 @@ object AntExecutor {
     private fun processOutputWithProgress(
         process: Process,
         progressReporter: ProgressReporter,
-        logger: Logger
+        logger: Logger,
+        timeoutMinutes: Long = 30L
     ): Int {
         var exitCode = -1
         val startTime = System.currentTimeMillis()
@@ -206,12 +208,17 @@ object AntExecutor {
             }, "DITA-OT-Progress-Reader")
             outputThread.start()
 
-            // Wait for process to complete (with timeout)
-            val completed = process.waitFor(30, TimeUnit.MINUTES)
+            // Wait for process to complete (with optional timeout)
+            val completed = if (timeoutMinutes <= 0L) {
+                process.waitFor()
+                true
+            } else {
+                process.waitFor(timeoutMinutes, TimeUnit.MINUTES)
+            }
             exitCode = if (completed) {
                 process.exitValue()
             } else {
-                logger.error("DITA-OT process timed out after 30 minutes")
+                logger.error("DITA-OT process timed out after $timeoutMinutes minutes")
                 destroyProcessSafely(process, logger)
                 -1
             }
