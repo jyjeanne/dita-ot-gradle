@@ -2,12 +2,12 @@ import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.4.21"
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "1.2.1"
-    id("de.undercouch.download") version "5.5.0"
-    id("se.patrikerdes.use-latest-versions") version "0.2.18"
-    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.gradle.plugin-publish") version "2.2.1"
+    id("de.undercouch.download") version "5.7.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.19"
+    id("io.github.ben-manes.versions") version "0.67.0"
 }
 
 group = "io.github.jyjeanne"
@@ -19,10 +19,10 @@ java {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        apiVersion = "2.1"
-        languageVersion = "2.1"
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
     }
 }
 
@@ -38,15 +38,15 @@ dependencies {
     implementation(kotlin("reflect"))
 
     // Common dependencies
-    implementation("commons-io:commons-io:2.20.0")
+    implementation("commons-io:commons-io:2.22.0")
 
     // Kotlin tests (Kotest)
-    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
-    testImplementation("io.kotest:kotest-property:5.9.1")
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.7")
+    testImplementation("io.kotest:kotest-assertions-core:6.2.7")
+    testImplementation("io.kotest:kotest-property:6.2.7")
 
     // For jsoup (HTML parsing in tests)
-    testImplementation("org.jsoup:jsoup:1.21.2")
+    testImplementation("org.jsoup:jsoup:1.24.1")
 }
 
 // DITA-OT download configuration

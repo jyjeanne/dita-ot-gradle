@@ -65,7 +65,7 @@ Test documentation builds with multiple DITA-OT versions:
 
 ```bash
 ./gradlew generateDocs -PditaOtVersion=4.1.0
-./gradlew generateDocs -PditaOtVersion=4.2.3
+./gradlew generateDocs -PditaOtVersion=4.4.2
 ```
 
 ## GitHub Actions Integration

@@ -1,0 +1,184 @@
+version: 2
+updates:
+  # GitHub Actions used in .github/workflows (root and the ci-cd example)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "ci"
+
+  - package-ecosystem: "github-actions"
+    directory: "/examples/ci-cd-publishing"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "ci"
+
+  # Gradle plugin build, its Gradle wrapper, and the integration test project
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build"
+
+  - package-ecosystem: "gradle"
+    directory: "/test-project"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build"
+
+  # Example projects (each is a standalone Gradle build)
+  - package-ecosystem: "gradle"
+    directory: "/examples"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/ci-cd-publishing"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/classpath"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/configuration-cache"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/custom-plugin-dev"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/download"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/filetree"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/gradle-plugin-self-documentation"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/multi-language"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/multi-project"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/multi-task"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/plugin-test"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/simple"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
+
+  - package-ecosystem: "gradle"
+    directory: "/examples/version-docs"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"

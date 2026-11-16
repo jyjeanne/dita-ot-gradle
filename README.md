@@ -388,10 +388,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -401,13 +401,13 @@ jobs:
         run: ./gradlew generateDocs -PditaOtVersion=${{ matrix.dita-version }}
 
       - name: Upload HTML Docs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: html-docs-${{ matrix.dita-version }}
           path: build/docs/html/
 
       - name: Upload PDF Docs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pdf-docs-${{ matrix.dita-version }}
           path: build/docs/pdf/
@@ -419,13 +419,13 @@ jobs:
 
     steps:
       - name: Download HTML Docs
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: html-docs-4.2.3
           path: docs-site/
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs-site

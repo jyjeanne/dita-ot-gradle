@@ -53,7 +53,7 @@ This example demonstrates how to:
 ```bash
 ./gradlew -PditaOtVersion=4.0.0 test
 ./gradlew -PditaOtVersion=4.1.0 test
-./gradlew -PditaOtVersion=4.2.3 test
+./gradlew -PditaOtVersion=4.4.2 test
 ```
 
 ### Test Different Plugins
@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dita-version: ['4.0.0', '4.1.0', '4.2.3']
+        dita-version: ['4.0.0', '4.1.0', '4.4.2']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

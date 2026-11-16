@@ -3,7 +3,7 @@
 import de.undercouch.gradle.tasks.download.Download
 
 plugins {
-    id("de.undercouch.download") version "4.1.1"
+    id("de.undercouch.download") version "5.7.0"
     id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
 }
 

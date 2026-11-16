@@ -1,6 +1,6 @@
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.2.0"
-    id("de.undercouch.download") version "5.5.0"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
+    id("de.undercouch.download") version "5.7.0"
 }
 
 repositories {

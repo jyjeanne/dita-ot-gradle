@@ -6,7 +6,7 @@ repositories {
     mavenCentral()
 }
 
-val ditaOtVersion = "4.2.3"
+val ditaOtVersion = "4.4.2"
 
 // Download DITA-OT task to project root dita-ot folder
 tasks.register<com.github.jyjeanne.DitaOtDownloadTask>("downloadDitaOt") {

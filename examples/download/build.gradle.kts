@@ -18,7 +18,7 @@ plugins {
     id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
 }
 
-val ditaOtVersion = "4.2.3"
+val ditaOtVersion = "4.4.2"
 
 // ============================================================================
 // Task: Download DITA-OT (built-in)
