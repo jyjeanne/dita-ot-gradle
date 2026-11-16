@@ -14,7 +14,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 import java.security.MessageDigest
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
@@ -399,7 +399,7 @@ abstract class DitaOtDownloadTask @Inject constructor(
         val targetFile = if (useTempFile) File(destFile.parent, destFile.name + TEMP_SUFFIX) else destFile
 
         try {
-            val url = URL(urlString)
+            val url = URI(urlString).toURL()
             var currentConnection = url.openConnection() as HttpURLConnection
             connections.add(currentConnection)
             currentConnection.connectTimeout = connectTimeout.get()
@@ -420,7 +420,7 @@ abstract class DitaOtDownloadTask @Inject constructor(
                         """.trimIndent()
                     )
 
-                currentConnection = URL(redirectUrl).openConnection() as HttpURLConnection
+                currentConnection = URI(redirectUrl).toURL().openConnection() as HttpURLConnection
                 connections.add(currentConnection)
                 currentConnection.connectTimeout = connectTimeout.get()
                 currentConnection.readTimeout = readTimeout.get()

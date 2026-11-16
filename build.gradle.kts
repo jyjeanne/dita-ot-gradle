@@ -21,8 +21,8 @@ java {
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
-        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
-        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
     }
 }
 
@@ -50,15 +50,16 @@ dependencies {
 }
 
 // DITA-OT download configuration
-val ditaOtVersion = "3.6"
+// Override with -PditaOtVersion=4.4.2 to run the test suite against another DITA-OT release
+val ditaOtVersion: String = providers.gradleProperty("ditaOtVersion").getOrElse("3.6")
 
-val downloadDitaOt by tasks.registering(Download::class) {
+val downloadDitaOt = tasks.register<Download>("downloadDitaOt") {
     src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
     dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
     overwrite(false)
 }
 
-val extractDitaOt by tasks.registering(Copy::class) {
+val extractDitaOt = tasks.register<Copy>("extractDitaOt") {
     dependsOn(downloadDitaOt)
     from(zipTree(downloadDitaOt.map { it.dest }))
     into(layout.buildDirectory.dir("dita-extract"))
@@ -78,7 +79,7 @@ val extractDitaOt by tasks.registering(Copy::class) {
     }
 }
 
-val installDitaOt by tasks.registering {
+val installDitaOt = tasks.register("installDitaOt") {
     dependsOn(extractDitaOt)
 }
 
