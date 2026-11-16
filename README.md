@@ -20,7 +20,7 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 | **Configuration Cache** | Up to **77% faster** incremental builds |
 | **Improved Error Messages** | Clear, actionable errors with troubleshooting steps |
 | **Cross-Platform** | Windows, macOS, Linux support (paths with spaces supported) |
-| **DITA-OT 3.x/4.x** | Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0, **4.4** |
+| **DITA-OT 3.x/4.x** | Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0, 4.4, **4.4.2** |
 | **Modern Architecture** | Provider API, Gradle 9.0 compatible |
 
 **Note**: This is a continuation of the original [com.github.eerohele.dita-ot-gradle](https://github.com/eerohele/dita-ot-gradle) plugin, migrated to Kotlin with modern Gradle support.
@@ -866,8 +866,8 @@ dita {
 
 | Component | Tested | Supported | Notes |
 |-----------|--------|-----------|-------|
-| **DITA-OT** | 3.5.4, 3.6, 4.2.3, 4.3.0, 4.4 | 3.0+ | Auto-detects version from plugin.xml |
-| **Gradle** | 8.5, 8.10, 9.0 | 6.5+ | Configuration cache requires 6.5+ |
+| **DITA-OT** | 3.5.4, 3.6, 4.2.3, 4.3.0, 4.4, 4.4.2 | 3.0+ | Auto-detects version from plugin.xml |
+| **Gradle** | 8.14.4, 9.0, 9.9.1 | 8.14.4+ | Minimum raised to 8.14.4; configuration cache supported |
 | **Java** | 17 (build) | 8+ | Compiled to Java 8 bytecode |
 
 ### Gradle Version Recommendations
@@ -875,10 +875,8 @@ dita {
 | Gradle Version | Support Level | Recommendation |
 |----------------|---------------|----------------|
 | **9.0+** | Full | **Recommended** - Best performance and features |
-| **8.5 - 8.14** | Full | Stable, production-ready |
-| **7.0 - 8.4** | Compatible | Works, but upgrade recommended |
-| **6.5 - 6.9** | Limited | Minimum for configuration cache |
-| **< 6.5** | Not supported | Upgrade required |
+| **8.14.4 - 8.x** | Full (minimum) | Oldest supported version, tested in CI |
+| **< 8.14.4** | Not supported | Upgrade required |
 
 ### Benefits of Gradle 9+
 
@@ -903,7 +901,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-9.0-bin.zip
 ./gradlew wrapper --gradle-version 9.0
 ```
 
-**Enable Configuration Cache (Gradle 6.5+):**
+**Enable Configuration Cache (Gradle 8.14.4+):**
 
 ```properties
 # gradle.properties

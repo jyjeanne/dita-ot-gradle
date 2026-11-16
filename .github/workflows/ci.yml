@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        gradle-version: ['8.5', '8.10', '9.0']
+        gradle-version: ['8.14.4', '9.0', '9.9.1']
       fail-fast: false
 
     steps:
@@ -51,18 +51,18 @@ jobs:
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7
-      if: matrix.gradle-version == '8.5'
+      if: matrix.gradle-version == '8.14.4'
       with:
         name: plugin-jar
         path: build/libs/*.jar
 
   integration-test:
-    name: Integration Tests - Gradle 8.5 + DITA-OT ${{ matrix.dita-version }}
+    name: Integration Tests - DITA-OT ${{ matrix.dita-version }}
     needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dita-version: ['3.4', '3.5', '3.6']
+        dita-version: ['3.4', '3.5', '3.6', '4.4.2']
       fail-fast: false
 
     steps:
@@ -151,7 +151,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        dita-version: ['3.5', '3.6']
+        dita-version: ['3.5', '3.6', '4.4.2']
       fail-fast: false
 
     steps:

@@ -9,6 +9,7 @@ Gradle wrapper; JDK 17 for building (bytecode targets Java 8). Default task is `
 ```bash
 ./gradlew clean assemble            # Build plugin jar (build/libs)
 ./gradlew test                      # Run unit tests (Kotest on JUnit Platform)
+./gradlew test -PditaOtVersion=4.4.2   # Run unit tests against another DITA-OT release (default 3.6)
 ./gradlew test --tests "com.github.jyjeanne.DitaOtTaskSpec"        # One test class
 ./gradlew test --tests "com.github.jyjeanne.DitaOtTaskSpec.*some name*"  # Filter by spec/test name
 ./gradlew publishToMavenLocal       # Install plugin locally (used by CI integration jobs)
