@@ -24,11 +24,16 @@ test-project/
 ## Running Locally
 
 ```bash
-# From the test-project directory
-./gradlew clean dita
+# From the repository root: publish the plugin under test to Maven Local
+./gradlew publishToMavenLocal
+
+# From the test-project directory: transform and check the HTML5 output
+./gradlew clean verifyOutput                        # DITA-OT 3.6 (default)
+./gradlew clean verifyOutput -PditaOtVersion=4.4.2  # any other DITA-OT release
 ```
 
-The output will be in `build/` directory.
+DITA-OT is downloaded to `build/dita-ot/dita-ot-<version>` and the output goes to `build/out`.
+The plugin version in `build.gradle.kts` must match `version` in the root `build.gradle.kts`.
 
 ## CI/CD Usage
 
