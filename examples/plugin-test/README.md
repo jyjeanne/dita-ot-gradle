@@ -10,7 +10,7 @@ This example demonstrates how to:
 ## Quick Start
 
 ```bash
-# Run with defaults (DITA-OT 4.2.3, org.lwdita plugin, markdown output)
+# Run with defaults (DITA-OT 4.4.2, org.lwdita plugin, markdown output)
 ./gradlew
 
 # Or with custom configuration
@@ -21,7 +21,7 @@ This example demonstrates how to:
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `ditaOtVersion` | `4.2.3` | DITA-OT version to download |
+| `ditaOtVersion` | `4.4.2` | DITA-OT version to download |
 | `pluginId` | `org.lwdita` | Plugin ID from DITA-OT registry |
 | `transtype` | `markdown` | Transformation type |
 

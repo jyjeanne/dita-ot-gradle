@@ -19,9 +19,9 @@ Gradle wrapper; JDK 17 for building (bytecode targets Java 8). Default task is `
 - `test` depends on `installDitaOt`, which downloads DITA-OT 3.6 from GitHub into `build/dita-ot` (`dita.home` system property defaults to that path). Tests that need DITA-OT fail without it.
 - Tests run with `examples.dir` pointing at `examples/`.
 - On Windows use `.\gradlew.bat` instead of `./gradlew`.
-- CI runs `test` with `continue-on-error: true`, so a red test run does not fail the pipeline; check the test report yourself.
-- `scripts/version.sh <old> <new>` rewrites the version string in every `build.gradle` file. The version also lives in `build.gradle.kts` (`version = ...`), `README.md`, and the docs, so bump those by hand as well.
-- `test-project/` and `examples/*` are standalone Gradle builds that consume the plugin; they are not part of the root build.
+- `scripts/version.sh <old> <new>` rewrites the version string in every `build.gradle` file. The version also lives in `build.gradle.kts` (`version = ...`), `test-project/build.gradle.kts` (plugin version under integration test, resolved from mavenLocal), `README.md`, and the docs, so bump those by hand as well.
+- None of `test-project/` or `examples/` is part of the root build. `test-project/` is a standalone build that resolves the plugin from mavenLocal (`./gradlew publishToMavenLocal` first); CI runs its `dita` task per DITA-OT version with `-PditaOtVersion=`.
+- `examples/` is itself a composite build: `examples/settings.gradle` does `includeBuild '../'` (plugin source) and includes `classpath`, `download`, `filetree`, `multi-task`, `multi-project`, `simple` as subprojects (`simple` and `multi-project` also have their own settings/wrapper and can run standalone). `gradle-plugin-self-documentation` also builds against the plugin source (`pluginManagement { includeBuild("../..") }`). The remaining examples (`ci-cd-publishing`, `configuration-cache`, `custom-plugin-dev`, `multi-language`, `plugin-test`, `version-docs`) are standalone builds that pull the released plugin from the Plugin Portal.
 
 ## Architecture
 
@@ -29,9 +29,9 @@ The project is a Gradle plugin (`io.github.jyjeanne.dita-ot-gradle`, entry point
 
 **Task model.** `DitaOtPlugin` only registers a `dita` task of type `DitaOtTask`. The other tasks (`DitaOtDownloadTask`, `DitaOtInstallPluginTask`, `DitaOtValidateTask`, `DitaLinkCheckTask`) are public task types users register themselves. Consumers reach them as `com.github.jyjeanne.<TaskName>` (no plugin-provided task names beyond `dita`).
 
-**Execution path for `DitaOtTask`.** Inputs are built from the DSL (`DitaOtTask` setters and `PropertyBuilder`/`GroovyPropertyCapture` for Groovy closures), then `Options` holds the resolved settings. The actual DITA-OT run goes through one of two strategies selected by `antExecutionStrategy` (enum in `Options.kt`):
-- `DITA_SCRIPT` (default): `AntExecutor` launches `bin/dita` / `dita.bat` from the DITA-OT home via `ProcessBuilder`, with `DITA_HOME` set. This is the configuration-cache-compatible path.
-- `ANT` / legacy: `renderViaIsolatedAntBuilder` uses Gradle's internal `IsolatedAntBuilder`. It is deprecated and not configuration-cache compatible; it logs a warning.
+**Execution path for `DitaOtTask`.** Inputs are built from the DSL (`DitaOtTask` setters and `PropertyBuilder`/`GroovyPropertyCapture` for Groovy closures), then `Options` holds the resolved settings. `antExecutionStrategy` (enum `Options.AntExecutionStrategy`: `ISOLATED_BUILDER`, `DITA_SCRIPT`, `CUSTOM_CLASSLOADER`, `GRADLE_EXEC`, `GROOVY_ANT_BINDING`) selects how DITA-OT runs, but `DitaOtTask` only has two code paths:
+- `DITA_SCRIPT` (the task's default): `AntExecutor` launches `bin/dita` / `dita.bat` from the DITA-OT home via `ProcessBuilder`, with `DITA_HOME` set. This is the configuration-cache-compatible path.
+- Every other value falls through to `renderViaIsolatedAntBuilder`, which uses Gradle's internal `IsolatedAntBuilder`. It is deprecated, not configuration-cache compatible, and logs a warning. The other enum values have no dedicated implementation (the enum's KDoc calling `ISOLATED_BUILDER` the default is stale).
 Any change to how DITA-OT is invoked has to be checked against both paths.
 
 **Supporting infrastructure.**
@@ -43,4 +43,4 @@ Any change to how DITA-OT is invoked has to be checked against both paths.
 
 **Version coupling.** Supported DITA-OT versions are auto-detected from `plugin.xml` in the DITA-OT installation; `DitaOtDownloadTask` and the CI matrices pin specific versions (3.4–3.6, 4.x). The `.github/workflows/ci.yml` matrices are the source of truth for which Gradle and DITA-OT versions are exercised.
 
-**Tests.** Kotest specs (`*Spec.kt`) and `*Test.kt` classes live in the same package under `src/test/kotlin`. `DitaOtIntegrationTest` is documentation-only and disabled; real transformations are verified via the `examples/` projects.
+**Tests.** Kotest specs (`*Spec.kt`) and `*Test.kt` classes live in the same package under `src/test/kotlin`. `DitaOtIntegrationTest` is documentation-only and disabled. Real transformations are verified by `test-project` (`./gradlew verifyOutput -PditaOtVersion=<v>` after `publishToMavenLocal`; CI runs it per DITA-OT version) and the `examples/` projects. On Windows, DITA-OT 4.x's `dita.bat` exceeds the 8191-char command-line limit when the checkout path is long (exit code 255, "The input line is too long"); 3.x is less affected.

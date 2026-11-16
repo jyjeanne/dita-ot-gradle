@@ -52,12 +52,12 @@ plugins {
 ```groovy
 // Groovy DSL
 tasks.register('downloadDitaOt', com.github.jyjeanne.DitaOtDownloadTask) {
-    version = '4.2.3'
+    version = '4.4.2'
 }
 
 // Kotlin DSL
 val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::class) {
-    version.set("4.2.3")
+    version.set("4.4.2")
 }
 ```
 
@@ -66,7 +66,7 @@ val downloadDitaOt by tasks.registering(com.github.jyjeanne.DitaOtDownloadTask::
 ```groovy
 dita {
     dependsOn downloadDitaOt
-    ditaOt layout.buildDirectory.dir('dita-ot/dita-ot-4.2.3')
+    ditaOt layout.buildDirectory.dir('dita-ot/dita-ot-4.4.2')
     input 'docs/guide.ditamap'
     transtype 'html5'
 }
@@ -95,7 +95,7 @@ The [`examples/plugin-test`](examples/plugin-test) project provides a complete s
 ```bash
 cd examples/plugin-test
 
-# Test with defaults (DITA-OT 4.2.3, org.lwdita plugin)
+# Test with defaults (DITA-OT 4.4.2, org.lwdita plugin)
 ./gradlew test
 
 # Test with specific DITA-OT version
@@ -132,7 +132,7 @@ plugins {
     id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
 }
 
-def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
+def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.4.2'
 def pluginId = project.findProperty('pluginId') ?: 'org.lwdita'
 def selectedTranstype = project.findProperty('transtype') ?: 'markdown'
 
@@ -191,7 +191,7 @@ plugins {
     id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
 }
 
-def ditaOtVersion = '4.2.3'
+def ditaOtVersion = '4.4.2'
 def ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
 def myPluginDir = file('src/my-plugin')
 
@@ -363,7 +363,7 @@ tasks.register("generateDocs") {
 **Sample `gradle.properties`:**
 
 ```properties
-ditaOtVersion=4.2.3
+ditaOtVersion=4.4.2
 org.gradle.configuration-cache=true
 ```
 
@@ -384,7 +384,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dita-version: ['4.1.0', '4.2.3']  # Test multiple versions
+        dita-version: ['4.1.0', '4.4.2']  # Test multiple versions
 
     steps:
       - name: Checkout
@@ -421,7 +421,7 @@ jobs:
       - name: Download HTML Docs
         uses: actions/download-artifact@v8
         with:
-          name: html-docs-4.2.3
+          name: html-docs-4.4.2
           path: docs-site/
 
       - name: Deploy to GitHub Pages
@@ -579,7 +579,7 @@ Automatically downloads and extracts DITA-OT from GitHub releases. **No external
 **Example:**
 ```kotlin
 tasks.register<com.github.jyjeanne.DitaOtDownloadTask>("downloadDitaOt") {
-    version.set("4.2.3")
+    version.set("4.4.2")
     destinationDir.set(layout.buildDirectory.dir("dita-ot"))
     retries.set(3)
 }
@@ -602,7 +602,7 @@ Installs DITA-OT plugins from registry, URL, or local files.
 ```kotlin
 tasks.register<com.github.jyjeanne.DitaOtInstallPluginTask>("installPlugins") {
     dependsOn(downloadDitaOt)
-    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.4.2"))
     plugins.set(listOf(
         "org.dita.pdf2",                    // From registry
         "https://example.com/plugin.zip",   // From URL
@@ -631,7 +631,7 @@ Validates DITA content without running full transformation. Uses DITA-OT structu
 ```kotlin
 tasks.register<com.github.jyjeanne.DitaOtValidateTask>("validateDita") {
     dependsOn(downloadDitaOt)
-    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.4.2"))
     input("docs/guide.ditamap")
     strictMode.set(true)  // Fail on warnings too
     validationTimeout.set(300000)  // 5 minutes
@@ -978,7 +978,7 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for full version history.
 > DITA-OT execution failed with exit code: 255
 > La ligne entrée est trop longue
 ```
-**Solution:** This occurs when the project path is deeply nested, causing Windows command line length to exceed ~8191 characters. DITA-OT's `env.bat` adds many JARs to CLASSPATH, which can overflow this limit.
+**Solution:** This occurs when the project path is deeply nested, causing Windows command line length to exceed ~8191 characters. DITA-OT's `env.bat` adds many JARs to CLASSPATH, which can overflow this limit. DITA-OT 4.x adds more plugin JARs than 3.x, so it hits the limit sooner: for example, DITA-OT 4.4.2 extracted to a directory whose path is about 100 characters long fails, while 3.6 at the same location works.
 
 Workarounds:
 1. Move your project to a shorter path (e.g., `C:\projects\` instead of deep nested folders)

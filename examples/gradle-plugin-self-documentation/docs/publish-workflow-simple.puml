@@ -16,7 +16,7 @@ skinparam arrow {
 start
 
 partition "Step 1: Setup" #e3f2fd {
-  :Download DITA-OT 4.2.3
+  :Download DITA-OT 4.4.2
   from GitHub releases;
 }
 
