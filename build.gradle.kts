@@ -86,6 +86,10 @@ val installDitaOt = tasks.register("installDitaOt") {
 tasks.test {
     dependsOn(installDitaOt)
 
+    // build/dita-ot is not tracked, so make the DITA-OT version an input:
+    // otherwise `test -PditaOtVersion=...` is reported UP-TO-DATE and never runs.
+    inputs.property("ditaOtVersion", ditaOtVersion)
+
     systemProperty("dita.home",
         System.getProperty("dita.home",
             File(layout.buildDirectory.asFile.get(), "dita-ot").canonicalPath))
