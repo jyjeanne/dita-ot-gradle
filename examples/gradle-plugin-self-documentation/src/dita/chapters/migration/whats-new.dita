@@ -5,6 +5,16 @@
   <shortdesc>Release highlights and new features.</shortdesc>
   <body>
     <section>
+      <title>Version 2.8.8</title>
+      <p><b>Windows Long Path Fix</b></p>
+      <ul>
+        <li><b>DITA-OT 4.x on deep paths:</b> no more exit code 255 ("The input line is too long"); <filepath>dita.bat</filepath> runs through its 8.3 short path, or a temporary junction under <filepath>%TEMP%</filepath>, only when its command line would exceed the <cmdname>cmd.exe</cmdname> limit</li>
+        <li>Applies to the transformation, DitaOtValidateTask and DitaOtInstallPluginTask</li>
+        <li>No change to the task DSL</li>
+      </ul>
+    </section>
+
+    <section>
       <title>Version 2.8.7</title>
       <p><b>Maintenance Release</b></p>
       <ul>

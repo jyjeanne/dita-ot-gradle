@@ -7,6 +7,14 @@
     <p>This roadmap outlines planned improvements for the DITA-OT Gradle Plugin.</p>
 
     <section>
+      <title>Completed in Version 2.8.8</title>
+      <ul>
+        <li><b>Windows long paths:</b> <filepath>dita.bat</filepath> runs through its 8.3 short path, or a temporary junction, when its command line would exceed the <cmdname>cmd.exe</cmdname> limit (transformation, validation, plugin install)</li>
+        <li><b>CI:</b> DitaOtValidateTask runs for every tested DITA-OT version</li>
+      </ul>
+    </section>
+
+    <section>
       <title>Completed in Version 2.8.7</title>
       <ul>
         <li><b>Minimum Gradle 8.14.4 and Kotlin 2.4.21 toolchain:</b> CI build matrix 8.14.4, 9.0, 9.9.1</li>
@@ -19,7 +27,7 @@
     <section>
       <title>Next: Known Issues</title>
       <ul>
-        <li>Windows: DITA-OT 4.x <filepath>dita.bat</filepath> can exceed the command-line length limit on long project paths</li>
+        <li>Windows: DITA-OT on a UNC network path can still exceed the command-line length limit (neither 8.3 names nor junctions can be used there)</li>
         <li>DitaOtDownloadTask: relative redirect locations and gzip-encoded responses are not handled</li>
       </ul>
     </section>

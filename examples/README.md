@@ -343,6 +343,10 @@ Every build now includes detailed reports:
 
 ## Version History of Examples
 
+### v2.8.8 (November 2026)
+All examples updated to **v2.8.8**:
+- ✅ On Windows, DITA-OT 4.x examples now also work from deeply nested folders (the plugin works around the `cmd.exe` command-line length limit)
+
 ### v2.8.7 (November 2026)
 All examples updated to **v2.8.7**:
 - ✅ Gradle wrapper 9.9.1 (minimum supported Gradle is now 8.14.4)

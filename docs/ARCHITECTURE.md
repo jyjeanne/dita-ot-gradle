@@ -90,7 +90,7 @@ A **Gradle plugin** is an extension that adds functionality to Gradle. It can:
 ```kotlin
 // How a plugin is used in build.gradle.kts
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.8"
 }
 ```
 
@@ -1086,4 +1086,4 @@ class DitaOtTaskSpec : StringSpec({
 ---
 
 *Document created December 16, 2025 - Updated February 2026*
-*Plugin version: 2.8.7*
+*Plugin version: 2.8.8*

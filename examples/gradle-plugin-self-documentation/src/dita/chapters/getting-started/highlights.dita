@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
 <topic id="highlights">
-  <title>Highlights (v2.8.7)</title>
+  <title>Highlights (v2.8.8)</title>
   <shortdesc>Key features and improvements in the current version.</shortdesc>
   <body>
+    <section>
+      <title>What's New in 2.8.8</title>
+      <ul>
+        <li><b>Windows long paths fixed:</b> DITA-OT 4.x no longer fails with exit code 255 ("The input line is too long") in deeply nested projects. When the <filepath>dita.bat</filepath> command line would exceed the 8191-character <cmdname>cmd.exe</cmdname> limit, the transformation, validation and plugin install tasks run it through its 8.3 short path, or a temporary junction under <filepath>%TEMP%</filepath> where 8.3 names are disabled. Command lines that fit run exactly as before.</li>
+        <li><b>CI:</b> DitaOtValidateTask now also runs for every tested DITA-OT version.</li>
+      </ul>
+    </section>
+
     <section>
       <title>What's New in 2.8.7</title>
       <p>A maintenance release with no change to the task DSL:</p>
@@ -11,7 +19,6 @@
         <li><b>Minimum Gradle 8.14.4:</b> The minimum supported Gradle version is now 8.14.4 (previously 6.5). Gradle 8.14.4, 9.0 and 9.9.1 are tested in CI. On older Gradle versions, stay on 2.8.6.</li>
         <li><b>DITA-OT 4.4.2:</b> Tested in CI with a real HTML5 transformation on Linux and Windows. The examples now default to DITA-OT 4.4.2.</li>
         <li><b>Up-to-date toolchain:</b> Kotlin 2.4.21, commons-io 2.22.0, Gradle wrapper 9.9.1, with no compiler or Gradle deprecation warnings.</li>
-        <li><b>Windows note:</b> DITA-OT 4.x is more likely than 3.x to exceed the Windows command-line length limit on deeply nested project paths (exit code 255, "The input line is too long"). Use a shorter project path.</li>
       </ul>
     </section>
 
@@ -163,7 +170,8 @@
 
     <section>
       <title>Version History</title>
-      <p><b>2.8.7</b> - Minimum Gradle 8.14.4, Kotlin 2.4 toolchain, DITA-OT 4.4.2 tested in CI</p>
+      <p><b>2.8.8</b> - Windows long path fix for DITA-OT 4.x (8.3 short path or junction)</p>
+      <p><b>2.8.7</b> -Minimum Gradle 8.14.4, Kotlin 2.4 toolchain, DITA-OT 4.4.2 tested in CI</p>
       <p><b>2.8.6</b> - Configurable DITA-OT process timeout, DITA-OT 4.4 plugin install fix, progress output fixes</p>
       <p><b>2.8.4</b> - validateDita message fix, checkLinks peer support, showWarnings option</p>
       <p><b>2.8.1</b> - Cross-platform path fix, DITA-OT version detection fix, DITA-OT 4.x compatibility</p>

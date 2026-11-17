@@ -1,7 +1,7 @@
 plugins {
     // Must match `version` in the root build.gradle.kts: CI publishes the plugin
     // to mavenLocal and this build resolves it from there (see settings.gradle.kts).
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.8"
 }
 
 repositories {
@@ -28,9 +28,17 @@ tasks.named<com.github.jyjeanne.DitaOtTask>("dita") {
     transtype("html5")
 }
 
-// Fail the build unless the transformation really produced HTML5 output.
+// Also exercise DitaOtValidateTask: like the transformation, it runs dita/dita.bat
+// with DITA-OT's full plugin classpath.
+val validateDita = tasks.register<com.github.jyjeanne.DitaOtValidateTask>("validateDita") {
+    dependsOn(downloadDitaOt)
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion"))
+    input("src/test.ditamap")
+}
+
+// Fail the build unless validation passes and the transformation really produced HTML5 output.
 tasks.register("verifyOutput") {
-    dependsOn("dita")
+    dependsOn(validateDita, "dita")
     val outDir = layout.buildDirectory.dir("out")
     doLast {
         val dir = outDir.get().asFile

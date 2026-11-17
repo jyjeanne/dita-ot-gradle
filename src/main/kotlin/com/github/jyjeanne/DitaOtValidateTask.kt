@@ -374,10 +374,17 @@ abstract class DitaOtValidateTask @Inject constructor(
         // Create temp directory for validation output
         val tempDir = File(ditaHome, "temp/validate-${System.currentTimeMillis()}")
 
+        // On Windows, dita.bat may run through a shorter path (8.3 name or junction) to stay
+        // under the cmd.exe limit (see WindowsCommandLine); closed after the process exits
+        var script: WindowsCommandLine.DitaScript? = null
+
         return try {
             // Build validation command
             // We use a minimal transformation that validates content
-            val command = buildValidationCommand(ditaHome, inputFile, tempDir)
+            val arguments = buildValidationArguments(inputFile, tempDir)
+            script = WindowsCommandLine.resolveDitaScript(ditaExecutable, arguments, logger)
+            val shell = if (Platform.isWindows) listOf("cmd", "/c") else emptyList()
+            val command = shell + script.path + arguments
 
             logger.debug("Executing: ${command.joinToString(" ")}")
 
@@ -458,7 +465,8 @@ abstract class DitaOtValidateTask @Inject constructor(
                 output = ""
             )
         } finally {
-            // Clean up temp directory
+            // Remove any junction created for this run, then the temp directory
+            script?.close()
             cleanupTempDirectory(tempDir)
         }
     }
@@ -478,46 +486,39 @@ abstract class DitaOtValidateTask @Inject constructor(
     }
 
     /**
-     * Build the DITA-OT command for validation.
+     * Build the dita/dita.bat arguments for validation.
      */
-    private fun buildValidationCommand(ditaHome: File, inputFile: File, tempDir: File): List<String> {
-        val command = mutableListOf<String>()
-
-        if (Platform.isWindows) {
-            command.add("cmd")
-            command.add("/c")
-        }
-
-        command.add(ditaExecutable.absolutePath)
+    private fun buildValidationArguments(inputFile: File, tempDir: File): List<String> {
+        val arguments = mutableListOf<String>()
 
         // Use 'dita' transtype for validation (compatible with DITA-OT 3.x+)
         // Note: 'preprocess' transtype was removed in DITA-OT 4.x
         // The 'dita' transtype performs preprocessing and outputs normalized DITA
         // Using separate arguments for cross-platform compatibility with paths containing spaces
-        command.add("--input")
-        command.add(inputFile.absolutePath)
+        arguments.add("--input")
+        arguments.add(inputFile.absolutePath)
 
-        command.add("--format")
-        command.add("dita")
+        arguments.add("--format")
+        arguments.add("dita")
 
         // Use the provided temporary output directory
-        command.add("--output")
-        command.add(tempDir.absolutePath)
+        arguments.add("--output")
+        arguments.add(tempDir.absolutePath)
 
         // Set processing mode
-        command.add("--processing-mode")
-        command.add(processingMode.get())
+        arguments.add("--processing-mode")
+        arguments.add(processingMode.get())
 
         // Add filter if specified
         filterFile.files.firstOrNull()?.let { filter ->
-            command.add("--filter")
-            command.add(filter.absolutePath)
+            arguments.add("--filter")
+            arguments.add(filter.absolutePath)
         }
 
         // Verbose output for better error messages
-        command.add("-v")
+        arguments.add("-v")
 
-        return command
+        return arguments
     }
 
     /**
