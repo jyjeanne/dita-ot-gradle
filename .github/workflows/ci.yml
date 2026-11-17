@@ -56,7 +56,7 @@ jobs:
         path: build/libs/*.jar
 
   integration-test:
-    name: Integration Tests - DITA-OT ${{ matrix.dita-version }}
+    name: Linux Integration Tests - DITA-OT ${{ matrix.dita-version }}
     needs: build
     runs-on: ubuntu-latest
     strategy:
