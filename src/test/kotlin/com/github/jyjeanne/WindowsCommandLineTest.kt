@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeLessThan
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.gradle.api.logging.Logging
 import java.io.File
 import java.nio.file.Files
@@ -20,6 +21,15 @@ class WindowsCommandLineTest : StringSpec({
         """set "CLASSPATH=%CLASSPATH%;%DITA_HOME%\plugins\org.example.plugin$i\lib\plugin-library-$i.jar""""
     }
 
+    // The relevant lines of DITA-OT 4.x and 3.x bin\dita.bat
+    val ditaBat4 = listOf(
+        "set DITA_HOME=%~dp0..",
+        """if "!DITA_CMD_SUBCOMMAND!" == "install" goto checkJava""",
+        """if "!DITA_CMD_SUBCOMMAND!" == "uninstall" goto checkJava""",
+        """call "%DITA_HOME%\config\env.bat""""
+    )
+    val ditaBat3 = listOf("set DITA_HOME=%~dp0..", """call "%DITA_HOME%\config\env.bat"""")
+
     fun estimateFor(ditaHome: String, arguments: List<String> = emptyList(), inheritedClasspath: String = "") =
         WindowsCommandLine.estimateCommandLength(
             ditaHomeAsSeenByScript = ditaHome,
@@ -31,12 +41,21 @@ class WindowsCommandLineTest : StringSpec({
             antArgs = ""
         )
 
+    /** Creates <temp>/<nested>/dita-ot-4.4.2/{bin/dita.bat, config/env.bat}; returns dita.bat. */
+    fun fakeDitaOt(root: File, nested: String, ditaBatLines: List<String>, envBatLines: List<String>): File {
+        val home = File(File(root, nested), "dita-ot-4.4.2")
+        File(home, "bin").mkdirs()
+        File(home, "config").mkdirs()
+        File(home, "config/env.bat").writeText(envBatLines.joinToString("\r\n"))
+        return File(home, "bin/dita.bat").apply { writeText(ditaBatLines.joinToString("\r\n")) }
+    }
+
     // ============================================================================
     // Estimate
     // ============================================================================
 
     "estimate exceeds the cmd.exe limit for a DITA-OT 4.x install under a long path" {
-        // 101 characters: the layout that failed with "La ligne entrée est trop longue"
+        // 104 characters: the layout that failed with "La ligne entrée est trop longue"
         val longHome = "C:\\Users\\someone\\Documents\\Perso\\Projects\\dita-ot-gradle\\test-project\\build\\dita-ot\\dita-ot-4.4.2\\bin\\.."
 
         estimateFor(longHome) shouldBeGreaterThan WindowsCommandLine.CMD_EXE_MAX_LENGTH
@@ -64,7 +83,7 @@ class WindowsCommandLineTest : StringSpec({
             WindowsCommandLine.estimateCommandLength(home, envBat, emptyList(), "java.exe", "", "", "")
     }
 
-    "estimate counts an inherited CLASSPATH and quotes around arguments with spaces" {
+    "estimate counts the inherited CLASSPATH (env.bat appends to it) and quotes around arguments with spaces" {
         val home = "C:\\dita"
         val base = estimateFor(home)
 
@@ -76,6 +95,36 @@ class WindowsCommandLineTest : StringSpec({
     "estimate is at least the fixed overhead without env.bat" {
         WindowsCommandLine.estimateCommandLength("C:\\d", emptyList(), emptyList(), "", "", "", "") shouldBeGreaterThan
             WindowsCommandLine.FIXED_OVERHEAD
+    }
+
+    // ============================================================================
+    // Which env.bat lines run
+    // ============================================================================
+
+    "DITA-OT 4.x dita.bat skips env.bat for install and uninstall only" {
+        WindowsCommandLine.skipsEnvBat(ditaBat4, "install") shouldBe true
+        WindowsCommandLine.skipsEnvBat(ditaBat4, "uninstall") shouldBe true
+        WindowsCommandLine.skipsEnvBat(ditaBat4, "plugins") shouldBe false
+    }
+
+    "DITA-OT 3.x dita.bat runs env.bat for install too" {
+        WindowsCommandLine.skipsEnvBat(ditaBat3, "install") shouldBe false
+    }
+
+    "env.bat is counted for install with DITA-OT 3.x but not with 4.x" {
+        val root = Files.createTempDirectory("dita-ot-env").toFile()
+        try {
+            val script4 = fakeDitaOt(File(root, "v4"), "x", ditaBat4, envBat)
+            val script3 = fakeDitaOt(File(root, "v3"), "x", ditaBat3, envBat)
+            val install = listOf("install", "org.dita.pdf2")
+            val transform = listOf("--input", "a.ditamap", "--format", "html5")
+
+            WindowsCommandLine.envBatLinesFor(script4, install) shouldBe emptyList()
+            WindowsCommandLine.envBatLinesFor(script4, transform).size shouldBe envBat.size
+            WindowsCommandLine.envBatLinesFor(script3, install).size shouldBe envBat.size
+        } finally {
+            root.deleteRecursively()
+        }
     }
 
     // ============================================================================
@@ -93,49 +142,97 @@ class WindowsCommandLineTest : StringSpec({
     }
 
     "java command follows dita.bat precedence: JAVACMD, then JAVA_HOME, then java.exe" {
-        WindowsCommandLine.javaCommand(mapOf("JAVACMD" to "C:\\j\\java.exe", "JAVA_HOME" to "C:\\jdk")) shouldBe "C:\\j\\java.exe"
-        WindowsCommandLine.javaCommand(mapOf("JAVA_HOME" to "C:\\jdk\\")) shouldBe "C:\\jdk\\bin\\java.exe"
-        WindowsCommandLine.javaCommand(emptyMap()) shouldBe "java.exe"
+        val both = mapOf("JAVACMD" to "C:\\j\\java.exe", "JAVA_HOME" to "C:\\jdk")
+        WindowsCommandLine.javaCommand { both[it] } shouldBe "C:\\j\\java.exe"
+        WindowsCommandLine.javaCommand { mapOf("JAVA_HOME" to "C:\\jdk\\")[it] } shouldBe "C:\\jdk\\bin\\java.exe"
+        WindowsCommandLine.javaCommand { null } shouldBe "java.exe"
     }
 
     // ============================================================================
     // resolveDitaScript
     // ============================================================================
 
-    "resolveDitaScript keeps the script when the command line fits" {
-        val ditaHome = Files.createTempDirectory("dita-ot").toFile()
+    "resolveDitaScript keeps the absolute script when the command line fits" {
+        val root = Files.createTempDirectory("dita-ot").toFile()
         try {
-            val bin = File(ditaHome, "bin").apply { mkdirs() }
-            val script = File(bin, if (Platform.isWindows) "dita.bat" else "dita").apply { writeText("") }
-            File(ditaHome, "config").mkdirs()
-            File(ditaHome, "config/env.bat").writeText(envBat.take(2).joinToString("\r\n"))
+            val script = fakeDitaOt(root, "x", ditaBat4, envBat.take(2))
+            val relative = script.relativeTo(File("").absoluteFile)
 
-            WindowsCommandLine.resolveDitaScript(script, listOf("--format", "html5"), logger) shouldBe script
+            val resolved = WindowsCommandLine.resolveDitaScript(relative, listOf("--format", "html5"), logger)
+
+            resolved.isAbsolute shouldBe true
+            resolved.canonicalPath shouldBe script.canonicalPath
         } finally {
-            ditaHome.deleteRecursively()
+            root.deleteRecursively()
         }
     }
 
-    "resolveDitaScript never changes the Unix dita script" {
-        val script = File("/opt/dita-ot/bin/dita")
-        WindowsCommandLine.resolveDitaScript(script, emptyList(), logger) shouldBe script
+    "resolveDitaScript never changes the Unix dita script, other than making it absolute" {
+        val script = File(File(File("opt"), "bin"), "dita")
+        WindowsCommandLine.resolveDitaScript(script, emptyList(), logger) shouldBe script.absoluteFile
     }
 
-    "shortPathOf points to the same directory, or returns null when 8.3 names are unavailable".config(
+    "resolveDitaScript runs an over-limit dita.bat through a shorter path to the same file".config(
+        enabled = Platform.isWindows
+    ) {
+        val root = Files.createTempDirectory("dita-ot-long").toFile()
+        try {
+            val script = fakeDitaOt(
+                root,
+                "a folder name long enough to push the dita bat command line over the cmd limit",
+                ditaBat4,
+                envBat
+            )
+            val arguments = listOf("--input", "a.ditamap", "--format", "html5")
+            WindowsCommandLine.estimate(script, arguments, envBat) shouldBeGreaterThan
+                WindowsCommandLine.CMD_EXE_MAX_LENGTH
+
+            val shortPath = WindowsCommandLine.shortPathOf(script.parentFile, logger)
+            val resolved = WindowsCommandLine.resolveDitaScript(script, arguments, logger)
+
+            if (shortPath is WindowsCommandLine.ShortPath.Found) {
+                resolved.path shouldNotBe script.absolutePath
+                resolved.path.length shouldBeLessThan script.absolutePath.length
+                resolved.canonicalPath shouldBe script.canonicalPath
+                WindowsCommandLine.estimate(resolved, arguments, envBat) shouldBeLessThan
+                    WindowsCommandLine.CMD_EXE_MAX_LENGTH
+            } else {
+                // 8.3 names disabled on this volume: the script is kept and a warning is logged
+                resolved shouldBe script.absoluteFile
+            }
+        } finally {
+            root.deleteRecursively()
+        }
+    }
+
+    // ============================================================================
+    // shortPathOf
+    // ============================================================================
+
+    "shortPathOf points to the same directory, or reports that no 8.3 name exists".config(
         enabled = Platform.isWindows
     ) {
         val parent = Files.createTempDirectory("short-path-test").toFile()
         try {
             val longDir = File(parent, "a directory name that is much longer than eight characters").apply { mkdirs() }
 
-            val shortDir = WindowsCommandLine.shortPathOf(longDir, logger)
-
-            if (shortDir != null) {
-                shortDir.path.length shouldBeLessThan longDir.absolutePath.length
-                shortDir.canonicalPath shouldBe longDir.canonicalPath
+            when (val shortPath = WindowsCommandLine.shortPathOf(longDir, logger)) {
+                is WindowsCommandLine.ShortPath.Found -> {
+                    shortPath.dir.path.length shouldBeLessThan longDir.absolutePath.length
+                    shortPath.dir.canonicalPath shouldBe longDir.canonicalPath
+                }
+                else -> shortPath shouldBe WindowsCommandLine.ShortPath.Unavailable
             }
         } finally {
             parent.deleteRecursively()
         }
+    }
+
+    "shortPathOf refuses UNC paths, where cmd.exe would fall back to C:\\Windows".config(
+        enabled = Platform.isWindows
+    ) {
+        val shortPath = WindowsCommandLine.shortPathOf(File("\\\\server\\share\\dita-ot\\bin"), logger)
+
+        (shortPath is WindowsCommandLine.ShortPath.Failed) shouldBe true
     }
 })

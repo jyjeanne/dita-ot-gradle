@@ -545,18 +545,18 @@ dita {
 }
 ```
 
-✅ **Solution 3: Handle long paths**
+✅ **Solution 3: Long paths and "The input line is too long" (exit code 255)**
 
-```bash
-# Windows long path support
-# Enable via Group Policy or registry
+DITA-OT's `dita.bat` puts one absolute path per plugin JAR on the CLASSPATH, so on a deeply
+nested project the command line can exceed the 8191-character limit of `cmd.exe`. DITA-OT 4.x
+hits it sooner than 3.x.
 
-# Or use 8.3 short names
-C:\PROGRA~1\DITAOT~1.6\
-
-# Or use UNC paths
-\\?\C:\very\long\path\to\dita-ot
-```
+- Since the next release after 2.8.7, the plugin detects this and runs `dita.bat` through its
+  8.3 short path (for example `C:\Users\me\DOCUME~1\...`). Run with `--info` to see it.
+- If the volume has no 8.3 names, the plugin logs a warning. Move the project or the DITA-OT
+  installation to a shorter path (e.g. `C:\dev\project`).
+- Windows "long path support" (Group Policy / registry) and `\\?\` or `\\server\share` paths do
+  **not** help: they do not raise the `cmd.exe` limit, and `cmd.exe` cannot run in UNC paths at all.
 
 ---
 

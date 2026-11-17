@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## Unreleased
 
 ### Fixed
-- **Windows: DITA-OT 4.x failing on long project paths** (exit code 255, "The input line is too long" / "La ligne entrée est trop longue"). Before running `dita.bat`, the plugin estimates the length of the command line it will build from `config\env.bat`. When that would exceed the 8191-character `cmd.exe` limit, the transformation (`DitaOtTask`) and `DitaOtValidateTask` run `dita.bat` through its 8.3 short path. Command lines that fit are run exactly as before. If no short path is available, a warning explains the problem and the workarounds.
+- **Windows: DITA-OT 4.x failing on long project paths** (exit code 255, "The input line is too long" / "La ligne entrée est trop longue"). Before running `dita.bat`, the plugin estimates the length of the command line it will build from `config\env.bat`. When that would exceed the 8191-character `cmd.exe` limit, the transformation (`DitaOtTask`), `DitaOtValidateTask` and `DitaOtInstallPluginTask` run `dita.bat` through its 8.3 short path (only after checking it leads to the same folder). Command lines that fit are run exactly as before. If no short path can be used, a warning says why (no 8.3 names, UNC path, cmd.exe error) and lists the workarounds.
 
 ### CI
 - `test-project` also runs `DitaOtValidateTask` for every DITA-OT version in the integration jobs.

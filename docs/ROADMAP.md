@@ -53,7 +53,7 @@ The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradl
 - Unit tests now fail CI when they fail. The root test suite can run against any DITA-OT release with `./gradlew test -PditaOtVersion=<v>`.
 - Examples now default to DITA-OT 4.4.2.
 
-**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section; see the backlog below.
+**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section. **Fixed after 2.8.7:** the plugin now runs `dita.bat` through its 8.3 short path when needed (see the backlog below).
 
 ### Tests
 

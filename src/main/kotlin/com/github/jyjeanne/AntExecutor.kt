@@ -123,7 +123,7 @@ object AntExecutor {
 
             // On Windows, run dita.bat through its 8.3 short path if the long path would
             // push its command line over the cmd.exe limit (see WindowsCommandLine)
-            command[0] = WindowsCommandLine.resolveDitaScript(ditaScript, command.drop(1), logger).path
+            command[0] = WindowsCommandLine.resolveDitaScript(ditaScript, command.drop(1), logger).absolutePath
 
             logger.info("DITA-OT script workaround: Executing command...")
             logger.debug("Command arguments: $command")

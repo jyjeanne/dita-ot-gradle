@@ -481,54 +481,41 @@ abstract class DitaOtValidateTask @Inject constructor(
      * Build the DITA-OT command for validation.
      */
     private fun buildValidationCommand(ditaHome: File, inputFile: File, tempDir: File): List<String> {
-        val command = mutableListOf<String>()
-
-        if (Platform.isWindows) {
-            command.add("cmd")
-            command.add("/c")
-        }
-
-        command.add(ditaExecutable.absolutePath)
+        val arguments = mutableListOf<String>()
 
         // Use 'dita' transtype for validation (compatible with DITA-OT 3.x+)
         // Note: 'preprocess' transtype was removed in DITA-OT 4.x
         // The 'dita' transtype performs preprocessing and outputs normalized DITA
         // Using separate arguments for cross-platform compatibility with paths containing spaces
-        command.add("--input")
-        command.add(inputFile.absolutePath)
+        arguments.add("--input")
+        arguments.add(inputFile.absolutePath)
 
-        command.add("--format")
-        command.add("dita")
+        arguments.add("--format")
+        arguments.add("dita")
 
         // Use the provided temporary output directory
-        command.add("--output")
-        command.add(tempDir.absolutePath)
+        arguments.add("--output")
+        arguments.add(tempDir.absolutePath)
 
         // Set processing mode
-        command.add("--processing-mode")
-        command.add(processingMode.get())
+        arguments.add("--processing-mode")
+        arguments.add(processingMode.get())
 
         // Add filter if specified
         filterFile.files.firstOrNull()?.let { filter ->
-            command.add("--filter")
-            command.add(filter.absolutePath)
+            arguments.add("--filter")
+            arguments.add(filter.absolutePath)
         }
 
         // Verbose output for better error messages
-        command.add("-v")
+        arguments.add("-v")
 
-        // On Windows, run dita.bat through its 8.3 short path if the long path would
-        // push its command line over the cmd.exe limit (see WindowsCommandLine)
-        if (Platform.isWindows) {
-            val scriptIndex = command.indexOf(ditaExecutable.absolutePath)
-            if (scriptIndex >= 0) {
-                command[scriptIndex] = WindowsCommandLine.resolveDitaScript(
-                    ditaExecutable, command.drop(scriptIndex + 1), logger
-                ).path
-            }
-        }
+        // On Windows, dita.bat may be run through its 8.3 short path to stay under the
+        // cmd.exe command-line limit (see WindowsCommandLine)
+        val script = WindowsCommandLine.resolveDitaScript(ditaExecutable, arguments, logger)
 
-        return command
+        val shell = if (Platform.isWindows) listOf("cmd", "/c") else emptyList()
+        return shell + script.absolutePath + arguments
     }
 
     /**

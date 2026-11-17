@@ -354,22 +354,19 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
      * with DITA-OT 4.4+ picocli argument parsing.
      */
     internal fun buildInstallCommand(plugin: String): List<String> {
-        val command = mutableListOf<String>()
-
-        if (Platform.isWindows) {
-            command.add("cmd")
-            command.add("/c")
-        }
-
-        command.add(ditaExecutable.absolutePath)
-        command.add("install")
-        command.add(plugin)
+        val arguments = mutableListOf("install", plugin)
 
         if (force.get()) {
-            command.add("--force")
+            arguments.add("--force")
         }
 
-        return command
+        // On Windows, dita.bat may be run through its 8.3 short path to stay under the
+        // cmd.exe command-line limit (see WindowsCommandLine). DITA-OT 4.x skips the long
+        // plugin CLASSPATH for `install`, but DITA-OT 3.x builds it for every command.
+        val script = WindowsCommandLine.resolveDitaScript(ditaExecutable, arguments, logger)
+
+        val shell = if (Platform.isWindows) listOf("cmd", "/c") else emptyList()
+        return shell + script.absolutePath + arguments
     }
 
     /**

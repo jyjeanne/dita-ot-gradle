@@ -291,15 +291,19 @@ object Messages {
 
     // ==================== Windows Warnings ====================
 
+    /**
+     * @param reason why the plugin could not avoid the limit, completing the sentence
+     *   "over the limit of cmd.exe, ..."
+     */
     fun windowsCommandLineTooLong(
         estimatedLength: Int,
         limit: Int,
         ditaHome: String,
-        shortPathUsed: Boolean
+        reason: String
     ) = """
         The DITA-OT command line will be about $estimatedLength characters, over the
-        $limit-character limit of cmd.exe, ${if (shortPathUsed) "even through the shorter (8.3) path of" else "and no shorter (8.3) path is available for"}:
-          $ditaHome
+        $limit-character limit of cmd.exe, $reason.
+        DITA-OT: $ditaHome
 
         dita.bat will most likely fail with exit code 255 and
         "The input line is too long" (French: "La ligne entrée est trop longue").
@@ -308,9 +312,11 @@ object Messages {
         so the length grows with the length of the DITA-OT installation path.
 
         Solutions:
-        1. Move the project, or the DITA-OT installation, to a shorter path (e.g. C:\dev\project)
-        2. Enable 8.3 short names on the volume (administrator: fsutil 8dot3name set C: 0),
-           then re-extract DITA-OT so its folders get short names
+        1. Move the project, or the DITA-OT installation (destinationDir of
+           DitaOtDownloadTask), to a shorter path (e.g. C:\dev\project)
+        2. Give the folders 8.3 short names (administrator). `fsutil 8dot3name set C: 0`
+           only affects folders created afterwards: re-create the project folders, or
+           name existing ones with `fsutil file setshortname <folder> <SHORTNAME>`
     """.trimIndent()
 
     // ==================== Help Messages ====================

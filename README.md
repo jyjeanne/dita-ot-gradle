@@ -991,12 +991,14 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for full version history.
 ```
 **Cause:** `cmd.exe` cannot process a command line longer than 8191 characters. DITA-OT's `dita.bat` and `config\env.bat` add one absolute path per plugin JAR to the CLASSPATH, so the command line grows with the length of the DITA-OT installation path. DITA-OT 4.x adds more plugin JARs than 3.x, so it hits the limit sooner: for example, DITA-OT 4.4.2 extracted to a directory whose path is about 100 characters long fails, while 3.6 at the same location works.
 
-**Automatic handling (unreleased, next version):** before running `dita.bat`, the plugin estimates the command-line length. When it would exceed the limit, the `dita` and `DitaOtValidateTask` tasks run `dita.bat` through its 8.3 short path (for example `C:\Users\me\DOCUME~1\...`), which keeps the CLASSPATH short. Run with `--info` to see when this happens. If no short path is available (8.3 names can be disabled per volume), the plugin logs a warning before running DITA-OT.
+**Automatic handling (unreleased, next version):** before running `dita.bat`, the plugin estimates the command-line length. When it would exceed the limit, the `dita`, `DitaOtValidateTask` and `DitaOtInstallPluginTask` tasks run `dita.bat` through its 8.3 short path (for example `C:\Users\me\DOCUME~1\...`), which keeps the CLASSPATH short. Run with `--info` to see when this happens. If no short path can be used (8.3 names can be disabled per volume, and `cmd.exe` cannot run in UNC network paths), the plugin logs a warning that says why before running DITA-OT.
 
 Workarounds if it still fails:
 1. Move your project to a shorter path (e.g., `C:\projects\` instead of deep nested folders)
 2. Use a shorter DITA-OT installation path (`destinationDir` of `DitaOtDownloadTask`)
-3. Enable 8.3 short names on the volume (administrator: `fsutil 8dot3name set C: 0`), then re-extract DITA-OT. Windows "long path support" does not help here: it does not raise the `cmd.exe` limit.
+3. Give the folders 8.3 short names (administrator). `fsutil 8dot3name set C: 0` only affects folders created afterwards, so re-create the project folders or name existing ones with `fsutil file setshortname`.
+
+Windows "long path support" and `\\?\` paths do not help here: they do not raise the `cmd.exe` limit.
 
 ---
 
