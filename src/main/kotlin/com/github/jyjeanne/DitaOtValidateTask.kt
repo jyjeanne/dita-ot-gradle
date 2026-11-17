@@ -517,6 +517,17 @@ abstract class DitaOtValidateTask @Inject constructor(
         // Verbose output for better error messages
         command.add("-v")
 
+        // On Windows, run dita.bat through its 8.3 short path if the long path would
+        // push its command line over the cmd.exe limit (see WindowsCommandLine)
+        if (Platform.isWindows) {
+            val scriptIndex = command.indexOf(ditaExecutable.absolutePath)
+            if (scriptIndex >= 0) {
+                command[scriptIndex] = WindowsCommandLine.resolveDitaScript(
+                    ditaExecutable, command.drop(scriptIndex + 1), logger
+                ).path
+            }
+        }
+
         return command
     }
 

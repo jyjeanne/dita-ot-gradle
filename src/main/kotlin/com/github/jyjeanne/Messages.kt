@@ -289,6 +289,30 @@ object Messages {
         Download: https://www.dita-ot.org/download
     """.trimIndent()
 
+    // ==================== Windows Warnings ====================
+
+    fun windowsCommandLineTooLong(
+        estimatedLength: Int,
+        limit: Int,
+        ditaHome: String,
+        shortPathUsed: Boolean
+    ) = """
+        The DITA-OT command line will be about $estimatedLength characters, over the
+        $limit-character limit of cmd.exe, ${if (shortPathUsed) "even through the shorter (8.3) path of" else "and no shorter (8.3) path is available for"}:
+          $ditaHome
+
+        dita.bat will most likely fail with exit code 255 and
+        "The input line is too long" (French: "La ligne entrée est trop longue").
+
+        DITA-OT's dita.bat adds one absolute path per plugin JAR to the CLASSPATH,
+        so the length grows with the length of the DITA-OT installation path.
+
+        Solutions:
+        1. Move the project, or the DITA-OT installation, to a shorter path (e.g. C:\dev\project)
+        2. Enable 8.3 short names on the volume (administrator: fsutil 8dot3name set C: 0),
+           then re-extract DITA-OT so its folders get short names
+    """.trimIndent()
+
     // ==================== Help Messages ====================
 
     val quickStartGuide = """
