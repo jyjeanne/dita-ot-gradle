@@ -551,7 +551,7 @@ DITA-OT's `dita.bat` puts one absolute path per plugin JAR on the CLASSPATH, so 
 nested project the command line can exceed the 8191-character limit of `cmd.exe`. DITA-OT 4.x
 hits it sooner than 3.x.
 
-- Since the next release after 2.8.7, the plugin detects this and runs `dita.bat` through its
+- Since 2.8.8, the plugin detects this and runs `dita.bat` through its
   8.3 short path (for example `C:\Users\me\DOCUME~1\...`), or, where 8.3 names are disabled,
   through a temporary directory junction under `%TEMP%` (`dotj-xxxxxxxx`, removed when DITA-OT
   exits). Run with `--info` to see it.

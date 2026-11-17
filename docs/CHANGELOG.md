@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## 2.8.8 - 2026-11-17
 
 ### Fixed
 - **Windows: DITA-OT 4.x failing on long project paths** (exit code 255, "The input line is too long" / "La ligne entrée est trop longue"). Before running `dita.bat`, the plugin estimates the length of the command line it will build from `config\env.bat`. When that would exceed the 8191-character `cmd.exe` limit, the transformation (`DitaOtTask`), `DitaOtValidateTask` and `DitaOtInstallPluginTask` run `dita.bat` through a shorter path to the same folder: its 8.3 short path, or, where 8.3 names are disabled (non-system drives, ReFS, Dev Drives), a temporary directory junction under `%TEMP%` (`dotj-xxxxxxxx`, no administrator rights needed, removed when DITA-OT exits; leftovers from killed builds are removed after a day). Command lines that fit are run exactly as before. If neither works, a warning lists why each attempt failed (no 8.3 names, UNC path, cmd.exe or mklink error) and the workarounds.

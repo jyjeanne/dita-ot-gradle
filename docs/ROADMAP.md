@@ -16,6 +16,27 @@ This document outlines planned improvements and features for the DITA-OT Gradle 
 
 ---
 
+## ✅ v2.8.8 Windows Long Path Fix (COMPLETED)
+
+### Windows command-line length limit with DITA-OT 4.x
+**Status**: ✅ COMPLETED (v2.8.8)
+
+**Problem:** DITA-OT's `dita.bat` and `config\env.bat` put one absolute path per plugin JAR on the CLASSPATH. With DITA-OT 4.x (about 47 JARs) under a path of roughly 100 characters, the `java` command line passes the 8191-character `cmd.exe` limit and `dita.bat` fails with exit code 255 ("The input line is too long").
+
+**Solution:** `WindowsCommandLine` estimates the command line from `env.bat` (and `dita.bat`, which DITA-OT 4.x uses to skip `env.bat` for `install`). Only when it would overflow, `dita.bat` is run through a shorter path to the same folder, which shortens `%~dp0` and every CLASSPATH entry:
+1. its 8.3 short path (no side effects), verified to lead to the same folder;
+2. otherwise a per-run directory junction under `%TEMP%` (`dotj-xxxxxxxx`), removed when DITA-OT exits; junctions left by killed builds are swept after a day.
+
+Used by the transformation, `DitaOtValidateTask` and `DitaOtInstallPluginTask`. If neither path works (UNC network paths), a warning lists why. Verified locally: `test-project` with DITA-OT 4.4.2 under a 104-character path went from exit code 255 to success.
+
+**Files:** `WindowsCommandLine.kt` (new), `AntExecutor.kt`, `DitaOtValidateTask.kt`, `DitaOtInstallPluginTask.kt`, `Messages.kt`
+
+### Tests
+
+250 tests (245 executed, 5 skipped), including 22 for `WindowsCommandLine` (most run on Windows only). `test-project` now also runs `DitaOtValidateTask` in CI.
+
+---
+
 ## ✅ v2.8.7 Maintenance Release (COMPLETED)
 
 No change to the task DSL. This release updates the toolchain, raises the minimum Gradle version, and makes CI exercise real DITA-OT transformations.
@@ -53,7 +74,7 @@ The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradl
 - Unit tests now fail CI when they fail. The root test suite can run against any DITA-OT release with `./gradlew test -PditaOtVersion=<v>`.
 - Examples now default to DITA-OT 4.4.2.
 
-**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section. **Fixed after 2.8.7:** the plugin now runs `dita.bat` through its 8.3 short path, or a temporary junction, when needed (see the backlog below).
+**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section. **Fixed in 2.8.8:** the plugin now runs `dita.bat` through its 8.3 short path, or a temporary junction, when needed (see the backlog below).
 
 ### Tests
 
@@ -63,7 +84,7 @@ The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradl
 
 | Area | Issue | Priority |
 |------|-------|----------|
-| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. **Fixed for the next release:** the plugin estimates the command-line length and, when needed, runs `dita.bat` through its 8.3 short path or, where 8.3 names are disabled, a temporary junction under `%TEMP%` (transformation, validation and plugin install). Still open for UNC network paths (a warning is logged). | ✅ P1 |
+| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. **Fixed in 2.8.8:** the plugin estimates the command-line length and, when needed, runs `dita.bat` through its 8.3 short path or, where 8.3 names are disabled, a temporary junction under `%TEMP%` (transformation, validation and plugin install). Still open for UNC network paths (a warning is logged). | ✅ P1 |
 | `DitaOtDownloadTask` | Relative `Location` headers on redirects are not resolved against the current URL, so such downloads fail on every retry. | P2 |
 | `DitaOtDownloadTask` | Sends `Accept-Encoding: gzip` but never decompresses; a gzipping server leaves a broken archive in the cache. | P2 |
 | Build | Gradle 8.14.x embeds Kotlin stdlib 2.0.21 while the plugin compiles against API level 2.2; nothing yet checks that no newer stdlib API is used. | P2 |
@@ -804,6 +825,8 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
+| **Windows long paths: 8.3 short path / junction fallback for dita.bat** | 2.8.8 | Nov 2026 |
+| **DitaOtValidateTask run in CI integration jobs** | 2.8.8 | Nov 2026 |
 | **Minimum Gradle 8.14.4, Kotlin 2.4.21 toolchain** | 2.8.7 | Nov 2026 |
 | **DITA-OT 4.4.2 tested with real CI transformations (Linux + Windows)** | 2.8.7 | Nov 2026 |
 | **Dependabot for GitHub Actions and Gradle** | 2.8.7 | Nov 2026 |

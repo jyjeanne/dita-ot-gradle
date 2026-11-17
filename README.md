@@ -7,7 +7,7 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.7)
+## Highlights (v2.8.8)
 
 | Feature | Description |
 |---------|-------------|
@@ -22,6 +22,11 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 | **Cross-Platform** | Windows, macOS, Linux support (paths with spaces supported) |
 | **DITA-OT 3.x/4.x** | Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0, 4.4, **4.4.2** |
 | **Modern Architecture** | Provider API, built with Kotlin 2.4, Gradle 8.14.4 – 9.9 |
+
+### What's new in 2.8.8
+
+- **Windows long paths fixed**: DITA-OT 4.x no longer fails with exit code 255 ("The input line is too long") in deeply nested projects. When `dita.bat`'s command line would exceed the 8191-character `cmd.exe` limit, the transformation, validation and plugin install tasks run it through its 8.3 short path, or a temporary junction under `%TEMP%` where 8.3 names are disabled. Command lines that fit run exactly as before. See [Troubleshooting](#troubleshooting).
+- CI now also runs `DitaOtValidateTask` for every tested DITA-OT version.
 
 ### What's new in 2.8.7
 
@@ -47,14 +52,14 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for details.
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.8'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.8"
 }
 ```
 
@@ -140,7 +145,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.8'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.4.2'
@@ -199,7 +204,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.8'
 }
 
 def ditaOtVersion = '4.4.2'
@@ -317,7 +322,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.8"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -934,7 +939,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.8'
 }
 ```
 
@@ -942,7 +947,7 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.7 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.8 (jyjeanne) |
 |---------|-------------------|-------------------|
 | Gradle 8.14.4+ | No | Yes |
 | Gradle 9+ | No | Yes (tested up to 9.9.1) |
@@ -991,7 +996,7 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for full version history.
 ```
 **Cause:** `cmd.exe` cannot process a command line longer than 8191 characters. DITA-OT's `dita.bat` and `config\env.bat` add one absolute path per plugin JAR to the CLASSPATH, so the command line grows with the length of the DITA-OT installation path. DITA-OT 4.x adds more plugin JARs than 3.x, so it hits the limit sooner: for example, DITA-OT 4.4.2 extracted to a directory whose path is about 100 characters long fails, while 3.6 at the same location works.
 
-**Automatic handling (unreleased, next version):** before running `dita.bat`, the plugin estimates the command-line length. When it would exceed the limit, the `dita`, `DitaOtValidateTask` and `DitaOtInstallPluginTask` tasks run `dita.bat` through a shorter path to the same folder, which keeps the CLASSPATH short:
+**Automatic handling (since 2.8.8):** before running `dita.bat`, the plugin estimates the command-line length. When it would exceed the limit, the `dita`, `DitaOtValidateTask` and `DitaOtInstallPluginTask` tasks run `dita.bat` through a shorter path to the same folder, which keeps the CLASSPATH short:
 
 - its 8.3 short path (for example `C:\Users\me\DOCUME~1\...`), or
 - where 8.3 names are disabled (common on non-system drives, always on ReFS and Dev Drives), a temporary directory junction under `%TEMP%` named `dotj-xxxxxxxx`. Junctions need no administrator rights; each one is removed when DITA-OT exits, and leftovers from killed builds are removed after a day.

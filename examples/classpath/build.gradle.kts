@@ -4,7 +4,7 @@ import de.undercouch.gradle.tasks.download.Download
 
 plugins {
     id("de.undercouch.download") version "5.7.0"
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.8"
 }
 
 val downloadSaxonPE by tasks.registering(Download::class) {
