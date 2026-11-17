@@ -1,7 +1,7 @@
 plugins {
     // Must match `version` in the root build.gradle.kts: CI publishes the plugin
     // to mavenLocal and this build resolves it from there (see settings.gradle.kts).
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
 }
 
 repositories {

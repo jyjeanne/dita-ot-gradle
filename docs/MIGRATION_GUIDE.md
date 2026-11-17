@@ -35,7 +35,7 @@ The **jyjeanne plugin** is a continuation and modernization of the eerohele plug
 ### Why Migrate?
 
 - **Better Performance** - Configuration cache support
-- **Modern Dependencies** - Kotlin 2.1.0, Gradle 8.5+
+- **Modern Dependencies** - Kotlin 2.4, Gradle 8.14.4+
 - **Type Safety** - Kotlin language benefits
 - **Enhanced Logging** - Detailed build metrics
 - **Active Maintenance** - Regular updates and bug fixes

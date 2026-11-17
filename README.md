@@ -7,7 +7,7 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 
 ---
 
-## Highlights (v2.8.6)
+## Highlights (v2.8.7)
 
 | Feature | Description |
 |---------|-------------|
@@ -21,7 +21,18 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 | **Improved Error Messages** | Clear, actionable errors with troubleshooting steps |
 | **Cross-Platform** | Windows, macOS, Linux support (paths with spaces supported) |
 | **DITA-OT 3.x/4.x** | Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0, 4.4, **4.4.2** |
-| **Modern Architecture** | Provider API, Gradle 9.0 compatible |
+| **Modern Architecture** | Provider API, built with Kotlin 2.4, Gradle 8.14.4 – 9.9 |
+
+### What's new in 2.8.7
+
+A maintenance release with no change to the task DSL.
+
+- **Minimum Gradle is now 8.14.4** (was 6.5+). Gradle 8.14.4, 9.0 and 9.9.1 are tested in CI. If you are on an older Gradle, stay on 2.8.6 or upgrade Gradle first.
+- **DITA-OT 4.4.2** is tested in CI with a real HTML5 transformation on Linux and Windows, and the examples now default to it.
+- **Up-to-date toolchain**: Kotlin 2.4.21, commons-io 2.22.0, Gradle wrapper 9.9.1. The build has no compiler or Gradle deprecation warnings.
+- **Windows note**: DITA-OT 4.x is more likely than 3.x to hit the Windows command-line length limit on deeply nested paths. See [Troubleshooting](#troubleshooting).
+
+See [CHANGELOG.md](docs/CHANGELOG.md) for details.
 
 **Note**: This is a continuation of the original [com.github.eerohele.dita-ot-gradle](https://github.com/eerohele/dita-ot-gradle) plugin, migrated to Kotlin with modern Gradle support.
 
@@ -36,14 +47,14 @@ A modern [Gradle] plugin for publishing DITA documents with [DITA Open Toolkit].
 **Groovy DSL** (`build.gradle`):
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
 }
 ```
 
 **Kotlin DSL** (`build.gradle.kts`):
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
 }
 ```
 
@@ -129,7 +140,7 @@ examples/plugin-test/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
 }
 
 def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.4.2'
@@ -188,7 +199,7 @@ my-dita-plugin/
 
 ```groovy
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
 }
 
 def ditaOtVersion = '4.4.2'
@@ -306,7 +317,7 @@ docs-project/
 
 ```kotlin
 plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
 }
 
 val ditaOtVersion: String by project  // From gradle.properties
@@ -895,10 +906,10 @@ Gradle 9 introduces significant improvements that enhance this plugin's performa
 
 ```bash
 # Update gradle/wrapper/gradle-wrapper.properties
-distributionUrl=https\://services.gradle.org/distributions/gradle-9.0-bin.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.9.1-bin.zip
 
 # Or use the wrapper task
-./gradlew wrapper --gradle-version 9.0
+./gradlew wrapper --gradle-version 9.9.1
 ```
 
 **Enable Configuration Cache (Gradle 8.14.4+):**
@@ -923,7 +934,7 @@ plugins {
 
 // NEW
 plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
 }
 ```
 
@@ -931,10 +942,10 @@ plugins {
 
 ### What's New
 
-| Feature | v0.7.1 (eerohele) | v2.8.6 (jyjeanne) |
+| Feature | v0.7.1 (eerohele) | v2.8.7 (jyjeanne) |
 |---------|-------------------|-------------------|
-| Gradle 8+ | No | Yes |
-| Gradle 9+ | No | Yes |
+| Gradle 8.14.4+ | No | Yes |
+| Gradle 9+ | No | Yes (tested up to 9.9.1) |
 | Configuration Cache | No | Yes (77% faster) |
 | **Built-in DITA-OT Download** | No | **Yes** (DitaOtDownloadTask) |
 | **Built-in Plugin Install** | No | **Yes** (DitaOtInstallPluginTask) |

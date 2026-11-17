@@ -5,6 +5,27 @@
   <shortdesc>Release highlights and new features.</shortdesc>
   <body>
     <section>
+      <title>Version 2.8.7</title>
+      <p><b>Maintenance Release</b></p>
+      <ul>
+        <li><b>Minimum Gradle 8.14.4:</b> Previously 6.5. Gradle 8.14.4, 9.0 and 9.9.1 are tested in CI.</li>
+        <li><b>DITA-OT 4.4.2:</b> Tested in CI with a real HTML5 transformation on Linux and Windows; examples default to 4.4.2</li>
+        <li><b>Toolchain:</b> Kotlin 2.4.21, commons-io 2.22.0, Gradle wrapper 9.9.1; no deprecation warnings</li>
+        <li>No change to the task DSL</li>
+      </ul>
+    </section>
+
+    <section>
+      <title>Version 2.8.6</title>
+      <p><b>Timeout and Bug Fixes</b></p>
+      <ul>
+        <li><b>Configurable Timeout:</b> <codeph>ditaProcessTimeoutMinutes</codeph> per task (default 30 minutes, 0 = no timeout)</li>
+        <li><b>DITA-OT 4.4 Plugin Install:</b> <codeph>--force</codeph> now placed after the plugin argument, as DITA-OT 4.4 requires</li>
+        <li><b>Progress Output:</b> No more duplicate 100% lines; summary waits for the output reader thread</li>
+      </ul>
+    </section>
+
+    <section>
       <title>Version 2.8.4</title>
       <p><b>Bug Fixes from Community Feedback</b></p>
       <ul>
