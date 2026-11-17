@@ -10,7 +10,7 @@ This example demonstrates how to:
 ## Quick Start
 
 ```bash
-# Run with defaults (DITA-OT 4.2.3, org.lwdita plugin, markdown output)
+# Run with defaults (DITA-OT 4.4.2, org.lwdita plugin, markdown output)
 ./gradlew
 
 # Or with custom configuration
@@ -21,7 +21,7 @@ This example demonstrates how to:
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `ditaOtVersion` | `4.2.3` | DITA-OT version to download |
+| `ditaOtVersion` | `4.4.2` | DITA-OT version to download |
 | `pluginId` | `org.lwdita` | Plugin ID from DITA-OT registry |
 | `transtype` | `markdown` | Transformation type |
 
@@ -53,7 +53,7 @@ This example demonstrates how to:
 ```bash
 ./gradlew -PditaOtVersion=4.0.0 test
 ./gradlew -PditaOtVersion=4.1.0 test
-./gradlew -PditaOtVersion=4.2.3 test
+./gradlew -PditaOtVersion=4.4.2 test
 ```
 
 ### Test Different Plugins
@@ -141,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dita-version: ['4.0.0', '4.1.0', '4.2.3']
+        dita-version: ['4.0.0', '4.1.0', '4.4.2']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

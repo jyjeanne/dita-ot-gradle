@@ -354,6 +354,16 @@ abstract class DitaOtDownloadTask @Inject constructor(
     }
 
     /**
+     * Parse a URL exactly as `URL(String)` always did.
+     *
+     * `URI(spec).toURL()` is the non-deprecated replacement, but it rejects characters that
+     * `URL(String)` accepts (unencoded spaces, `[ ]`, `|`, `{ }`, a bare `%`). That would break
+     * custom `downloadUrl` values that work today, so the lenient constructor is kept on purpose.
+     */
+    @Suppress("DEPRECATION")
+    private fun parseUrl(spec: String): URL = URL(spec)
+
+    /**
      * Download file with retry support.
      */
     private fun downloadFileWithRetry(urlString: String, destFile: File) {
@@ -399,7 +409,7 @@ abstract class DitaOtDownloadTask @Inject constructor(
         val targetFile = if (useTempFile) File(destFile.parent, destFile.name + TEMP_SUFFIX) else destFile
 
         try {
-            val url = URL(urlString)
+            val url = parseUrl(urlString)
             var currentConnection = url.openConnection() as HttpURLConnection
             connections.add(currentConnection)
             currentConnection.connectTimeout = connectTimeout.get()
@@ -420,7 +430,7 @@ abstract class DitaOtDownloadTask @Inject constructor(
                         """.trimIndent()
                     )
 
-                currentConnection = URL(redirectUrl).openConnection() as HttpURLConnection
+                currentConnection = parseUrl(redirectUrl).openConnection() as HttpURLConnection
                 connections.add(currentConnection)
                 currentConnection.connectTimeout = connectTimeout.get()
                 currentConnection.readTimeout = readTimeout.get()

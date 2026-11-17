@@ -52,7 +52,7 @@ class DitaOtIntegrationTest : StringSpec({
     }
 
     "Execute simple HTML5 transformation".config(enabled = false) {
-        val task = project.tasks.create("dita", DitaOtTask::class.java).apply {
+        val task = project.tasks.register("dita", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             output(testOutputDir.path)
@@ -72,7 +72,7 @@ class DitaOtIntegrationTest : StringSpec({
     }
 
     "Execute transformation with DITAVAL filter".config(enabled = false) {
-        val task = project.tasks.create("dita", DitaOtTask::class.java).apply {
+        val task = project.tasks.register("dita", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             filter("$examplesDir/simple/dita/root.ditaval")
@@ -96,7 +96,7 @@ class DitaOtIntegrationTest : StringSpec({
     "Execute transformation with multiple transtypes".config(enabled = false) {
         val outputDir = File(testOutputDir, "multi-format")
 
-        val task = project.tasks.create("dita", DitaOtTask::class.java).apply {
+        val task = project.tasks.register("dita", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             output(outputDir.path)
@@ -123,7 +123,7 @@ class DitaOtIntegrationTest : StringSpec({
             }
         }
 
-        val task = project.tasks.create("dita", DitaOtTask::class.java).apply {
+        val task = project.tasks.register("dita", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             output(testOutputDir.path)
@@ -142,7 +142,7 @@ class DitaOtIntegrationTest : StringSpec({
     "Execute transformation with multiple input files".config(enabled = false) {
         val outputDir = File(testOutputDir, "multi-input")
 
-        val task = project.tasks.create("dita", DitaOtTask::class.java).apply {
+        val task = project.tasks.register("dita", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input(
                 project.files(

@@ -76,7 +76,7 @@ class DitaOtTaskSpec : StringSpec({
             }
         }
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(ROOT_DITAMAP)
             filter(ROOT_DITAVAL)
             transtype(DEFAULT_TRANSTYPE)
@@ -90,7 +90,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Using multiple transtypes" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(ROOT_DITAMAP)
             transtype("xhtml", "pdf", "html5", "troff")
         }
@@ -99,7 +99,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving single input file as String" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input("$examplesDir/simple/dita/root.ditamap")
         }
 
@@ -107,7 +107,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving single input file as File" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(project.file("$examplesDir/simple/dita/root.ditamap"))
         }
 
@@ -115,7 +115,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving single input file and multiple transtypes" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(project.file("$examplesDir/simple/dita/root.ditamap"))
             transtype("html5", "pdf")
         }
@@ -124,7 +124,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving multiple input files" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(
                 project.files(
                     "$examplesDir/multi-project/one/one.ditamap",
@@ -137,7 +137,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving multiple input files and multiple transtypes" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(
                 project.files(
                     "$examplesDir/multi-project/one/one.ditamap",
@@ -156,7 +156,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Includes containing directories in up-to-date check" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(
                 project.files(
                     "$examplesDir/multi-project/one/one.ditamap",
@@ -173,7 +173,7 @@ class DitaOtTaskSpec : StringSpec({
     "Getting file associated with input file" {
         val inputFile = project.file("$examplesDir/simple/dita/root.ditamap")
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(inputFile)
         }
 
@@ -181,7 +181,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving DITAVAL as File" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(project.file("$examplesDir/simple/dita/root.ditamap"))
             filter(project.file("$examplesDir/simple/dita/root.ditaval"))
         }
@@ -194,7 +194,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Giving input file tree" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             val fileTree = project.fileTree("$examplesDir/filetree/dita")
             fileTree.include("*.ditamap")
             input(fileTree)
@@ -206,7 +206,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "DITAVAL file is included in the input file tree" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input("$examplesDir/simple/dita/root.ditamap")
             filter("$examplesDir/simple/dita/root.ditaval")
         }
@@ -218,7 +218,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "DITAVAL file is included in the input file tree when outside root map directory" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input("$examplesDir/simple/dita/root.ditamap")
             filter("$examplesDir/filetree/dita/two.ditaval")
         }
@@ -230,7 +230,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Using associated DITAVAL file" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input("$examplesDir/simple/dita/root.ditamap")
             useAssociatedFilter(true)
         }
@@ -240,7 +240,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "DITA-OT directory is included in the input file tree if devMode is enabled" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             devMode(true)
@@ -254,7 +254,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "DITA-OT directory is not included in the input file tree if devMode is disabled" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             devMode(false)
@@ -271,7 +271,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Single input file => single output directory" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input("$examplesDir/simple/dita/root.ditamap")
         }
 
@@ -279,7 +279,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Single directory mode => single output directory" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             singleOutputDir(true)
             input(
                 project.files(
@@ -293,7 +293,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Multiple input files => multiple input folders" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(
                 project.files(
                     "$examplesDir/multi-project/one/one.ditamap",
@@ -307,7 +307,7 @@ class DitaOtTaskSpec : StringSpec({
 
     "Task fails during execution if DITA-OT directory is not set" {
         // Unit test: verify task throws exception when ditaOt is not configured
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
         }
@@ -325,7 +325,7 @@ class DitaOtTaskSpec : StringSpec({
 
     "Task is properly configured when DITA-OT dir is set" {
         // Unit test: verify task configuration works correctly
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -343,7 +343,7 @@ class DitaOtTaskSpec : StringSpec({
         val customOutput = File(testProjectDir, "custom-output")
         val customTemp = File(testProjectDir, "custom-temp")
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             output(customOutput.path)
@@ -387,7 +387,7 @@ class DitaOtTaskSpec : StringSpec({
         // Unit test: verify DITAVAL configuration works
         val ditavalPath = "$examplesDir/simple/dita/root.ditaval"
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             filter(ditavalPath)
@@ -400,7 +400,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Relative output and temp directories resolve against project root directory" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             input(ROOT_DITAMAP)
             output("out")
             temp("temp")
@@ -412,7 +412,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Kotlin DSL properties configuration works" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -428,7 +428,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "Kotlin DSL properties with property() method works" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -479,7 +479,7 @@ class DitaOtTaskSpec : StringSpec({
             }
         }
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -507,7 +507,7 @@ class DitaOtTaskSpec : StringSpec({
             }
         }
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -518,7 +518,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "ditaProperties MapProperty can be used directly" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -538,7 +538,7 @@ class DitaOtTaskSpec : StringSpec({
             }
         }
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -564,7 +564,7 @@ class DitaOtTaskSpec : StringSpec({
             }
         }
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -588,7 +588,7 @@ class DitaOtTaskSpec : StringSpec({
             }
         }
 
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("pdf")
@@ -686,7 +686,7 @@ class DitaOtTaskSpec : StringSpec({
         // This test verifies the fix for the implicit dependency bug.
         // When ditaOtDir was @InputDirectory, Gradle would infer implicit
         // dependencies between tasks sharing the same DITA-OT installation.
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -703,14 +703,14 @@ class DitaOtTaskSpec : StringSpec({
 
     "Multiple tasks with same ditaOtDir should not have shared input files" {
         // Create two tasks pointing to the same DITA-OT directory
-        val task1 = project.tasks.create("html", DitaOtTask::class.java).apply {
+        val task1 = project.tasks.register("html", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             output("out/html")
             transtype("html5")
         }
 
-        val task2 = project.tasks.create("pdf", DitaOtTask::class.java).apply {
+        val task2 = project.tasks.register("pdf", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             output("out/pdf")
@@ -825,7 +825,7 @@ class DitaOtTaskSpec : StringSpec({
     }
 
     "devMode includes ditaOtDir in input file tree but not as direct task input" {
-        val task = project.tasks.create(DITA, DitaOtTask::class.java).apply {
+        val task = project.tasks.register(DITA, DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
             transtype("html5")
@@ -862,7 +862,7 @@ class DitaOtTaskSpec : StringSpec({
                 </plugin>
             """.trimIndent())
 
-            val task = project.tasks.create("versionTest1", DitaOtTask::class.java).apply {
+            val task = project.tasks.register("versionTest1", DitaOtTask::class.java).get().apply {
                 ditaOt(tempDitaOt)
                 input("$examplesDir/simple/dita/root.ditamap")
             }
@@ -888,7 +888,7 @@ class DitaOtTaskSpec : StringSpec({
                 </plugin>
             """.trimIndent())
 
-            val task = project.tasks.create("versionTest2", DitaOtTask::class.java).apply {
+            val task = project.tasks.register("versionTest2", DitaOtTask::class.java).get().apply {
                 ditaOt(tempDitaOt)
                 input("$examplesDir/simple/dita/root.ditamap")
             }
@@ -912,7 +912,7 @@ class DitaOtTaskSpec : StringSpec({
                 </plugin>
             """.trimIndent())
 
-            val task = project.tasks.create("versionTest3", DitaOtTask::class.java).apply {
+            val task = project.tasks.register("versionTest3", DitaOtTask::class.java).get().apply {
                 ditaOt(tempDitaOt)
                 input("$examplesDir/simple/dita/root.ditamap")
             }
@@ -931,7 +931,7 @@ class DitaOtTaskSpec : StringSpec({
             ditaOtWithVersion.mkdirs()
             File(ditaOtWithVersion, "build.xml").writeText("<project/>")
 
-            val task = project.tasks.create("versionTest4", DitaOtTask::class.java).apply {
+            val task = project.tasks.register("versionTest4", DitaOtTask::class.java).get().apply {
                 ditaOt(ditaOtWithVersion)
                 input("$examplesDir/simple/dita/root.ditamap")
             }
@@ -949,7 +949,7 @@ class DitaOtTaskSpec : StringSpec({
         try {
             File(tempDitaOt, "build.xml").writeText("<project/>")
 
-            val task = project.tasks.create("versionTest5", DitaOtTask::class.java).apply {
+            val task = project.tasks.register("versionTest5", DitaOtTask::class.java).get().apply {
                 ditaOt(tempDitaOt)
                 input("$examplesDir/simple/dita/root.ditamap")
             }
@@ -962,7 +962,7 @@ class DitaOtTaskSpec : StringSpec({
 
     "detectDitaOtVersion detects version from real DITA-OT installation" {
         // Test with the actual DITA-OT installation used for testing
-        val task = project.tasks.create("versionTestReal", DitaOtTask::class.java).apply {
+        val task = project.tasks.register("versionTestReal", DitaOtTask::class.java).get().apply {
             ditaOt(ditaHome)
             input("$examplesDir/simple/dita/root.ditamap")
         }

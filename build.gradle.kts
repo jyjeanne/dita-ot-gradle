@@ -2,12 +2,12 @@ import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.4.21"
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "1.2.1"
-    id("de.undercouch.download") version "5.5.0"
-    id("se.patrikerdes.use-latest-versions") version "0.2.18"
-    id("com.github.ben-manes.versions") version "0.50.0"
+    id("com.gradle.plugin-publish") version "2.2.1"
+    id("de.undercouch.download") version "5.7.0"
+    id("se.patrikerdes.use-latest-versions") version "0.2.19"
+    id("io.github.ben-manes.versions") version "0.67.0"
 }
 
 group = "io.github.jyjeanne"
@@ -19,10 +19,10 @@ java {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        apiVersion = "2.1"
-        languageVersion = "2.1"
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_2)
     }
 }
 
@@ -38,27 +38,28 @@ dependencies {
     implementation(kotlin("reflect"))
 
     // Common dependencies
-    implementation("commons-io:commons-io:2.20.0")
+    implementation("commons-io:commons-io:2.22.0")
 
     // Kotlin tests (Kotest)
-    testImplementation("io.kotest:kotest-runner-junit5:5.9.1")
-    testImplementation("io.kotest:kotest-assertions-core:5.9.1")
-    testImplementation("io.kotest:kotest-property:5.9.1")
+    testImplementation("io.kotest:kotest-runner-junit5:6.2.7")
+    testImplementation("io.kotest:kotest-assertions-core:6.2.7")
+    testImplementation("io.kotest:kotest-property:6.2.7")
 
     // For jsoup (HTML parsing in tests)
-    testImplementation("org.jsoup:jsoup:1.21.2")
+    testImplementation("org.jsoup:jsoup:1.24.1")
 }
 
 // DITA-OT download configuration
-val ditaOtVersion = "3.6"
+// Override with -PditaOtVersion=4.4.2 to run the test suite against another DITA-OT release
+val ditaOtVersion: String = providers.gradleProperty("ditaOtVersion").getOrElse("3.6")
 
-val downloadDitaOt by tasks.registering(Download::class) {
+val downloadDitaOt = tasks.register<Download>("downloadDitaOt") {
     src("https://github.com/dita-ot/dita-ot/releases/download/$ditaOtVersion/dita-ot-$ditaOtVersion.zip")
     dest(layout.buildDirectory.file("dita-ot-$ditaOtVersion.zip"))
     overwrite(false)
 }
 
-val extractDitaOt by tasks.registering(Copy::class) {
+val extractDitaOt = tasks.register<Copy>("extractDitaOt") {
     dependsOn(downloadDitaOt)
     from(zipTree(downloadDitaOt.map { it.dest }))
     into(layout.buildDirectory.dir("dita-extract"))
@@ -78,12 +79,16 @@ val extractDitaOt by tasks.registering(Copy::class) {
     }
 }
 
-val installDitaOt by tasks.registering {
+val installDitaOt = tasks.register("installDitaOt") {
     dependsOn(extractDitaOt)
 }
 
 tasks.test {
     dependsOn(installDitaOt)
+
+    // build/dita-ot is not tracked, so make the DITA-OT version an input:
+    // otherwise `test -PditaOtVersion=...` is reported UP-TO-DATE and never runs.
+    inputs.property("ditaOtVersion", ditaOtVersion)
 
     systemProperty("dita.home",
         System.getProperty("dita.home",

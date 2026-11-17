@@ -24,7 +24,7 @@ plugins {
 // Configuration
 // ============================================================================
 
-def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
+def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.4.2'
 def ditaOtDir = layout.buildDirectory.dir("dita-ot/dita-ot-${ditaOtVersion}")
 def myPluginDir = file('src/my-custom-plugin')
 

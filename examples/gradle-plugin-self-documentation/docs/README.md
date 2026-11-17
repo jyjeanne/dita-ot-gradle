@@ -15,7 +15,7 @@ The `publishWorkflow` task executes these steps in order:
 
 | Step | Task | Description |
 |------|------|-------------|
-| 1 | `downloadDitaOt` | Download DITA-OT 4.2.3 from GitHub |
+| 1 | `downloadDitaOt` | Download DITA-OT 4.4.2 from GitHub |
 | 2 | `installPlugins` | Install Bootstrap plugin from registry |
 | 3 | `validateDita` | Validate DITA content (strict mode) |
 | 4 | `checkLinks` | Check internal and external links |
@@ -78,7 +78,7 @@ Then run:
 ┌─────────────────────────────────────────────────────────────┐
 │                    publishWorkflow                          │
 ├─────────────────────────────────────────────────────────────┤
-│  1. downloadDitaOt    │ Download DITA-OT 4.2.3              │
+│  1. downloadDitaOt    │ Download DITA-OT 4.4.2              │
 │  2. installPlugins    │ Install Bootstrap plugin            │
 │  3. validateDita      │ Validate DITA content               │
 │  4. checkLinks        │ Check internal/external links       │
@@ -98,5 +98,5 @@ Then run:
 ## Plugin Information
 
 - **DITA-OT Gradle Plugin**: v2.8.1
-- **DITA-OT Version**: 4.2.3
+- **DITA-OT Version**: 4.4.2
 - **Installed Plugin**: net.infotexture.dita-bootstrap

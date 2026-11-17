@@ -8,7 +8,7 @@
  * 4. Verify the output
  *
  * Usage:
- *   ./gradlew                           # Use default DITA-OT version (4.2.3)
+ *   ./gradlew                           # Use default DITA-OT version (4.4.2)
  *   ./gradlew -PditaOtVersion=4.1.0     # Use specific DITA-OT version
  *   ./gradlew -PpluginId=org.lwdita     # Install specific plugin
  *   ./gradlew clean test                # Run full test cycle
@@ -32,7 +32,7 @@ plugins {
 // ============================================================================
 
 // DITA-OT version - can be overridden with -PditaOtVersion=x.y.z
-def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.2.3'
+def ditaOtVersion = project.findProperty('ditaOtVersion') ?: '4.4.2'
 
 // Plugin to install from DITA-OT registry - can be overridden with -PpluginId=xxx
 def pluginId = project.findProperty('pluginId') ?: 'org.lwdita'

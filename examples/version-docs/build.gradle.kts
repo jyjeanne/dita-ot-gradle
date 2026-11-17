@@ -25,7 +25,7 @@ plugins {
 // Configuration
 // ============================================================================
 
-val ditaOtVersion: String = project.findProperty("ditaOtVersion")?.toString() ?: "4.2.3"
+val ditaOtVersion: String = project.findProperty("ditaOtVersion")?.toString() ?: "4.4.2"
 val ditaOtHome = layout.buildDirectory.dir("dita-ot/dita-ot-$ditaOtVersion")
 
 // Supported product versions

@@ -8,7 +8,7 @@ This project demonstrates a modern docs-as-code workflow using:
 
 - **Oxygen XML Editor** for DITA authoring and validation
 - **Gradle 9** with the DITA-OT Gradle Plugin for build automation
-- **DITA Open Toolkit 4.2.3** for documentation transformation
+- **DITA Open Toolkit 4.4.2** for documentation transformation
 - **Git** for version control
 
 ## Prerequisites
@@ -25,7 +25,7 @@ This project demonstrates a modern docs-as-code workflow using:
    ```
 
    This executes the full workflow:
-   - Download DITA-OT 4.2.3
+   - Download DITA-OT 4.4.2
    - Install plugins (Bootstrap)
    - Validate DITA content
    - Check internal and external links
@@ -40,7 +40,7 @@ This project demonstrates a modern docs-as-code workflow using:
 
 | Task | Description |
 |------|-------------|
-| `downloadDitaOt` | Download DITA-OT 4.2.3 from GitHub releases |
+| `downloadDitaOt` | Download DITA-OT 4.4.2 from GitHub releases |
 | `installPlugins` | Install DITA-OT plugins from registry (Bootstrap) |
 | `validateDita` | Validate DITA content for errors |
 | `checkLinks` | Check internal and external links |
@@ -81,7 +81,7 @@ The `publishWorkflow` task executes a complete CI/CD-ready documentation pipelin
 ┌─────────────────────────────────────────────────────────────┐
 │                    publishWorkflow                          │
 ├─────────────────────────────────────────────────────────────┤
-│  1. downloadDitaOt    │ Download DITA-OT 4.2.3              │
+│  1. downloadDitaOt    │ Download DITA-OT 4.4.2              │
 │  2. installPlugins    │ Install Bootstrap plugin            │
 │  3. validateDita      │ Validate DITA content               │
 │  4. checkLinks        │ Check internal/external links       │
@@ -115,7 +115,7 @@ dita-gradle-demo/
 │           └── pdf.ditaval
 │
 ├── dita-ot/                  # Downloaded DITA-OT (gitignored)
-│   └── dita-ot-4.2.3/        # DITA-OT installation
+│   └── dita-ot-4.4.2/        # DITA-OT installation
 │
 ├── build/                    # Generated outputs (gitignored)
 │   └── docs/
@@ -139,7 +139,7 @@ dita-gradle-demo/
 This project works seamlessly with Oxygen XML Editor:
 
 1. **Open the project** - Open the project folder in Oxygen XML Editor
-2. **Configure DITA-OT** - Point Oxygen to `dita-ot/dita-ot-4.2.3` after running `./gradlew downloadDitaOt`
+2. **Configure DITA-OT** - Point Oxygen to `dita-ot/dita-ot-4.4.2` after running `./gradlew downloadDitaOt`
 3. **Edit DITA content** - Use Oxygen's DITA authoring features
 4. **Build with Gradle** - Use the terminal or Oxygen's external tools to run Gradle tasks
 
@@ -190,7 +190,7 @@ To install additional DITA-OT plugins:
 ```kotlin
 tasks.register<com.github.jyjeanne.DitaOtInstallPluginTask>("installPlugins") {
     dependsOn("downloadDitaOt")
-    ditaOtDir.set(file("dita-ot/dita-ot-4.2.3"))
+    ditaOtDir.set(file("dita-ot/dita-ot-4.4.2"))
     plugins.set(listOf(
         "net.infotexture.dita-bootstrap",  // Bootstrap 5 HTML
         "org.lwdita",                       // Lightweight DITA

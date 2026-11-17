@@ -14,15 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        gradle-version: ['8.5', '8.10', '9.0']
+        gradle-version: ['8.14.4', '9.0', '9.9.1']
       fail-fast: false
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -40,37 +40,36 @@ jobs:
 
     - name: Run unit tests
       run: ./gradlew test --no-daemon --stacktrace
-      continue-on-error: true
 
     - name: Upload test results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: test-results-gradle-${{ matrix.gradle-version }}
         path: build/reports/tests/test/
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      if: matrix.gradle-version == '8.5'
+      uses: actions/upload-artifact@v7
+      if: matrix.gradle-version == '8.14.4'
       with:
         name: plugin-jar
         path: build/libs/*.jar
 
   integration-test:
-    name: Integration Tests - Gradle 8.5 + DITA-OT ${{ matrix.dita-version }}
+    name: Linux Integration Tests - DITA-OT ${{ matrix.dita-version }}
     needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dita-version: ['3.4', '3.5', '3.6']
+        dita-version: ['3.4', '3.5', '3.6', '4.4.2']
       fail-fast: false
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -82,35 +81,17 @@ jobs:
     - name: Install plugin to Maven Local
       run: ./gradlew publishToMavenLocal --no-daemon
 
-    - name: Download DITA-OT ${{ matrix.dita-version }}
+    # test-project downloads DITA-OT with the plugin's DitaOtDownloadTask, runs a real
+    # html5 transformation, and fails unless index.html and test-topic.html are produced.
+    - name: Transform test project with DITA-OT ${{ matrix.dita-version }}
+      working-directory: test-project
       run: |
-        DITA_VERSION=${{ matrix.dita-version }}
-        mkdir -p .ci/dita-ot
-        curl -L https://github.com/dita-ot/dita-ot/releases/download/$DITA_VERSION/dita-ot-$DITA_VERSION.zip \
-          -o .ci/dita-ot-$DITA_VERSION.zip
-        unzip -q .ci/dita-ot-$DITA_VERSION.zip -d .ci/dita-ot
-        ls -la .ci/dita-ot/dita-ot-$DITA_VERSION/
-
-    - name: Run integration test project with DITA-OT ${{ matrix.dita-version }}
-      run: |
-        cd test-project
         chmod +x gradlew
-        DITA_HOME=../.ci/dita-ot/dita-ot-${{ matrix.dita-version }}
-        echo "DITA_HOME: $DITA_HOME"
-
-        # Verify plugin loads correctly and configuration works
-        ./gradlew tasks --all --no-daemon --no-configuration-cache | grep -q "dita" && echo "✓ Plugin loaded successfully"
-
-        # Test basic configuration
-        echo "Testing DITA-OT version ${{ matrix.dita-version }} compatibility..."
-
-        # Note: Full DITA transformation requires IsolatedAntBuilder fix
-        # For now, we test plugin loading and configuration only
-        echo "✓ Integration test passed for DITA-OT ${{ matrix.dita-version }}"
+        ./gradlew verifyOutput -PditaOtVersion=${{ matrix.dita-version }} --no-daemon --no-configuration-cache --stacktrace
 
     - name: Upload integration test results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: integration-test-dita-${{ matrix.dita-version }}
         path: test-project/build/
@@ -122,10 +103,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -136,10 +117,9 @@ jobs:
 
     - name: Run unit tests (Windows)
       run: .\gradlew.bat test --no-daemon --stacktrace
-      continue-on-error: true
 
     - name: Upload test results (Windows)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: test-results-windows
@@ -151,15 +131,15 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        dita-version: ['3.5', '3.6']
+        dita-version: ['3.5', '3.6', '4.4.2']
       fail-fast: false
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -168,28 +148,16 @@ jobs:
     - name: Install plugin to Maven Local (Windows)
       run: .\gradlew.bat publishToMavenLocal --no-daemon
 
-    - name: Download DITA-OT ${{ matrix.dita-version }} (Windows)
-      run: |
-        $DITA_VERSION="${{ matrix.dita-version }}"
-        New-Item -ItemType Directory -Force -Path ".ci\dita-ot" | Out-Null
-        $DownloadUrl = "https://github.com/dita-ot/dita-ot/releases/download/$DITA_VERSION/dita-ot-$DITA_VERSION.zip"
-        $OutputPath = ".ci\dita-ot-$DITA_VERSION.zip"
-        Write-Host "Downloading from: $DownloadUrl"
-        Invoke-WebRequest -Uri $DownloadUrl -OutFile $OutputPath
-        Expand-Archive -Path $OutputPath -DestinationPath ".ci\dita-ot" -Force
-        Get-ChildItem ".ci\dita-ot"
-
-    - name: Run integration test (Windows - DITA-OT ${{ matrix.dita-version }})
-      run: |
-        cd test-project
-        $env:DITA_HOME="..\ci\dita-ot\dita-ot-${{ matrix.dita-version }}"
-        Write-Host "DITA_HOME: $env:DITA_HOME"
-        .\gradlew.bat tasks --all --no-daemon --no-configuration-cache
-        Write-Host "✓ Integration test passed for DITA-OT ${{ matrix.dita-version }} on Windows"
+    # Note: DITA-OT 4.x's dita.bat builds a long CLASSPATH from absolute jar paths, so on a
+    # deeply nested checkout it can exceed the 8191-character cmd.exe limit ("The input line
+    # is too long"). The runner's short D:\a\... path keeps it under the limit.
+    - name: Transform test project (Windows - DITA-OT ${{ matrix.dita-version }})
+      working-directory: test-project
+      run: .\gradlew.bat verifyOutput "-PditaOtVersion=${{ matrix.dita-version }}" --no-daemon --no-configuration-cache --stacktrace
 
     - name: Upload Windows integration test results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: integration-test-windows-dita-${{ matrix.dita-version }}
         path: test-project/build/
@@ -203,10 +171,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         java-version: '17'
         distribution: 'temurin'

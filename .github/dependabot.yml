@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # GitHub Actions in the root workflows and the ci-cd-publishing example workflow
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - "/examples/ci-cd-publishing"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "ci"
+
+  # The plugin build itself and its Gradle wrapper
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build"
+
+  # Integration test project and example builds.
+  # Only list Gradle *roots*: "/examples" already covers its subprojects from
+  # examples/settings.gradle (classpath, download, filetree, multi-task,
+  # multi-project, simple). Listing those again makes Dependabot open two
+  # conflicting PRs for the same file.
+  - package-ecosystem: "gradle"
+    directories:
+      - "/test-project"
+      - "/examples"
+      - "/examples/ci-cd-publishing"
+      - "/examples/configuration-cache"
+      - "/examples/custom-plugin-dev"
+      - "/examples/gradle-plugin-self-documentation"
+      - "/examples/multi-language"
+      - "/examples/plugin-test"
+      - "/examples/version-docs"
+    schedule:
+      interval: "weekly"
+    groups:
+      gradle-minor-patch:
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "build(examples)"
