@@ -153,14 +153,16 @@ class WindowsCommandLineTest : StringSpec({
     // ============================================================================
 
     "resolveDitaScript keeps the absolute script when the command line fits" {
-        val root = Files.createTempDirectory("dita-ot").toFile()
+        // A relative path under the working directory. (Not relativeTo() on a temp file: on CI
+        // the temp folder is on C: and the checkout on D:, and paths across drives can't be relative.)
+        val root = File("build/tmp/windows-command-line-test-${System.nanoTime()}")
         try {
-            val script = fakeDitaOt(root, "x", ditaBat4, envBat.take(2))
-            val relative = script.relativeTo(File("").absoluteFile)
+            val relative = fakeDitaOt(root, "x", ditaBat4, envBat.take(2))
+            relative.isAbsolute shouldBe false
 
             WindowsCommandLine.resolveDitaScript(relative, listOf("--format", "html5"), logger).use { resolved ->
                 resolved.file.isAbsolute shouldBe true
-                resolved.file.canonicalPath shouldBe script.canonicalPath
+                resolved.file.canonicalPath shouldBe relative.absoluteFile.canonicalPath
             }
         } finally {
             root.deleteRecursively()
