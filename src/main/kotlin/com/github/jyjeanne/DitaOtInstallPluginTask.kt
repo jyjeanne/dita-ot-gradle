@@ -353,33 +353,37 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
      * The positional argument (plugin) is placed before --force to comply
      * with DITA-OT 4.4+ picocli argument parsing.
      */
-    internal fun buildInstallCommand(plugin: String): List<String> {
+    internal fun buildInstallCommand(plugin: String, script: File = ditaExecutable): List<String> {
+        val shell = if (Platform.isWindows) listOf("cmd", "/c") else emptyList()
+        return shell + script.absolutePath + buildInstallArguments(plugin)
+    }
+
+    private fun buildInstallArguments(plugin: String): List<String> {
         val arguments = mutableListOf("install", plugin)
 
         if (force.get()) {
             arguments.add("--force")
         }
-
-        // On Windows, dita.bat may be run through its 8.3 short path to stay under the
-        // cmd.exe command-line limit (see WindowsCommandLine). DITA-OT 4.x skips the long
-        // plugin CLASSPATH for `install`, but DITA-OT 3.x builds it for every command.
-        val script = WindowsCommandLine.resolveDitaScript(ditaExecutable, arguments, logger)
-
-        val shell = if (Platform.isWindows) listOf("cmd", "/c") else emptyList()
-        return shell + script.absolutePath + arguments
+        return arguments
     }
 
     /**
      * Install a single plugin.
      */
     private fun installPlugin(ditaHome: File, plugin: String): InstallResult {
+        // On Windows, dita.bat may run through a shorter path (8.3 name or junction) to stay
+        // under the cmd.exe limit (see WindowsCommandLine). DITA-OT 4.x skips the long plugin
+        // CLASSPATH for `install`, but DITA-OT 3.x builds it for every command.
+        var script: WindowsCommandLine.DitaScript? = null
+
         return try {
             // Check if already installed (for registry plugins)
             if (!force.get() && isPluginInstalled(ditaHome, plugin)) {
                 return InstallResult.AlreadyInstalled(extractPluginId(plugin))
             }
 
-            val command = buildInstallCommand(plugin)
+            script = WindowsCommandLine.resolveDitaScript(ditaExecutable, buildInstallArguments(plugin), logger)
+            val command = buildInstallCommand(plugin, script.file)
 
             logger.debug("Executing: ${command.joinToString(" ")}")
 
@@ -426,6 +430,9 @@ abstract class DitaOtInstallPluginTask @Inject constructor(
             }
         } catch (e: Exception) {
             InstallResult.Failed(plugin, e.message ?: "Unknown error")
+        } finally {
+            // Remove any junction created for this run
+            script?.close()
         }
     }
 

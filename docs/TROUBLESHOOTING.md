@@ -552,9 +552,11 @@ nested project the command line can exceed the 8191-character limit of `cmd.exe`
 hits it sooner than 3.x.
 
 - Since the next release after 2.8.7, the plugin detects this and runs `dita.bat` through its
-  8.3 short path (for example `C:\Users\me\DOCUME~1\...`). Run with `--info` to see it.
-- If the volume has no 8.3 names, the plugin logs a warning. Move the project or the DITA-OT
-  installation to a shorter path (e.g. `C:\dev\project`).
+  8.3 short path (for example `C:\Users\me\DOCUME~1\...`), or, where 8.3 names are disabled,
+  through a temporary directory junction under `%TEMP%` (`dotj-xxxxxxxx`, removed when DITA-OT
+  exits). Run with `--info` to see it.
+- If neither works (UNC network paths, or a very long `%TEMP%`), the plugin logs a warning.
+  Move the project or the DITA-OT installation to a shorter path (e.g. `C:\dev\project`).
 - Windows "long path support" (Group Policy / registry) and `\\?\` or `\\server\share` paths do
   **not** help: they do not raise the `cmd.exe` limit, and `cmd.exe` cannot run in UNC paths at all.
 

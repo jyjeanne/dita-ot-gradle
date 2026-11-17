@@ -53,7 +53,7 @@ The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradl
 - Unit tests now fail CI when they fail. The root test suite can run against any DITA-OT release with `./gradlew test -PditaOtVersion=<v>`.
 - Examples now default to DITA-OT 4.4.2.
 
-**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section. **Fixed after 2.8.7:** the plugin now runs `dita.bat` through its 8.3 short path when needed (see the backlog below).
+**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section. **Fixed after 2.8.7:** the plugin now runs `dita.bat` through its 8.3 short path, or a temporary junction, when needed (see the backlog below).
 
 ### Tests
 
@@ -63,7 +63,7 @@ The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradl
 
 | Area | Issue | Priority |
 |------|-------|----------|
-| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. **Fixed for the next release:** the plugin estimates the command-line length and runs `dita.bat` through its 8.3 short path when needed (transformation and validation). Still open when 8.3 names are disabled on the volume (a warning is logged). | ✅ P1 |
+| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. **Fixed for the next release:** the plugin estimates the command-line length and, when needed, runs `dita.bat` through its 8.3 short path or, where 8.3 names are disabled, a temporary junction under `%TEMP%` (transformation, validation and plugin install). Still open for UNC network paths (a warning is logged). | ✅ P1 |
 | `DitaOtDownloadTask` | Relative `Location` headers on redirects are not resolved against the current URL, so such downloads fail on every retry. | P2 |
 | `DitaOtDownloadTask` | Sends `Accept-Encoding: gzip` but never decompresses; a gzipping server leaves a broken archive in the cache. | P2 |
 | Build | Gradle 8.14.x embeds Kotlin stdlib 2.0.21 while the plugin compiles against API level 2.2; nothing yet checks that no newer stdlib API is used. | P2 |

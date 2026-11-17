@@ -150,8 +150,9 @@ jobs:
 
     # Note: DITA-OT 4.x's dita.bat builds a long CLASSPATH from absolute jar paths, which can
     # exceed the 8191-character cmd.exe limit on deeply nested checkouts. The plugin then runs
-    # dita.bat through its 8.3 short path (WindowsCommandLine). The runner's short D:\a\...
-    # path stays under the limit, so that fallback is covered by unit tests, not by this job.
+    # dita.bat through its 8.3 short path or a temporary junction (WindowsCommandLine). The
+    # runner's short D:\a\... path stays under the limit, so those fallbacks are covered by
+    # unit tests, not by this job.
     - name: Transform test project (Windows - DITA-OT ${{ matrix.dita-version }})
       working-directory: test-project
       run: .\gradlew.bat verifyOutput "-PditaOtVersion=${{ matrix.dita-version }}" --no-daemon --no-configuration-cache --stacktrace

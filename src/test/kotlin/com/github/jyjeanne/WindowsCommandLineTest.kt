@@ -158,10 +158,10 @@ class WindowsCommandLineTest : StringSpec({
             val script = fakeDitaOt(root, "x", ditaBat4, envBat.take(2))
             val relative = script.relativeTo(File("").absoluteFile)
 
-            val resolved = WindowsCommandLine.resolveDitaScript(relative, listOf("--format", "html5"), logger)
-
-            resolved.isAbsolute shouldBe true
-            resolved.canonicalPath shouldBe script.canonicalPath
+            WindowsCommandLine.resolveDitaScript(relative, listOf("--format", "html5"), logger).use { resolved ->
+                resolved.file.isAbsolute shouldBe true
+                resolved.file.canonicalPath shouldBe script.canonicalPath
+            }
         } finally {
             root.deleteRecursively()
         }
@@ -169,7 +169,9 @@ class WindowsCommandLineTest : StringSpec({
 
     "resolveDitaScript never changes the Unix dita script, other than making it absolute" {
         val script = File(File(File("opt"), "bin"), "dita")
-        WindowsCommandLine.resolveDitaScript(script, emptyList(), logger) shouldBe script.absoluteFile
+        WindowsCommandLine.resolveDitaScript(script, emptyList(), logger).use { resolved ->
+            resolved.file shouldBe script.absoluteFile
+        }
     }
 
     "resolveDitaScript runs an over-limit dita.bat through a shorter path to the same file".config(
@@ -177,32 +179,30 @@ class WindowsCommandLineTest : StringSpec({
     ) {
         val root = Files.createTempDirectory("dita-ot-long").toFile()
         try {
-            val script = fakeDitaOt(
-                root,
-                "a folder name long enough to push the dita bat command line over the cmd limit",
-                ditaBat4,
-                envBat
-            )
+            val script = fakeDitaOt(root, LONG_FOLDER, ditaBat4, envBat)
             val arguments = listOf("--input", "a.ditamap", "--format", "html5")
             WindowsCommandLine.estimate(script, arguments, envBat) shouldBeGreaterThan
                 WindowsCommandLine.CMD_EXE_MAX_LENGTH
 
-            val shortPath = WindowsCommandLine.shortPathOf(script.parentFile, logger)
-            val resolved = WindowsCommandLine.resolveDitaScript(script, arguments, logger)
-
-            if (shortPath is WindowsCommandLine.ShortPath.Found) {
+            // 8.3 short path where available, otherwise a junction: both must lead to dita.bat
+            WindowsCommandLine.resolveDitaScript(script, arguments, logger).use { resolved ->
                 resolved.path shouldNotBe script.absolutePath
                 resolved.path.length shouldBeLessThan script.absolutePath.length
-                resolved.canonicalPath shouldBe script.canonicalPath
-                WindowsCommandLine.estimate(resolved, arguments, envBat) shouldBeLessThan
+                resolved.file.toPath().toRealPath() shouldBe script.toPath().toRealPath()
+                WindowsCommandLine.estimate(resolved.file, arguments, envBat) shouldBeLessThan
                     WindowsCommandLine.CMD_EXE_MAX_LENGTH
-            } else {
-                // 8.3 names disabled on this volume: the script is kept and a warning is logged
-                resolved shouldBe script.absoluteFile
             }
         } finally {
             root.deleteRecursively()
         }
+    }
+
+    "the warning lists why each shortening attempt failed" {
+        val message = WindowsCommandLine.CMD_EXE_MAX_LENGTH.let { limit ->
+            Messages.windowsCommandLineTooLong(9000, limit, "C:\\dita-ot", listOf("first reason", "second reason"))
+        }
+
+        message.lines().filter { it.startsWith("  - ") } shouldBe listOf("  - first reason", "  - second reason")
     }
 
     // ============================================================================
@@ -235,4 +235,115 @@ class WindowsCommandLineTest : StringSpec({
 
         (shortPath is WindowsCommandLine.ShortPath.Failed) shouldBe true
     }
+
+    // ============================================================================
+    // Junction fallback (8.3 names disabled)
+    // ============================================================================
+
+    "removing a junction deletes only the link, never the DITA-OT files behind it".config(
+        enabled = Platform.isWindows
+    ) {
+        val target = Files.createTempDirectory("junction-target").toFile()
+        val base = Files.createTempDirectory("junction-base").toFile()
+        try {
+            val marker = File(target, "plugins/org.example/plugin.xml").apply { parentFile.mkdirs(); writeText("<plugin/>") }
+
+            val created = WindowsCommandLine.createJunction(target, base, logger)
+            (created is WindowsCommandLine.Junction.Created) shouldBe true
+            val link = (created as WindowsCommandLine.Junction.Created).link
+            WindowsCommandLine.isJunction(link.toPath()) shouldBe true
+            File(link, "plugins/org.example/plugin.xml").readText() shouldBe "<plugin/>"
+
+            WindowsCommandLine.removeJunction(link, logger)
+
+            link.exists() shouldBe false
+            marker.readText() shouldBe "<plugin/>"
+        } finally {
+            base.listFiles()?.forEach { WindowsCommandLine.removeJunction(it, logger) }
+            base.delete()
+            target.deleteRecursively()
+        }
+    }
+
+    "removeJunction leaves real folders alone" {
+        val folder = Files.createTempDirectory("not-a-junction").toFile()
+        try {
+            File(folder, "keep.txt").writeText("keep")
+
+            WindowsCommandLine.removeJunction(folder, logger)
+
+            File(folder, "keep.txt").readText() shouldBe "keep"
+        } finally {
+            folder.deleteRecursively()
+        }
+    }
+
+    "without 8.3 names, an over-limit dita.bat runs through a junction that is removed on close".config(
+        enabled = Platform.isWindows
+    ) {
+        val root = Files.createTempDirectory("dita-ot-junction").toFile()
+        val base = Files.createTempDirectory("junction-base").toFile()
+        try {
+            // A dita.bat that prints the folder it was invoked from (%~dp0)
+            val script = fakeDitaOt(root, LONG_FOLDER, listOf("@echo off", "echo %~dp0"), envBat)
+            val arguments = listOf("--input", "a.ditamap", "--format", "html5")
+
+            val resolved = WindowsCommandLine.resolveDitaScript(
+                script, arguments, logger, useShortNames = false, junctionBaseDir = base
+            )
+            val link = resolved.file.parentFile.parentFile
+            try {
+                link.parentFile.canonicalPath shouldBe base.canonicalPath
+                link.name.startsWith(WindowsCommandLine.JUNCTION_PREFIX) shouldBe true
+                resolved.file.toPath().toRealPath() shouldBe script.toPath().toRealPath()
+                WindowsCommandLine.estimate(resolved.file, arguments, envBat) shouldBeLessThan
+                    WindowsCommandLine.CMD_EXE_MAX_LENGTH
+
+                // dita.bat derives DITA_HOME from %~dp0, which must be the junction path
+                val process = ProcessBuilder("cmd.exe", "/d", "/c", resolved.path).redirectErrorStream(true).start()
+                val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
+                process.waitFor()
+                output.lowercase() shouldBe (link.path + "\\bin\\").lowercase()
+            } finally {
+                resolved.close()
+            }
+
+            link.exists() shouldBe false
+            script.isFile shouldBe true
+            File(script.parentFile.parentFile, "config/env.bat").isFile shouldBe true
+        } finally {
+            base.listFiles()?.forEach { WindowsCommandLine.removeJunction(it, logger) }
+            base.delete()
+            root.deleteRecursively()
+        }
+    }
+
+    "the stale-junction sweep removes only old junctions".config(enabled = Platform.isWindows) {
+        val target = Files.createTempDirectory("junction-target").toFile()
+        val base = Files.createTempDirectory("junction-base").toFile()
+        try {
+            File(target, "keep.txt").writeText("keep")
+            val link = (WindowsCommandLine.createJunction(target, base, logger) as WindowsCommandLine.Junction.Created).link
+            val realFolder = File(base, WindowsCommandLine.JUNCTION_PREFIX + "realfolder").apply { mkdirs() }
+
+            // Not stale yet
+            WindowsCommandLine.sweepStaleJunctions(base, System.currentTimeMillis(), logger)
+            link.exists() shouldBe true
+
+            // Two days later
+            val later = System.currentTimeMillis() + 2 * WindowsCommandLine.STALE_JUNCTION_AGE_MILLIS
+            WindowsCommandLine.sweepStaleJunctions(base, later, logger)
+
+            link.exists() shouldBe false
+            realFolder.isDirectory shouldBe true
+            File(target, "keep.txt").readText() shouldBe "keep"
+        } finally {
+            base.listFiles()?.forEach { WindowsCommandLine.removeJunction(it, logger) }
+            base.deleteRecursively()
+            target.deleteRecursively()
+        }
+    }
 })
+
+/** A folder name that pushes a DITA-OT 4.x command line over the cmd.exe limit. */
+private const val LONG_FOLDER = "a folder name long enough to push the dita bat command line over the cmd limit"

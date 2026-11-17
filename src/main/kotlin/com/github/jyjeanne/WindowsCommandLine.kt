@@ -1,10 +1,16 @@
 package com.github.jyjeanne
 
 import org.gradle.api.logging.Logger
+import java.io.Closeable
 import java.io.File
-import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.Path
+import java.nio.file.attribute.BasicFileAttributes
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Keeps DITA-OT's `dita.bat` under the cmd.exe command-line length limit on Windows.
@@ -15,10 +21,17 @@ import java.util.concurrent.TimeUnit
  * directory of roughly 100 characters the line passes cmd.exe's 8191-character limit and
  * `dita.bat` fails with exit code 255 ("The input line is too long").
  *
- * `%~dp0` is the path the script was *invoked* with, so running `dita.bat` through its 8.3
- * short path (for example `C:\Users\me\DOCUME~1\...`) shortens every CLASSPATH entry.
- * This is only done when the estimated command line would exceed the limit, so builds that
- * work today run exactly as before.
+ * `%~dp0` is the path the script was *invoked* with, so running `dita.bat` through a shorter
+ * path to the same folder shortens every CLASSPATH entry. Two shorter paths are tried, only
+ * when the estimated command line would exceed the limit (builds that fit run as before):
+ *
+ * 1. The folder's 8.3 short path (for example `C:\Users\me\DOCUME~1\...`). No side effects,
+ *    but 8.3 names can be disabled per volume (common on non-system drives, never on ReFS
+ *    or Dev Drives).
+ * 2. A directory junction under the temp folder (`%TEMP%\dotj-1a2b3c4d`) pointing to the
+ *    DITA-OT folder. Junctions need no administrator rights and work on any local NTFS
+ *    volume. Each run gets its own junction, removed when DITA-OT exits; leftovers from
+ *    killed builds are removed after a day.
  *
  * @since 2.8.8
  */
@@ -37,12 +50,34 @@ internal object WindowsCommandLine {
     /** `%DITA_HOME%` references in dita.bat's `java` line outside `CLASSPATH`. */
     internal const val DITA_HOME_REFERENCES = 5
 
-    private const val SHORT_PATH_TIMEOUT_SECONDS = 10L
+    /** Name prefix of the junctions this plugin creates in the temp folder. */
+    internal const val JUNCTION_PREFIX = "dotj-"
+
+    /** Junctions older than this are leftovers from killed builds. */
+    internal val STALE_JUNCTION_AGE_MILLIS = TimeUnit.DAYS.toMillis(1)
+
+    private const val PROCESS_TIMEOUT_SECONDS = 10L
+    private const val FILE_ATTRIBUTE_REPARSE_POINT = 0x400
 
     private val CLASSPATH_LINE =
         Regex("""^\s*set\s+"CLASSPATH=%CLASSPATH%(.*)"\s*$""", RegexOption.IGNORE_CASE)
 
     private const val DITA_HOME_TOKEN = "%DITA_HOME%"
+
+    /**
+     * The dita.bat to run. [close] it after DITA-OT has exited: it removes the junction
+     * created for this run, if any.
+     */
+    class DitaScript internal constructor(val file: File, private val cleanup: () -> Unit = {}) : Closeable {
+        /** Absolute path to put on the command line. */
+        val path: String get() = file.absolutePath
+
+        private val closed = AtomicBoolean(false)
+
+        override fun close() {
+            if (closed.compareAndSet(false, true)) cleanup()
+        }
+    }
 
     /** Outcome of looking up the 8.3 short form of a directory. */
     internal sealed class ShortPath {
@@ -56,6 +91,12 @@ internal object WindowsCommandLine {
         data class Failed(val reason: String) : ShortPath()
     }
 
+    /** Outcome of creating a junction. */
+    internal sealed class Junction {
+        data class Created(val link: File) : Junction()
+        data class Failed(val reason: String) : Junction()
+    }
+
     /** Short paths found in this JVM. Re-checked before reuse: folders can be deleted and re-created. */
     private val shortPathCache = ConcurrentHashMap<String, File>()
 
@@ -64,59 +105,100 @@ internal object WindowsCommandLine {
     /** dita.bat / env.bat contents, keyed by path and invalidated when the file changes. */
     private val linesCache = ConcurrentHashMap<String, CachedLines>()
 
+    private val staleJunctionsSwept = AtomicBoolean(false)
+
     /**
-     * Returns the absolute script to execute: [script] itself, or the same file addressed
-     * through its 8.3 short path when the long path would push dita.bat's command line over
-     * the limit.
+     * Returns the script to execute: [script] itself (made absolute), or the same file
+     * addressed through a shorter path when the long path would push dita.bat's command line
+     * over the limit. Close the result after the DITA-OT process has exited.
      *
-     * On non-Windows platforms, or for anything other than a `.bat` file, the absolute
-     * [script] is returned unchanged.
+     * On non-Windows platforms, or for anything other than a `.bat` file, [script] is
+     * returned unchanged.
      *
      * @param script the `dita.bat` file
      * @param arguments the arguments passed after the script (subcommand first, if any)
+     * @param useShortNames try 8.3 short names before junctions (tests turn this off)
+     * @param junctionBaseDir where junctions are created (the temp folder by default)
      */
-    fun resolveDitaScript(script: File, arguments: List<String>, logger: Logger): File {
+    fun resolveDitaScript(
+        script: File,
+        arguments: List<String>,
+        logger: Logger,
+        useShortNames: Boolean = true,
+        junctionBaseDir: File = File(System.getProperty("java.io.tmpdir"))
+    ): DitaScript {
         val absoluteScript = script.absoluteFile
         if (!Platform.isWindows || !absoluteScript.name.endsWith(".bat", ignoreCase = true)) {
-            return absoluteScript
+            return DitaScript(absoluteScript)
         }
 
         val envBat = envBatLinesFor(absoluteScript, arguments)
         val estimate = estimate(absoluteScript, arguments, envBat)
         if (estimate <= CMD_EXE_MAX_LENGTH) {
             logger.debug("dita.bat command line estimate: $estimate characters (limit $CMD_EXE_MAX_LENGTH)")
-            return absoluteScript
+            return DitaScript(absoluteScript)
         }
 
-        val ditaHome = ditaHomeOf(absoluteScript).path
-        val shortPath = shortPathOf(absoluteScript.parentFile, logger)
-        val shortScript = (shortPath as? ShortPath.Found)?.let { File(it.dir, absoluteScript.name) }
+        val ditaHome = ditaHomeOf(absoluteScript)
+        val problems = mutableListOf<String>()
+        var fallback = absoluteScript
+        var fallbackEstimate = estimate
 
-        if (shortScript == null || !shortScript.isFile) {
-            val reason = when (shortPath) {
-                is ShortPath.Failed -> "and its 8.3 short path could not be determined: ${shortPath.reason}"
-                is ShortPath.Found -> "and dita.bat was not found through its 8.3 short path ${shortPath.dir}"
-                ShortPath.Unavailable -> "and the folder has no 8.3 short name (8.3 names are disabled " +
+        // 1. The 8.3 short path: no side effects
+        if (useShortNames) {
+            when (val shortPath = shortPathOf(absoluteScript.parentFile, logger)) {
+                is ShortPath.Found -> {
+                    val shortScript = File(shortPath.dir, absoluteScript.name)
+                    val shortEstimate = estimate(shortScript, arguments, envBat)
+                    when {
+                        !shortScript.isFile -> problems += "dita.bat was not found through the 8.3 short path ${shortPath.dir}"
+                        shortEstimate <= CMD_EXE_MAX_LENGTH -> {
+                            logSwitch(logger, estimate, shortEstimate, "its 8.3 short path", shortScript)
+                            return DitaScript(shortScript)
+                        }
+                        else -> {
+                            problems += "the 8.3 short path is still too long ($shortEstimate characters)"
+                            if (shortEstimate < fallbackEstimate) {
+                                fallback = shortScript
+                                fallbackEstimate = shortEstimate
+                            }
+                        }
+                    }
+                }
+                ShortPath.Unavailable -> problems += "the folder has no 8.3 short name (8.3 names are disabled " +
                     "on the volume, or were when its folders were created)"
+                is ShortPath.Failed -> problems += "the 8.3 short path could not be determined: ${shortPath.reason}"
             }
-            logger.warn(Messages.windowsCommandLineTooLong(estimate, CMD_EXE_MAX_LENGTH, ditaHome, reason))
-            return absoluteScript
         }
 
-        val shortEstimate = estimate(shortScript, arguments, envBat)
+        // 2. A junction under the temp folder, removed when the caller closes the result
+        when (val junction = createJunction(ditaHome, junctionBaseDir, logger)) {
+            is Junction.Created -> {
+                val junctionScript = File(junction.link, absoluteScript.relativeTo(ditaHome).path)
+                val junctionEstimate = estimate(junctionScript, arguments, envBat)
+                if (junctionScript.isFile && junctionEstimate <= CMD_EXE_MAX_LENGTH) {
+                    logSwitch(logger, estimate, junctionEstimate, "a junction", junctionScript)
+                    return DitaScript(junctionScript) { removeJunction(junction.link, logger) }
+                }
+                removeJunction(junction.link, logger)
+                problems += if (junctionScript.isFile) {
+                    "a junction under ${junctionBaseDir.path} is still too long ($junctionEstimate characters)"
+                } else {
+                    "dita.bat was not found through the junction ${junction.link}"
+                }
+            }
+            is Junction.Failed -> problems += "no junction could be created: ${junction.reason}"
+        }
+
+        logger.warn(Messages.windowsCommandLineTooLong(fallbackEstimate, CMD_EXE_MAX_LENGTH, ditaHome.path, problems))
+        return DitaScript(fallback)
+    }
+
+    private fun logSwitch(logger: Logger, estimate: Int, newEstimate: Int, via: String, newScript: File) {
         logger.info(
             "dita.bat command line would be about $estimate characters (cmd.exe limit: " +
-                "$CMD_EXE_MAX_LENGTH); running it through its short path instead " +
-                "($shortEstimate characters): ${shortScript.path}"
+                "$CMD_EXE_MAX_LENGTH); running it through $via instead ($newEstimate characters): ${newScript.path}"
         )
-        if (shortEstimate > CMD_EXE_MAX_LENGTH) {
-            logger.warn(
-                Messages.windowsCommandLineTooLong(
-                    shortEstimate, CMD_EXE_MAX_LENGTH, ditaHome, "even through its 8.3 short path ${shortScript.parent}"
-                )
-            )
-        }
-        return shortScript
     }
 
     /**
@@ -206,6 +288,8 @@ internal object WindowsCommandLine {
         return "java.exe"
     }
 
+    // ==================== 8.3 short paths ====================
+
     /**
      * The 8.3 short form of [dir]. Only a path that leads to the same directory is accepted:
      * for example, cmd.exe cannot run in a UNC path and silently falls back to `C:\Windows`.
@@ -223,24 +307,13 @@ internal object WindowsCommandLine {
 
         return try {
             // Runs in the directory itself, so the command needs no path and no quoting
-            val process = ProcessBuilder("cmd.exe", "/d", "/c", "for %I in (.) do @echo %~fsI")
-                .directory(absoluteDir)
-                .redirectErrorStream(true)
-                .start()
-            process.outputStream.close()
-
-            if (!process.waitFor(SHORT_PATH_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                process.destroyForcibly()
-                return ShortPath.Failed("cmd.exe did not answer within $SHORT_PATH_TIMEOUT_SECONDS seconds")
-            }
-            // The output is one short line, far below the pipe buffer size, so the process
-            // could not block on it; reading after it exited cannot hang.
-            val output = process.inputStream.bufferedReader().use { it.readText() }
-            if (process.exitValue() != 0) {
-                return ShortPath.Failed("cmd.exe exited with code ${process.exitValue()}: ${output.trim()}")
+            val run = runCmd(listOf("for %I in (.) do @echo %~fsI"), absoluteDir)
+                ?: return ShortPath.Failed("cmd.exe did not answer within $PROCESS_TIMEOUT_SECONDS seconds")
+            if (run.exitCode != 0) {
+                return ShortPath.Failed("cmd.exe exited with code ${run.exitCode}: ${run.output.trim()}")
             }
 
-            val line = output.lines().map { it.trim() }.lastOrNull { it.isNotEmpty() }
+            val line = run.output.lines().map { it.trim() }.lastOrNull { it.isNotEmpty() }
                 ?: return ShortPath.Failed("cmd.exe printed no path")
             val candidate = File(line)
             when {
@@ -258,10 +331,108 @@ internal object WindowsCommandLine {
         }
     }
 
+    // ==================== Junctions ====================
+
+    /**
+     * Create a uniquely named junction in [baseDir] that points to [target].
+     * Junctions need no administrator rights but only work for local NTFS paths.
+     */
+    internal fun createJunction(target: File, baseDir: File, logger: Logger): Junction {
+        val absoluteTarget = target.absoluteFile
+        if (absoluteTarget.path.startsWith("\\\\")) {
+            return Junction.Failed("junctions cannot point to UNC (network) paths")
+        }
+        if (staleJunctionsSwept.compareAndSet(false, true)) {
+            sweepStaleJunctions(baseDir, System.currentTimeMillis(), logger)
+        }
+
+        val link = File(baseDir.absoluteFile, JUNCTION_PREFIX + UUID.randomUUID().toString().substring(0, 8))
+        return try {
+            val run = runCmd(listOf("mklink", "/J", quote(link.path), quote(absoluteTarget.path)), null)
+            if (run == null || run.exitCode != 0 || !isSameDirectory(link, absoluteTarget)) {
+                removeJunction(link, logger)
+                val detail = run?.let { "exit code ${it.exitCode}: ${it.output.trim()}" }
+                    ?: "no answer within $PROCESS_TIMEOUT_SECONDS seconds"
+                return Junction.Failed("mklink /J failed ($detail)")
+            }
+            logger.debug("Created junction ${link.path} -> ${absoluteTarget.path}")
+            Junction.Created(link)
+        } catch (e: Exception) {
+            logger.debug("Could not create a junction to ${absoluteTarget.path}", e)
+            removeJunction(link, logger)
+            Junction.Failed("could not run mklink (${e.javaClass.simpleName}: ${e.message})")
+        }
+    }
+
+    /**
+     * Remove a junction created by [createJunction]. Only the link itself is deleted
+     * (`Files.delete` on a junction calls RemoveDirectory on the link); the DITA-OT files
+     * it points to are never touched. Anything that is not a junction is left alone.
+     */
+    internal fun removeJunction(link: File, logger: Logger) {
+        try {
+            val path = link.toPath()
+            if (isJunction(path)) {
+                Files.delete(path)
+            }
+        } catch (e: Exception) {
+            logger.debug("Could not remove junction ${link.path}: ${e.message}")
+        }
+    }
+
+    /** Remove junctions left in [baseDir] by builds that were killed before cleaning up. */
+    internal fun sweepStaleJunctions(baseDir: File, now: Long, logger: Logger) {
+        val candidates = baseDir.listFiles { file -> file.name.startsWith(JUNCTION_PREFIX) } ?: return
+        for (candidate in candidates) {
+            try {
+                val path = candidate.toPath()
+                if (!isJunction(path)) continue
+                val modified = Files.readAttributes(path, BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS)
+                    .lastModifiedTime().toMillis()
+                if (now - modified > STALE_JUNCTION_AGE_MILLIS) {
+                    removeJunction(candidate, logger)
+                }
+            } catch (e: Exception) {
+                logger.debug("Could not check ${candidate.path}: ${e.message}")
+            }
+        }
+    }
+
+    /** A directory reparse point (junction), checked without following it. */
+    internal fun isJunction(path: Path): Boolean = try {
+        val dosAttributes = Files.getAttribute(path, "dos:attributes", LinkOption.NOFOLLOW_LINKS) as Int
+        (dosAttributes and FILE_ATTRIBUTE_REPARSE_POINT) != 0 && Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)
+    } catch (e: Exception) {
+        false
+    }
+
+    // ==================== Helpers ====================
+
+    private class CmdResult(val exitCode: Int, val output: String)
+
+    /** Run `cmd.exe /d /c <command>`; `null` on timeout. Output is expected to be a few lines. */
+    private fun runCmd(command: List<String>, workingDir: File?): CmdResult? {
+        val process = ProcessBuilder(listOf("cmd.exe", "/d", "/c") + command)
+            .apply { if (workingDir != null) directory(workingDir) }
+            .redirectErrorStream(true)
+            .start()
+        process.outputStream.close()
+        if (!process.waitFor(PROCESS_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            process.destroyForcibly()
+            return null
+        }
+        // A few short lines, far below the pipe buffer size: the process could not block on
+        // its output, so reading it after the exit cannot hang.
+        val output = process.inputStream.bufferedReader().use { it.readText() }
+        return CmdResult(process.exitValue(), output)
+    }
+
+    private fun quote(path: String) = "\"$path\""
+
+    /** Same folder, comparing real paths (resolves 8.3 names and junctions). */
     private fun isSameDirectory(a: File, b: File): Boolean = try {
-        // canonicalPath expands 8.3 names, so both forms of one folder compare equal
-        a.isDirectory && b.isDirectory && a.canonicalPath.equals(b.canonicalPath, ignoreCase = true)
-    } catch (e: IOException) {
+        a.isDirectory && b.isDirectory && a.toPath().toRealPath() == b.toPath().toRealPath()
+    } catch (e: Exception) {
         false
     }
 

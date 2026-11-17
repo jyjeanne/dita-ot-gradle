@@ -121,54 +121,57 @@ object AntExecutor {
                 }
             }
 
-            // On Windows, run dita.bat through its 8.3 short path if the long path would
-            // push its command line over the cmd.exe limit (see WindowsCommandLine)
-            command[0] = WindowsCommandLine.resolveDitaScript(ditaScript, command.drop(1), logger).absolutePath
+            // On Windows, dita.bat may run through a shorter path (8.3 name or junction) to
+            // stay under the cmd.exe limit (see WindowsCommandLine). Closing the script
+            // after the process exits removes any junction created for this run.
+            WindowsCommandLine.resolveDitaScript(ditaScript, command.drop(1), logger).use { script ->
+                command[0] = script.path
 
-            logger.info("DITA-OT script workaround: Executing command...")
-            logger.debug("Command arguments: $command")
+                logger.info("DITA-OT script workaround: Executing command...")
+                logger.debug("Command arguments: $command")
 
-            val processBuilder = ProcessBuilder(command)
-            processBuilder.directory(ditaHome)
+                val processBuilder = ProcessBuilder(command)
+                processBuilder.directory(ditaHome)
 
-            // Merge stderr to stdout
-            processBuilder.redirectErrorStream(true)
+                // Merge stderr to stdout
+                processBuilder.redirectErrorStream(true)
 
-            // Set environment variables
-            val env = processBuilder.environment()
-            env["DITA_HOME"] = ditaHome.absolutePath
+                // Set environment variables
+                val env = processBuilder.environment()
+                env["DITA_HOME"] = ditaHome.absolutePath
 
-            // Execute the process based on whether progress reporting is enabled
-            val exitCode = if (progressReporter != null) {
-                // Capture output for progress reporting
-                val process = processBuilder.start()
-                processOutputWithProgress(process, progressReporter, logger, timeoutMinutes)
-            } else {
-                // Legacy: inherit IO and wait (output goes directly to console)
-                processBuilder.inheritIO()
-                val process = processBuilder.start()
-                try {
-                    process.waitFor()
-                } catch (e: InterruptedException) {
-                    logger.warn("DITA-OT process was interrupted")
-                    process.destroyForcibly()
-                    Thread.currentThread().interrupt()
-                    -1
-                } finally {
-                    // Ensure process is destroyed if still running
-                    if (process.isAlive) {
+                // Execute the process based on whether progress reporting is enabled
+                val exitCode = if (progressReporter != null) {
+                    // Capture output for progress reporting
+                    val process = processBuilder.start()
+                    processOutputWithProgress(process, progressReporter, logger, timeoutMinutes)
+                } else {
+                    // Legacy: inherit IO and wait (output goes directly to console)
+                    processBuilder.inheritIO()
+                    val process = processBuilder.start()
+                    try {
+                        process.waitFor()
+                    } catch (e: InterruptedException) {
+                        logger.warn("DITA-OT process was interrupted")
                         process.destroyForcibly()
+                        Thread.currentThread().interrupt()
+                        -1
+                    } finally {
+                        // Ensure process is destroyed if still running
+                        if (process.isAlive) {
+                            process.destroyForcibly()
+                        }
                     }
                 }
-            }
 
-            if (exitCode == 0) {
-                logger.info("✓ DITA-OT transformation successful (exit code: $exitCode)")
-            } else {
-                logger.error("✗ DITA-OT execution failed with exit code: $exitCode")
-            }
+                if (exitCode == 0) {
+                    logger.info("✓ DITA-OT transformation successful (exit code: $exitCode)")
+                } else {
+                    logger.error("✗ DITA-OT execution failed with exit code: $exitCode")
+                }
 
-            return exitCode
+                return exitCode
+            }
         } catch (e: Exception) {
             logger.error("Failed to execute DITA script workaround: ${e.message}", e)
             return -1

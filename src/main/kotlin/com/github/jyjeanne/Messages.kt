@@ -292,32 +292,36 @@ object Messages {
     // ==================== Windows Warnings ====================
 
     /**
-     * @param reason why the plugin could not avoid the limit, completing the sentence
-     *   "over the limit of cmd.exe, ..."
+     * @param problems why each way of shortening the command line did not work
      */
     fun windowsCommandLineTooLong(
         estimatedLength: Int,
         limit: Int,
         ditaHome: String,
-        reason: String
-    ) = """
-        The DITA-OT command line will be about $estimatedLength characters, over the
-        $limit-character limit of cmd.exe, $reason.
-        DITA-OT: $ditaHome
+        problems: List<String>
+    ): String {
+        val header = """
+            The DITA-OT command line will be about $estimatedLength characters, over the
+            $limit-character limit of cmd.exe, and the plugin could not shorten it:
+        """.trimIndent()
+        val details = """
+            DITA-OT: $ditaHome
 
-        dita.bat will most likely fail with exit code 255 and
-        "The input line is too long" (French: "La ligne entrée est trop longue").
+            dita.bat will most likely fail with exit code 255 and
+            "The input line is too long" (French: "La ligne entrée est trop longue").
 
-        DITA-OT's dita.bat adds one absolute path per plugin JAR to the CLASSPATH,
-        so the length grows with the length of the DITA-OT installation path.
+            DITA-OT's dita.bat adds one absolute path per plugin JAR to the CLASSPATH,
+            so the length grows with the length of the DITA-OT installation path.
 
-        Solutions:
-        1. Move the project, or the DITA-OT installation (destinationDir of
-           DitaOtDownloadTask), to a shorter path (e.g. C:\dev\project)
-        2. Give the folders 8.3 short names (administrator). `fsutil 8dot3name set C: 0`
-           only affects folders created afterwards: re-create the project folders, or
-           name existing ones with `fsutil file setshortname <folder> <SHORTNAME>`
-    """.trimIndent()
+            Solutions:
+            1. Move the project, or the DITA-OT installation (destinationDir of
+               DitaOtDownloadTask), to a shorter path (e.g. C:\dev\project)
+            2. Give the folders 8.3 short names (administrator). `fsutil 8dot3name set C: 0`
+               only affects folders created afterwards: re-create the project folders, or
+               name existing ones with `fsutil file setshortname <folder> <SHORTNAME>`
+        """.trimIndent()
+        return header + "\n" + problems.joinToString("\n") { "  - $it" } + "\n\n" + details
+    }
 
     // ==================== Help Messages ====================
 
