@@ -9,7 +9,7 @@
     <section>
       <title>Prerequisites</title>
       <ul>
-        <li>Gradle 6.5 or later (Gradle 9.0+ recommended)</li>
+        <li>Gradle 8.14.4 or later (Gradle 9.x recommended)</li>
         <li>Java 8 or later</li>
         <li>DITA-OT 3.0 or later</li>
       </ul>
@@ -19,7 +19,7 @@
       <title>Groovy DSL</title>
       <p>Add the following to your <filepath>build.gradle</filepath>:</p>
       <codeblock>plugins {
-    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.6'
+    id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.7'
 }</codeblock>
     </section>
 
@@ -27,7 +27,7 @@
       <title>Kotlin DSL</title>
       <p>Add the following to your <filepath>build.gradle.kts</filepath>:</p>
       <codeblock>plugins {
-    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.6"
+    id("io.github.jyjeanne.dita-ot-gradle") version "2.8.7"
 }</codeblock>
     </section>
 

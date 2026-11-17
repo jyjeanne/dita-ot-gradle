@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
 <topic id="highlights">
-  <title>Highlights (v2.8.4)</title>
+  <title>Highlights (v2.8.7)</title>
   <shortdesc>Key features and improvements in the current version.</shortdesc>
   <body>
     <section>
-      <title>What's New in 2.8.4</title>
-      <p>This release includes bug fixes from community feedback and new features:</p>
+      <title>What's New in 2.8.7</title>
+      <p>A maintenance release with no change to the task DSL:</p>
       <ul>
-        <li><b>validateDita Fix:</b> DITA-OT informational messages (like DOTJ031I) are no longer incorrectly treated as errors</li>
-        <li><b>checkLinks Peer Support:</b> Links with <codeph>scope="peer"</codeph> are now properly skipped (not flagged as broken)</li>
-        <li><b>showWarnings Option:</b> FOP warnings are now suppressed by default during PDF transformation, configurable via <codeph>showWarnings(true)</codeph></li>
+        <li><b>Minimum Gradle 8.14.4:</b> The minimum supported Gradle version is now 8.14.4 (previously 6.5). Gradle 8.14.4, 9.0 and 9.9.1 are tested in CI. On older Gradle versions, stay on 2.8.6.</li>
+        <li><b>DITA-OT 4.4.2:</b> Tested in CI with a real HTML5 transformation on Linux and Windows. The examples now default to DITA-OT 4.4.2.</li>
+        <li><b>Up-to-date toolchain:</b> Kotlin 2.4.21, commons-io 2.22.0, Gradle wrapper 9.9.1, with no compiler or Gradle deprecation warnings.</li>
+        <li><b>Windows note:</b> DITA-OT 4.x is more likely than 3.x to exceed the Windows command-line length limit on deeply nested project paths (exit code 255, "The input line is too long"). Use a shorter project path.</li>
       </ul>
     </section>
 
@@ -61,11 +62,11 @@
             </row>
             <row>
               <entry><b>DITA-OT 3.x/4.x</b></entry>
-              <entry>Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0</entry>
+              <entry>Tested with DITA-OT 3.5.4, 4.2.3, 4.3.0, 4.4, 4.4.2</entry>
             </row>
             <row>
               <entry><b>Modern Architecture</b></entry>
-              <entry>Provider API, Gradle 9.0 compatible</entry>
+              <entry>Provider API, built with Kotlin 2.4, Gradle 8.14.4 – 9.9</entry>
             </row>
           </tbody>
         </tgroup>
@@ -77,7 +78,7 @@
 
       <p><b>DitaOtValidateTask</b> - Validate DITA content without full transformation:</p>
       <codeblock>tasks.register&lt;DitaOtValidateTask&gt;("validateDita") {
-    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.4.2"))
     input("docs/guide.ditamap")
     strictMode.set(true)  // Fail on warnings too
 }</codeblock>
@@ -91,13 +92,13 @@
 
       <p><b>DitaOtDownloadTask</b> - Automatically download DITA-OT:</p>
       <codeblock>val downloadDitaOt by tasks.registering(DitaOtDownloadTask::class) {
-    version.set("4.2.3")  // DITA-OT version
+    version.set("4.4.2")  // DITA-OT version
     destinationDir.set(layout.buildDirectory.dir("dita-ot"))
 }</codeblock>
 
       <p><b>DitaOtInstallPluginTask</b> - Install DITA-OT plugins:</p>
       <codeblock>val installPlugins by tasks.registering(DitaOtInstallPluginTask::class) {
-    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.2.3"))
+    ditaOtDir.set(layout.buildDirectory.dir("dita-ot/dita-ot-4.4.2"))
     plugins.set(listOf(
         "org.dita.pdf2",                    // From registry
         "https://example.com/plugin.zip",   // From URL
@@ -162,6 +163,8 @@
 
     <section>
       <title>Version History</title>
+      <p><b>2.8.7</b> - Minimum Gradle 8.14.4, Kotlin 2.4 toolchain, DITA-OT 4.4.2 tested in CI</p>
+      <p><b>2.8.6</b> - Configurable DITA-OT process timeout, DITA-OT 4.4 plugin install fix, progress output fixes</p>
       <p><b>2.8.4</b> - validateDita message fix, checkLinks peer support, showWarnings option</p>
       <p><b>2.8.1</b> - Cross-platform path fix, DITA-OT version detection fix, DITA-OT 4.x compatibility</p>
       <p><b>2.8.0</b> - Progress reporting, thread safety improvements</p>

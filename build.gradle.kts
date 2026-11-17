@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.jyjeanne"
-version = "2.8.6"
+version = "2.8.7"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

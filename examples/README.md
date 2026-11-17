@@ -343,6 +343,13 @@ Every build now includes detailed reports:
 
 ## Version History of Examples
 
+### v2.8.7 (November 2026)
+All examples updated to **v2.8.7**:
+- ✅ Gradle wrapper 9.9.1 (minimum supported Gradle is now 8.14.4)
+- ✅ Default DITA-OT version 4.4.2 (override with `-PditaOtVersion=<v>` where supported)
+- ✅ `examples/classpath` uses gradle-download-task 5.7.0
+- ✅ `ci-cd-publishing` workflow uses current GitHub Actions (checkout v7, setup-java v6, setup-gradle v6, Pages actions)
+
 ### v2.3.1 (November 2025)
 All examples updated to **v2.3.1** featuring:
 - ✅ **Full Configuration Cache Support** - Up to 77% faster incremental builds

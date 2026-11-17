@@ -65,6 +65,6 @@
       </ul>
     </section>
 
-    <note type="tip">Configuration Cache requires Gradle 6.5 or later. For best results, use Gradle 9.0+.</note>
+    <note type="tip">The plugin requires Gradle 8.14.4 or later, which fully supports the Configuration Cache. For best results, use Gradle 9.x.</note>
   </body>
 </topic>

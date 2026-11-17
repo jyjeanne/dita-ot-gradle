@@ -16,6 +16,63 @@ This document outlines planned improvements and features for the DITA-OT Gradle 
 
 ---
 
+## ✅ v2.8.7 Maintenance Release (COMPLETED)
+
+No change to the task DSL. This release updates the toolchain, raises the minimum Gradle version, and makes CI exercise real DITA-OT transformations.
+
+### Minimum Gradle Raised to 8.14.4
+**Status**: ✅ COMPLETED (v2.8.7)
+
+The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradle versions below 8.14.4. The CI build matrix moved from 8.5 / 8.10 / 9.0 to **8.14.4 / 9.0 / 9.9.1**, and the README compatibility tables now list 8.14.4 as the minimum (previously 6.5+). Users on older Gradle versions should stay on 2.8.6.
+
+### Dependency and Toolchain Updates
+**Status**: ✅ COMPLETED (v2.8.7)
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Kotlin | 2.1.0 | 2.4.21 (language/API level 2.2) |
+| commons-io | 2.20.0 | 2.22.0 |
+| Kotest | 5.9.1 | 6.2.7 |
+| jsoup (tests) | 1.21.2 | 1.24.1 |
+| Gradle wrapper | 8.5 | 9.9.1 (root, test-project, examples) |
+| plugin-publish | 1.2.1 | 2.2.1 |
+| GitHub Actions | checkout v4, setup-java v4, upload/download-artifact v4 | checkout v7, setup-java v6, upload-artifact v7, download-artifact v8 |
+
+- `kotlinOptions` migrated to `compilerOptions`; deprecated `tasks.registering` delegates and `TaskContainer.create` replaced. The build now compiles with **no compiler or Gradle deprecation warnings**.
+- `DitaOtDownloadTask` keeps the lenient `URL(String)` parsing on purpose (`URI.toURL()` would reject URLs with unencoded spaces, `[ ]`, `|` or `%` that work today).
+- **Dependabot** now opens weekly PRs for GitHub Actions and Gradle dependencies (root build, test-project, examples).
+
+### DITA-OT 4.4.2 Support and Real Integration Tests
+**Status**: ✅ COMPLETED (v2.8.7)
+
+**Problem:** The CI "integration" jobs only ran `gradlew tasks`, so they could not catch a broken transformation. The unit-test steps used `continue-on-error`, so failing tests did not fail CI.
+
+**Solution:**
+- `test-project` downloads DITA-OT with the plugin's own `DitaOtDownloadTask` (`-PditaOtVersion=<v>`), runs an HTML5 transformation, and its `verifyOutput` task fails unless `index.html` and `test-topic.html` are produced.
+- CI runs it for DITA-OT 3.4 / 3.5 / 3.6 / **4.4.2** on Linux and 3.5 / 3.6 / **4.4.2** on Windows.
+- Unit tests now fail CI when they fail. The root test suite can run against any DITA-OT release with `./gradlew test -PditaOtVersion=<v>`.
+- Examples now default to DITA-OT 4.4.2.
+
+**Known limitation:** on Windows, DITA-OT 4.x's `dita.bat` builds a CLASSPATH from absolute JAR paths and can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). 3.x is less affected. Documented in the README troubleshooting section; see the backlog below.
+
+### Tests
+
+228 tests (223 executed, 5 skipped). Verified locally on Gradle 9.9.1 against DITA-OT 3.6 and 4.4.2, and on Gradle 8.14.4 against DITA-OT 3.6.
+
+### Open Issues (Backlog from the v2.8.7 Code Review)
+
+| Area | Issue | Priority |
+|------|-------|----------|
+| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. A possible fix is invoking it through its 8.3 short path, which was verified to work manually. | P1 |
+| `DitaOtDownloadTask` | Relative `Location` headers on redirects are not resolved against the current URL, so such downloads fail on every retry. | P2 |
+| `DitaOtDownloadTask` | Sends `Accept-Encoding: gzip` but never decompresses; a gzipping server leaves a broken archive in the cache. | P2 |
+| Build | Gradle 8.14.x embeds Kotlin stdlib 2.0.21 while the plugin compiles against API level 2.2; nothing yet checks that no newer stdlib API is used. | P2 |
+| Build | `kotlin-reflect` is a runtime dependency but unused. | P3 |
+| Build | Root `extractDitaOt` ignores a failed rename and re-extracts the DITA-OT zip on every test run. | P3 |
+| Repository | No `.gitattributes` (line endings flip between contributors); example wrapper jars/scripts were not regenerated; root `gradlew` is not executable in git. | P3 |
+
+---
+
 ## ✅ v2.8.6 Bug Fixes (COMPLETED)
 
 ### DitaOtInstallPluginTask - DITA-OT 4.4 Compatibility
@@ -747,6 +804,11 @@ Ensure compatibility with Gradle 10 when released.
 
 | Feature | Version | Date |
 |---------|---------|------|
+| **Minimum Gradle 8.14.4, Kotlin 2.4.21 toolchain** | 2.8.7 | Nov 2026 |
+| **DITA-OT 4.4.2 tested with real CI transformations (Linux + Windows)** | 2.8.7 | Nov 2026 |
+| **Dependabot for GitHub Actions and Gradle** | 2.8.7 | Nov 2026 |
+| **Zero compiler / Gradle deprecation warnings** | 2.8.7 | Nov 2026 |
+| **Configurable DITA-OT Process Timeout (`ditaProcessTimeoutMinutes`)** | 2.8.6 | Feb 2026 |
 | **DitaOtInstallPluginTask DITA-OT 4.4 Compatibility** | 2.8.6 | Feb 2026 |
 | **ProgressReporter Duplicate Progress Lines Fix** | 2.8.6 | Feb 2026 |
 | **AntExecutor Thread Synchronization Fix** | 2.8.6 | Feb 2026 |

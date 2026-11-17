@@ -2,6 +2,37 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 2.8.7 - 2026-11-17
+
+Maintenance release. No change to the task DSL.
+
+### Changed
+- **Minimum Gradle version is now 8.14.4** (previously 6.5+). The plugin is built with Kotlin 2.4.21, which deprecates older Gradle versions. Users on older Gradle should stay on 2.8.6.
+- Kotlin 2.1.0 → 2.4.21 (language/API level 2.2), commons-io 2.20.0 → 2.22.0
+- Gradle wrapper 8.5 → 9.9.1 (root, test-project and examples)
+- Examples default to DITA-OT 4.4.2 (was 4.2.3). `DitaOtDownloadTask`'s own default is unchanged (4.2.3).
+- Build tooling: Kotest 6.2.7, jsoup 1.24.1, plugin-publish 2.2.1, gradle-download-task 5.7.0, ben-manes versions 0.67.0 (plugin id `io.github.ben-manes.versions`)
+- GitHub Actions: checkout v7, setup-java v6, upload-artifact v7, download-artifact v8 (plus setup-gradle v6 and the Pages actions in the ci-cd-publishing example)
+
+### Fixed
+- Build compiles with no compiler or Gradle deprecation warnings (`compilerOptions`, task providers, `tasks.register` in tests)
+- `./gradlew test -PditaOtVersion=<v>` reruns the tests instead of reporting them up to date
+
+### CI
+- Integration jobs run a real HTML5 transformation with `test-project` (download via `DitaOtDownloadTask`, then `verifyOutput` checks the output) for DITA-OT 3.4 / 3.5 / 3.6 / 4.4.2 on Linux and 3.5 / 3.6 / 4.4.2 on Windows. They previously only listed tasks.
+- Gradle build matrix: 8.14.4, 9.0, 9.9.1 (was 8.5, 8.10, 9.0)
+- Unit test failures now fail CI (`continue-on-error` removed)
+- Dependabot configured for GitHub Actions and Gradle
+
+### Documentation
+- README: compatibility tables (Gradle 8.14.4+, DITA-OT 4.4.2), "What's new in 2.8.7", Windows command-line limit with DITA-OT 4.x
+- ROADMAP: v2.8.7 section and backlog of open issues
+
+### Known issues
+- On Windows, DITA-OT 4.x's `dita.bat` can exceed the 8191-character command-line limit when the project path is long (exit code 255, "The input line is too long"). See README troubleshooting.
+
+> Releases 2.4.0 – 2.8.6 are not recorded in this file; see the "Completed Features" table in [ROADMAP.md](ROADMAP.md).
+
 ## 2.3.2 - 2026-01-05
 
 ### Fixed

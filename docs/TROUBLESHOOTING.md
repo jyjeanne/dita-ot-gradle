@@ -66,13 +66,13 @@ plugins {
 ✅ **Solution 3: Update Gradle**
 
 ```bash
-# Minimum version: Gradle 4.10, recommended: 8.5+
-./gradlew wrapper --gradle-version=8.10
+# Minimum version: Gradle 8.14.4, recommended: 9.x
+./gradlew wrapper --gradle-version=9.9.1
 ```
 
 **Prevention:**
 - Always use correct plugin ID: `io.github.jyjeanne.dita-ot-gradle`
-- Check Gradle version is 4.10+
+- Check Gradle version is 8.14.4+
 - Include `gradlePluginPortal()` in `pluginManagement`
 
 ---
