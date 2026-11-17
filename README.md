@@ -989,12 +989,14 @@ See [CHANGELOG.md](docs/CHANGELOG.md) for full version history.
 > DITA-OT execution failed with exit code: 255
 > La ligne entrée est trop longue
 ```
-**Solution:** This occurs when the project path is deeply nested, causing Windows command line length to exceed ~8191 characters. DITA-OT's `env.bat` adds many JARs to CLASSPATH, which can overflow this limit. DITA-OT 4.x adds more plugin JARs than 3.x, so it hits the limit sooner: for example, DITA-OT 4.4.2 extracted to a directory whose path is about 100 characters long fails, while 3.6 at the same location works.
+**Cause:** `cmd.exe` cannot process a command line longer than 8191 characters. DITA-OT's `dita.bat` and `config\env.bat` add one absolute path per plugin JAR to the CLASSPATH, so the command line grows with the length of the DITA-OT installation path. DITA-OT 4.x adds more plugin JARs than 3.x, so it hits the limit sooner: for example, DITA-OT 4.4.2 extracted to a directory whose path is about 100 characters long fails, while 3.6 at the same location works.
 
-Workarounds:
+**Automatic handling (unreleased, next version):** before running `dita.bat`, the plugin estimates the command-line length. When it would exceed the limit, the `dita` and `DitaOtValidateTask` tasks run `dita.bat` through its 8.3 short path (for example `C:\Users\me\DOCUME~1\...`), which keeps the CLASSPATH short. Run with `--info` to see when this happens. If no short path is available (8.3 names can be disabled per volume), the plugin logs a warning before running DITA-OT.
+
+Workarounds if it still fails:
 1. Move your project to a shorter path (e.g., `C:\projects\` instead of deep nested folders)
-2. Use shorter DITA-OT installation paths
-3. Consider using Windows Long Path support (requires Windows 10 1607+ and registry configuration)
+2. Use a shorter DITA-OT installation path (`destinationDir` of `DitaOtDownloadTask`)
+3. Enable 8.3 short names on the volume (administrator: `fsutil 8dot3name set C: 0`), then re-extract DITA-OT. Windows "long path support" does not help here: it does not raise the `cmd.exe` limit.
 
 ---
 

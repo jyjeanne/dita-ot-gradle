@@ -63,7 +63,7 @@ The plugin is now built with Kotlin 2.4.21, whose Gradle plugin deprecates Gradl
 
 | Area | Issue | Priority |
 |------|-------|----------|
-| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. A possible fix is invoking it through its 8.3 short path, which was verified to work manually. | P1 |
+| Windows / DITA-OT 4.x | `dita.bat` exceeds the command-line limit on long paths. **Fixed for the next release:** the plugin estimates the command-line length and runs `dita.bat` through its 8.3 short path when needed (transformation and validation). Still open when 8.3 names are disabled on the volume (a warning is logged). | ✅ P1 |
 | `DitaOtDownloadTask` | Relative `Location` headers on redirects are not resolved against the current URL, so such downloads fail on every retry. | P2 |
 | `DitaOtDownloadTask` | Sends `Accept-Encoding: gzip` but never decompresses; a gzipping server leaves a broken archive in the cache. | P2 |
 | Build | Gradle 8.14.x embeds Kotlin stdlib 2.0.21 while the plugin compiles against API level 2.2; nothing yet checks that no newer stdlib API is used. | P2 |

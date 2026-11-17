@@ -35,7 +35,8 @@ The project is a Gradle plugin (`io.github.jyjeanne.dita-ot-gradle`, entry point
 Any change to how DITA-OT is invoked has to be checked against both paths.
 
 **Supporting infrastructure.**
-- `Classpath.kt` resolves DITA-OT's classpath and plugin locations; `Platform.kt` holds Windows/Unix differences (script names, path quoting, command-line length).
+- `Classpath.kt` resolves DITA-OT's classpath and plugin locations; `Platform.kt` holds OS detection and the `bin/dita` / `bin/dita.bat` paths.
+- `WindowsCommandLine.kt`: on Windows, `dita.bat` + `config\env.bat` put one absolute path per plugin JAR on the CLASSPATH, which can exceed cmd.exe's 8191-char limit (exit code 255). `resolveDitaScript` estimates the length and, only when it would overflow, swaps in the script's 8.3 short path. `AntExecutor` (transform) and `DitaOtValidateTask` call it; `DitaOtInstallPluginTask` doesn't need it (`dita install` skips `env.bat`).
 - `ProgressReporter.kt` parses DITA-OT's `--verbose` log output to detect processing stages and drive the progress bar. It depends on stage-marker strings from DITA-OT output, so changes to those patterns need test updates.
 - `Messages.kt` holds user-facing error text, including troubleshooting hints. Errors thrown from tasks should come from here.
 - `DitaOtValidateTask` only classifies DITA-OT structured message codes (`[DOTJ012E]`-style) as errors/warnings. Generic `[ERROR]` lines are deliberately ignored to avoid false positives; keep that rule when editing it.
@@ -43,4 +44,4 @@ Any change to how DITA-OT is invoked has to be checked against both paths.
 
 **Version coupling.** Supported DITA-OT versions are auto-detected from `plugin.xml` in the DITA-OT installation; `DitaOtDownloadTask` and the CI matrices pin specific versions (3.4–3.6, 4.x). The `.github/workflows/ci.yml` matrices are the source of truth for which Gradle and DITA-OT versions are exercised.
 
-**Tests.** Kotest specs (`*Spec.kt`) and `*Test.kt` classes live in the same package under `src/test/kotlin`. `DitaOtIntegrationTest` is documentation-only and disabled. Real transformations are verified by `test-project` (`./gradlew verifyOutput -PditaOtVersion=<v>` after `publishToMavenLocal`; CI runs it per DITA-OT version) and the `examples/` projects. On Windows, DITA-OT 4.x's `dita.bat` exceeds the 8191-char command-line limit when the checkout path is long (exit code 255, "The input line is too long"); 3.x is less affected.
+**Tests.** Kotest specs (`*Spec.kt`) and `*Test.kt` classes live in the same package under `src/test/kotlin`. `DitaOtIntegrationTest` is documentation-only and disabled. Real transformations are verified by `test-project` (`./gradlew verifyOutput -PditaOtVersion=<v>` after `publishToMavenLocal`; CI runs it per DITA-OT version) and the `examples/` projects. To test `test-project` against unpublished plugin changes without overwriting the released version in Maven Local, add `--include-build ..`. `test-project` runs both `validateDita` and `dita`; with `--info`, a log line shows when the Windows short-path fallback kicks in.
