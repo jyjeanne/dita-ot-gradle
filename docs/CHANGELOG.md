@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+### Documentation
+- Added `llms.txt` at the repository root ([llmstxt.org](https://llmstxt.org/) format): a summary of the plugin and links to the docs, examples and sources for AI assistants and LLM tools.
+
 ## 2.8.8 - 2026-11-17
 
 ### Fixed
