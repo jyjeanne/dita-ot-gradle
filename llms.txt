@@ -1,0 +1,63 @@
+# DITA-OT Gradle Plugin
+
+> Gradle plugin `io.github.jyjeanne.dita-ot-gradle` (current version 2.8.8) that publishes DITA documentation with the DITA Open Toolkit (DITA-OT). From a Gradle build it downloads DITA-OT, installs DITA-OT plugins, validates DITA content, checks links, and runs transformations (HTML5, PDF, and any other DITA-OT transtype). Written in Kotlin; continuation of the unmaintained `com.github.eerohele.dita-ot-gradle` plugin, whose `dita { }` configuration still works.
+
+Key facts for writing build scripts with this plugin:
+
+- Apply it with `plugins { id("io.github.jyjeanne.dita-ot-gradle") version "2.8.8" }` (Groovy: `id 'io.github.jyjeanne.dita-ot-gradle' version '2.8.8'`). It is published on the Gradle Plugin Portal.
+- Requirements: Gradle 8.14.4 or later (tested with 8.14.4, 9.0 and 9.9.1; on older Gradle use 2.8.6). Plugin bytecode targets Java 8. DITA-OT 3.x and 4.x (tested up to 4.4.2). Windows, macOS and Linux.
+- The plugin registers a single task, `dita`, of type `com.github.jyjeanne.DitaOtTask`. The other task types are registered by the build author: `DitaOtDownloadTask`, `DitaOtInstallPluginTask`, `DitaOtValidateTask` and `DitaLinkCheckTask`. All task classes are in the package `com.github.jyjeanne` (not `io.github.jyjeanne`).
+- `DitaOtDownloadTask` extracts DITA-OT to `<destinationDir>/dita-ot-<version>` (by default `build/dita-ot/dita-ot-<version>`). Point the `dita` task's `ditaOt(...)` at that folder and make it depend on the download task. Set `version` explicitly: the task's default is 4.2.3.
+- `DitaOtTask` options: `ditaOt(dir)`, `input(file or file collection)`, `output(dir)` (default `build`), `transtype("html5", "pdf", ...)`, `filter(ditavalFile)`, `singleOutputDir`, `useAssociatedFilter`, `showProgress`, `progressStyle` (`DETAILED`, `SIMPLE`, `MINIMAL`, `QUIET`), `showWarnings`, `ditaProcessTimeoutMinutes` (default 30, `0` disables the timeout).
+- DITA-OT properties: Kotlin DSL `properties { "args.css" to "custom.css" }`, Groovy DSL `properties { property(name: 'args.css', value: 'custom.css') }`, or `ditaProperties.put("args.css", "custom.css")`. The Kotlin form and `ditaProperties` are configuration-cache compatible; Groovy closures are not.
+- Kotlin DSL sets task properties with `.set(...)` (`version.set("4.4.2")`); Groovy DSL uses assignment (`version = '4.4.2'`).
+- Gradle's configuration cache is supported and recommended (`org.gradle.configuration-cache=true`).
+- On Windows, DITA-OT 4.x's `dita.bat` can exceed the 8191-character `cmd.exe` limit when the project path is long (exit code 255, "The input line is too long"). Since 2.8.8 the plugin works around this automatically by running `dita.bat` through an 8.3 short path or a temporary directory junction under `%TEMP%`.
+- Several examples read the DITA-OT location from a Gradle property: run them with `-PditaHome=/path/to/dita-ot`.
+
+## Docs
+
+- [README](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/README.md): Overview, quick start, the five main use cases with full build scripts, option tables for every task type, configuration cache, progress reporting, compatibility, migration and troubleshooting
+- [Configuration reference](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/CONFIGURATION_REFERENCE.md): Every configuration option of the plugin in detail
+- [Troubleshooting guide](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/TROUBLESHOOTING.md): Common errors and their fixes, including Windows path issues
+- [Migration guide](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/MIGRATION_GUIDE.md): Moving from `com.github.eerohele.dita-ot-gradle` to this plugin
+- [Best practices](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/BEST_PRACTICES.md): Performance, project layout and CI/CD recommendations
+- [Changelog](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/CHANGELOG.md): Release notes for 2.8.7 and later, and for 2.3.2 and earlier (2.4.0 to 2.8.6 are listed in the roadmap)
+
+## Examples
+
+- [Examples index](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/README.md): All example builds with run commands
+- [Download example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/download/build.gradle.kts): Download DITA-OT with `DitaOtDownloadTask`, install plugins with `DitaOtInstallPluginTask`, then transform (Kotlin DSL)
+- [Simple example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/simple/build.gradle.kts): Minimal, commented `dita` task configuration (Kotlin DSL; the same folder has a Groovy `build.gradle`)
+- [CI/CD publishing example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/ci-cd-publishing/build.gradle.kts): HTML5 and PDF builds with a DITAVAL filter and a version chosen with `-PditaOtVersion`
+- [CI/CD GitHub Actions workflow](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/ci-cd-publishing/.github/workflows/docs.yml): Building documentation for several DITA-OT versions and deploying it to GitHub Pages
+- [Plugin testing example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/plugin-test/README.md): Test a DITA-OT plugin from the registry against different DITA-OT versions
+- [Custom plugin development example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/custom-plugin-dev/README.md): Develop a custom DITA-OT plugin with a fast, continuous rebuild loop
+- [Multi-language example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/multi-language/README.md): Parallel builds of localized DITA sources
+- [Version documentation example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/version-docs/README.md): One source, several product versions with DITA profiling and DITAVAL
+- [Multiple outputs example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/multi-task/build.gradle.kts): Several `DitaOtTask` tasks with different transtypes and DITAVAL filters
+- [Configuration cache example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/configuration-cache/build.gradle.kts): Configuration-cache-compatible setup
+
+## Source
+
+- [Contributor notes](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/CLAUDE.md): Build and test commands, how the repository is organized, and the architecture points that span several files
+- [Architecture](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/ARCHITECTURE.md): Walkthrough of every Kotlin class and the execution flow
+- [DitaOtTask.kt](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/src/main/kotlin/com/github/jyjeanne/DitaOtTask.kt): The `dita` transformation task and its DSL
+- [DitaOtDownloadTask.kt](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/src/main/kotlin/com/github/jyjeanne/DitaOtDownloadTask.kt): DITA-OT download, checksum verification, caching and extraction
+- [DitaOtInstallPluginTask.kt](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/src/main/kotlin/com/github/jyjeanne/DitaOtInstallPluginTask.kt): Installing DITA-OT plugins from the registry, a URL or a local file
+- [DitaOtValidateTask.kt](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/src/main/kotlin/com/github/jyjeanne/DitaOtValidateTask.kt): Content validation based on DITA-OT message codes
+- [DitaLinkCheckTask.kt](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/src/main/kotlin/com/github/jyjeanne/DitaLinkCheckTask.kt): Broken-link checker for DITA maps and topics
+- [CI workflow](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/.github/workflows/ci.yml): The Gradle and DITA-OT versions tested on Linux and Windows
+
+## Optional
+
+- [Roadmap](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/ROADMAP.md): Planned features, completed features per release, and open issues
+- [Gradle Plugin Portal page](https://plugins.gradle.org/plugin/io.github.jyjeanne.dita-ot-gradle): Published versions of the plugin
+- [Documentation index](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/DOCUMENTATION_INDEX.md): Overview of all documentation files
+- [ANT execution strategies](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/ANT_EXECUTION_STRATEGIES.md): Background on why DITA-OT is run through its `dita` script (`DITA_SCRIPT` strategy)
+- [Architecture (French)](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/docs/ARCHITECTURE_FR.md): French translation of the architecture walkthrough
+- [Integration test project](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/test-project/README.md): The project CI uses to run real transformations for each DITA-OT version
+- [File tree example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/filetree/build.gradle.kts): Publishing every map in a folder with a `fileTree` input
+- [Custom classpath example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/classpath/build.gradle.kts): Running DITA-OT with an extra JAR (Saxon-PE) on the classpath
+- [Multi-project example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/multi-project/build.gradle.kts): Applying the plugin to several subprojects
+- [Self-documentation example](https://raw.githubusercontent.com/jyjeanne/dita-ot-gradle/main/examples/gradle-plugin-self-documentation/README.md): This plugin's own user guide written in DITA and built to HTML5, PDF and Bootstrap

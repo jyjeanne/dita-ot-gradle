@@ -1022,6 +1022,7 @@ Windows "long path support" and `\\?\` paths do not help here: they do not raise
 | [Best Practices](docs/BEST_PRACTICES.md) | Performance and CI/CD tips |
 | [Architecture](docs/ARCHITECTURE.md) | Plugin internals explained |
 | [Roadmap](docs/ROADMAP.md) | Planned features and improvements |
+| [llms.txt](llms.txt) | Index of this documentation for AI assistants and LLM tools ([llmstxt.org](https://llmstxt.org/) format) |
 
 ---
 
